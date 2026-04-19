@@ -27,6 +27,13 @@ Image is intentionally narrow:
 
 There is no SVG, HTML, Canvas, or raster-painter fallback. The schedule risk is accepted because the research path is the product path.
 
+## SVG Modality (separate from image)
+
+Vector output uses first-class modality `svg`: harness calls a **grammar-constrained**
+local engine (Outlines JSON + XML check; see `research/chat2svg-lora/`) which returns
+JSON IR; `packages/codec-svg` validates and writes `output.svg`. This does **not**
+satisfy the image neural path.
+
 ## Research Alignment
 
 The image stack is intentionally closest to a discrete-latent framing:
