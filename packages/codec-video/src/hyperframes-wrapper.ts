@@ -3,6 +3,7 @@ import { mkdir, writeFile, stat } from "node:fs/promises";
 import { dirname, extname, join } from "node:path";
 import type { RenderCtx, RenderResult } from "@wittgenstein/schemas";
 import type { VideoComposition } from "./schema.js";
+import { buildClipTimelineCss } from "./slideshow-timeline-css.js";
 
 export async function renderWithHyperFrames(
   composition: VideoComposition,
@@ -224,6 +225,7 @@ function buildHyperFramesHtml(composition: VideoComposition, ctx: RenderCtx): st
     clipTimelineCss = buildClipTimelineCss(
       svgClips.map((c) => ({ index: c.index, start: c.start, durationSec: c.durationSec })),
       totalDurationSec,
+      { iterationCount: 1 },
     );
 
     bodyInner = svgClips.map(({ svg, index, start, durationSec, label }) => {
@@ -304,6 +306,7 @@ function buildHyperFramesHtml(composition: VideoComposition, ctx: RenderCtx): st
   clipTimelineCss = buildClipTimelineCss(
     clips.map((c) => ({ index: c.index, start: c.start, durationSec: c.scene.durationSec })),
     totalDurationSec,
+    { iterationCount: 1 },
   );
 
   bodyInner = clips.map(({ scene, index, start }) => {
@@ -390,64 +393,6 @@ function sceneTone(index: number): { a: string; b: string } {
     { a: "rgba(190, 120, 255, 0.26)", b: "rgba(120, 255, 200, 0.18)" },
   ] as const;
   return tones[index % tones.length]!;
-}
-
-function buildClipTimelineCss(
-  clips: Array<{ index: number; start: number; durationSec: number }>,
-  totalSec: number,
-): string {
-  const T = Math.max(totalSec, 0.0001);
-  const blocks: string[] = [];
-
-  for (const { index, start, durationSec } of clips) {
-    const end = start + durationSec;
-    const p0 = (start / T) * 100;
-    const p1 = Math.min(100, (end / T) * 100);
-    const name = `hf-clip-op-${index}`;
-    const atStart = start <= 1e-6;
-    const endsAtEnd = end >= T - 1e-6;
-    const eps = 0.05;
-
-    let keyframes: string;
-    if (atStart && endsAtEnd) {
-      keyframes = `@keyframes ${name} { 0%, 100% { opacity: 1; transform: scale(1); } }`;
-    } else if (atStart) {
-      keyframes = `@keyframes ${name} {
-        0% { opacity: 1; transform: scale(1); }
-        ${fmtPct(Math.max(0, p1 - eps))} { opacity: 1; transform: scale(1); }
-        ${fmtPct(p1)} { opacity: 0; transform: scale(0.99); }
-        100% { opacity: 0; transform: scale(0.99); }
-      }`;
-    } else if (endsAtEnd) {
-      keyframes = `@keyframes ${name} {
-        0% { opacity: 0; transform: scale(0.99); }
-        ${fmtPct(Math.max(0, p0 - eps))} { opacity: 0; transform: scale(0.99); }
-        ${fmtPct(p0)} { opacity: 1; transform: scale(1); }
-        100% { opacity: 1; transform: scale(1); }
-      }`;
-    } else {
-      keyframes = `@keyframes ${name} {
-        0% { opacity: 0; transform: scale(0.99); }
-        ${fmtPct(Math.max(0, p0 - eps))} { opacity: 0; transform: scale(0.99); }
-        ${fmtPct(p0)} { opacity: 1; transform: scale(1); }
-        ${fmtPct(Math.max(p0, p1 - eps))} { opacity: 1; transform: scale(1); }
-        ${fmtPct(p1)} { opacity: 0; transform: scale(0.99); }
-        100% { opacity: 0; transform: scale(0.99); }
-      }`;
-    }
-
-    blocks.push(keyframes);
-    blocks.push(
-      `.hf-clip--${index} { animation: ${name} ${T}s linear both; will-change: opacity, transform; }`,
-    );
-  }
-
-  return blocks.join("\n");
-}
-
-function fmtPct(value: number): string {
-  const clamped = Math.max(0, Math.min(100, value));
-  return `${clamped.toFixed(3)}%`;
 }
 
 function sanitizeId(input: string): string {

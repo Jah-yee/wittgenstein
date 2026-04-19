@@ -12,6 +12,20 @@ Optional `inlineSvgs` is an array of **full** `<svg>…</svg>` documents. When p
 - Else if `durationSec` is set, split it evenly across slides.
 - Else default **3 seconds per slide**.
 
+## CLI: playable animation HTML (no HyperFrames)
+
+`wittgenstein animate-html` writes a **single HTML file** that plays in any browser: SVG slides cross-fade on a timer using **CSS `animation`**, default **`animation-iteration-count: infinite`**.
+
+```bash
+pnpm exec wittgenstein animate-html \
+  --svg ./output/tree-a.svg --svg ./output/tree-b.svg \
+  --duration-sec 6 \
+  --title "Tree study" \
+  --out ./output/play-animation.html
+```
+
+Use `--once` to play a single cycle instead of looping.
+
 ## CLI: SVG files → MP4 (no LLM)
 
 When you pass `--svg` one or more times, the CLI reads those files into `VideoRequest.inlineSvgs` and the harness **skips the LLM** and feeds the video codec a composition JSON directly.
