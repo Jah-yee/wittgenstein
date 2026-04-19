@@ -1,5 +1,10 @@
 import { resolve } from "node:path";
-import type { WittgensteinRequest, RenderCtx, RenderResult, RunManifest } from "@wittgenstein/schemas";
+import type {
+  WittgensteinRequest,
+  RenderCtx,
+  RenderResult,
+  RunManifest,
+} from "@wittgenstein/schemas";
 import { loadWittgensteinConfig } from "./config.js";
 import { BudgetTracker } from "./budget.js";
 import { collectRuntimeFingerprint, hashFile } from "./manifest.js";
@@ -16,6 +21,12 @@ import { registerAudioCodec } from "../codecs/audio.js";
 import { registerImageCodec } from "../codecs/image.js";
 import { registerVideoCodec } from "../codecs/video.js";
 import { registerSensorCodec } from "../codecs/sensor.js";
+import { registerSvgCodec } from "../codecs/svg.js";
+import { registerAsciipngCodec } from "../codecs/asciipng.js";
+import { generateSvgFromEngine } from "./svg-generation.js";
+import { buildSvgLocalGeneration } from "./svg-local.js";
+import { buildVideoCompositionFromInlineSvgs } from "./video-inline-svgs.js";
+import { generateAsciipngFromMinimax } from "./asciipng-minimax.js";
 
 export interface HarnessRunOptions {
   command: string;
@@ -110,9 +121,55 @@ export class Wittgenstein {
     let error: ReturnType<typeof serializeError> | null = null;
 
     try {
-      const generation = options.dryRun
-        ? createDryRunGeneration()
-        : await this.generateStructured(promptExpanded, seed);
+      const generation =
+        request.modality === "asciipng" && request.source === "minimax" && !options.dryRun
+          ? await generateAsciipngFromMinimax(request, promptExpanded, seed, this.config.llm)
+          : request.modality === "asciipng"
+            ? buildAsciiPngGeneration(request)
+            : request.modality === "video" && Array.isArray(request.inlineSvgs) && request.inlineSvgs.length > 0
+              ? buildVideoCompositionFromInlineSvgs(request)
+              : request.modality === "svg" && request.source === "local"
+                ? buildSvgLocalGeneration(request)
+                : options.dryRun
+                  ? createDryRunGeneration(request)
+                  : request.modality === "svg"
+                    ? await generateSvgFromEngine(promptExpanded, seed, this.config.svg)
+                    : await this.generateStructured(promptExpanded, seed);
+
+      if (request.modality === "svg") {
+        const raw = generation.raw;
+        if (raw && typeof raw === "object" && "svgLocal" in raw && (raw as { svgLocal?: boolean }).svgLocal === true) {
+          manifest.llmProvider = "svg-local";
+          manifest.llmModel = "geometry-from-prompt";
+        } else {
+          manifest.llmProvider = "svg-engine";
+          manifest.llmModel = this.config.svg.inferenceUrl;
+        }
+      }
+
+      if (request.modality === "asciipng" && request.source === "minimax") {
+        manifest.llmProvider = "minimax";
+        manifest.llmModel =
+          request.minimaxModel?.trim() ||
+          process.env.WITTGENSTEIN_MINIMAX_MODEL?.trim() ||
+          "abab6.5s-chat-h";
+      } else if (request.modality === "asciipng") {
+        manifest.llmProvider = "local-asciipng";
+        manifest.llmModel = "pseudo-ascii-raster";
+      }
+
+      if (request.modality === "video") {
+        const raw = generation.raw;
+        if (
+          raw &&
+          typeof raw === "object" &&
+          "videoInlineSvgs" in raw &&
+          (raw as { videoInlineSvgs?: boolean }).videoInlineSvgs === true
+        ) {
+          manifest.llmProvider = "inline-svgs";
+          manifest.llmModel = "filesystem";
+        }
+      }
 
       budget.consume(
         generation.tokens.input + generation.tokens.output,
@@ -206,6 +263,8 @@ export function createDefaultRegistry(): CodecRegistry {
   registerAudioCodec(registry);
   registerVideoCodec(registry);
   registerSensorCodec(registry);
+  registerSvgCodec(registry);
+  registerAsciipngCodec(registry);
   return registry;
 }
 
@@ -219,7 +278,67 @@ function createLlmAdapter(
   return new OpenAICompatibleLlmAdapter(llmConfig);
 }
 
-function createDryRunGeneration(): LlmGenerationResult {
+function buildAsciiPngGeneration(request: WittgensteinRequest): LlmGenerationResult {
+  if (request.modality !== "asciipng") {
+    throw new ValidationError("buildAsciiPngGeneration called for non-asciipng request.");
+  }
+  const ir = {
+    text: request.prompt.slice(0, 2000),
+    columns: request.columns,
+    rows: request.rows,
+    cell: request.cell,
+    glyphMode: "pseudo" as const,
+  };
+  return {
+    text: JSON.stringify(ir),
+    tokens: { input: 0, output: 0 },
+    costUsd: 0,
+    raw: { asciiPngLocal: true },
+  };
+}
+
+function createDryRunGeneration(request: WittgensteinRequest): LlmGenerationResult {
+  if (request.modality === "svg") {
+    return {
+      ...buildSvgLocalGeneration(request),
+      raw: { dryRun: true, svgLocal: true },
+    };
+  }
+
+  if (request.modality === "image") {
+    const scene = {
+      intent: "Photorealistic wildlife portrait suitable for print",
+      subject: request.prompt,
+      composition: {
+        framing: "tight portrait on subject",
+        camera: "telephoto compression, shallow depth of field",
+        depthPlan: ["sharp subject", "soft bokeh", "clean background"],
+      },
+      lighting: { mood: "natural soft daylight", key: "diffused key, gentle fill" },
+      style: {
+        references: ["wildlife photography", "fine-art nature print"],
+        palette: ["neutral grey", "natural fur tones", "cool water highlights"],
+      },
+      decoder: {
+        family: "llamagen" as const,
+        codebook: "stub-codebook",
+        latentResolution: [32, 32] as [number, number],
+      },
+    };
+
+    return {
+      text: JSON.stringify(scene),
+      tokens: {
+        input: 0,
+        output: 0,
+      },
+      costUsd: 0,
+      raw: {
+        dryRun: true,
+      },
+    };
+  }
+
   return {
     text: "{}",
     tokens: {
@@ -235,13 +354,15 @@ function createDryRunGeneration(): LlmGenerationResult {
 
 function defaultOutputPathFor(modality: WittgensteinRequest["modality"], cwd: string, runId: string) {
   const extension =
-    modality === "image"
+    modality === "image" || modality === "asciipng"
       ? "png"
       : modality === "audio"
         ? "wav"
         : modality === "video"
           ? "mp4"
-          : "json";
+          : modality === "svg"
+            ? "svg"
+            : "json";
 
   return resolve(cwd, "artifacts", "runs", runId, `output.${extension}`);
 }

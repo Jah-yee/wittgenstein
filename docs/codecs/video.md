@@ -6,9 +6,59 @@ Video owns a composition-first JSON IR and a render seam for HyperFrames.
 
 The model emits scene blocks, timing, and composition metadata.
 
+Optional `inlineSvgs` is an array of **full** `<svg>…</svg>` documents. When present, the HyperFrames HTML renderer shows **one slide per SVG** on a black stage (no title cards). Timing:
+
+- If `scenes.length` matches `inlineSvgs.length`, use each `scenes[i].durationSec`.
+- Else if `durationSec` is set, split it evenly across slides.
+- Else default **3 seconds per slide**.
+
+## CLI: playable animation HTML (no HyperFrames)
+
+`wittgenstein animate-html` writes a **single HTML file** that plays in any browser: SVG slides cross-fade on a timer using **CSS `animation`**, default **`animation-iteration-count: infinite`**.
+
+```bash
+pnpm exec wittgenstein animate-html \
+  --svg ./output/tree-a.svg --svg ./output/tree-b.svg \
+  --duration-sec 6 \
+  --title "Tree study" \
+  --out ./output/play-animation.html
+```
+
+Use `--once` to play a single cycle instead of looping.
+
+## CLI: SVG files → MP4 (no LLM)
+
+When you pass `--svg` one or more times, the CLI reads those files into `VideoRequest.inlineSvgs` and the harness **skips the LLM** and feeds the video codec a composition JSON directly.
+
+```bash
+export WITTGENSTEIN_HYPERFRAMES_RENDER=1
+pnpm exec wittgenstein video "unused" --svg ./output/a.svg --svg ./output/b.svg --duration-sec 6 --out ./output/slides.mp4
+```
+
 ## Renderer
 
-`packages/codec-video/src/hyperframes-wrapper.ts` is the future integration seam for MP4 generation.
+`packages/codec-video/src/hyperframes-wrapper.ts` is the integration seam for HyperFrames-shaped **HTML compositions** and optional **local MP4** encoding.
+
+### HTML (default)
+
+The codec writes a deterministic HTML file using HyperFrames-style `data-*` timing attributes.
+
+Note: the harness default output path for video is still `output.mp4`, but **without** local encode enabled the codec writes `output.hyperframes.html` next to that basename so the artifact type matches what was generated.
+
+### MP4 (opt-in, local HyperFrames CLI)
+
+HyperFrames is **not** “an API you must call” for basic rendering: the open-source CLI renders **locally** with **FFmpeg + headless Chrome** (see upstream `hyperframes doctor`). Optional network traffic may occur for `npx` package download or CLI update notices unless disabled with `HYPERFRAMES_NO_UPDATE_CHECK=1` (Wittgenstein defaults telemetry/update noise off when spawning).
+
+To emit a real `.mp4` artifact at the harness `outPath`, enable:
+
+```bash
+export WITTGENSTEIN_HYPERFRAMES_RENDER=1
+```
+
+Optional tuning:
+
+- `WITTGENSTEIN_HYPERFRAMES_RENDER_TIMEOUT_MS` (default `600000`)
+- `WITTGENSTEIN_HYPERFRAMES_QUALITY` (`draft` | `standard` | `high`, default `standard`)
 
 ## Benchmark Direction
 

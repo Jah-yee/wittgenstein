@@ -54,5 +54,8 @@
     "@wittgenstein/schemas": "workspace:*",
     "commander": "^12.1.0",
     "tsx": "^4.19.0"
+  },
+  "devDependencies": {
+    "esbuild": "0.24.2"
   }
 }

@@ -1,13 +1,14 @@
 import { Command } from "commander";
-import { fileURLToPath } from "node:url";
-import { resolve } from "node:path";
 import { registerInitCommand } from "./commands/init.js";
 import { registerImageCommand } from "./commands/image.js";
 import { registerAudioCommand } from "./commands/audio.js";
 import { registerTtsCommand } from "./commands/tts.js";
 import { registerVideoCommand } from "./commands/video.js";
 import { registerSensorCommand } from "./commands/sensor.js";
+import { registerSvgCommand } from "./commands/svg.js";
+import { registerAsciipngCommand } from "./commands/asciipng.js";
 import { registerDoctorCommand } from "./commands/doctor.js";
+import { registerAnimateHtmlCommand } from "./commands/animate-html.js";
 
 export function createProgram(): Command {
   const program = new Command();
@@ -15,7 +16,7 @@ export function createProgram(): Command {
   program
     .name("wittgenstein")
     .description("Wittgenstein modality harness CLI")
-    .version("0.0.0");
+    .version("0.1.0");
 
   registerInitCommand(program);
   registerImageCommand(program);
@@ -23,19 +24,14 @@ export function createProgram(): Command {
   registerAudioCommand(program);
   registerVideoCommand(program);
   registerSensorCommand(program);
+  registerSvgCommand(program);
+  registerAsciipngCommand(program);
   registerDoctorCommand(program);
+  registerAnimateHtmlCommand(program);
 
   return program;
 }
 
 export async function runCli(argv = process.argv): Promise<void> {
   await createProgram().parseAsync(argv);
-}
-
-const isMain = process.argv[1]
-  ? resolve(process.argv[1]) === fileURLToPath(import.meta.url)
-  : false;
-
-if (isMain) {
-  void runCli();
 }

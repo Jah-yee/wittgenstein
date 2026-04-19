@@ -6,7 +6,7 @@ Wittgenstein is a five-layer harness. The layers are explicit in the repo so fut
 | --- | --- | --- |
 | L1 Harness / Runtime | Planner orchestration, routing, retry, budget, telemetry, sandbox, invariants | `packages/core/src/runtime/*`, `packages/sandbox/`, `AGENTS.md`, `packages/agent-contact-text/README.md`, CI |
 | L2 IR / Codec | Natural structured modality IR, expressed as zod schemas and prompt preambles | `packages/codec-*/src/schema.ts`, `docs/codec-protocol.md`, `docs/codecs/*.md` |
-| L3 Renderer / Decoder | IR to file via deterministic renderer or frozen decoder | `packages/codec-image/src/pipeline/decoder.ts`, `packages/codec-audio/src/routes/*`, `packages/codec-video/src/hyperframes-wrapper.ts`, `packages/codec-sensor/src/signals/*` |
+| L3 Renderer / Decoder | IR to file via deterministic renderer or frozen decoder | `packages/codec-image/src/pipeline/decoder.ts`, `packages/codec-audio/src/routes/*`, `packages/codec-video/src/hyperframes-wrapper.ts`, `packages/codec-sensor/src/signals/*`, `packages/codec-svg/src/codec.ts` |
 | L4 Optional Adapter | Small learned translator when a decoder needs latent-code alignment | `packages/codec-image/src/pipeline/adapter.ts`, `packages/codec-image/src/adapters/`, `packages/codec-image/src/training/` |
 | L5 Packaging / Distribution | CLI, install, docs, skills, output conventions, ownership | `packages/cli/`, `scripts/install.sh`, `AGENTS.md`, `packages/agent-contact-text/`, `docs/distribution.md`, `CODEOWNERS` |
 

@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { imageCodec } from "../src/index.js";
+import { renderImagePipeline } from "../src/pipeline/index.js";
 
 describe("@wittgenstein/codec-image", () => {
   it("parses and enriches scene contract defaults", () => {
@@ -96,5 +97,36 @@ describe("@wittgenstein/codec-image", () => {
     });
     const bytes = await readFile(outPath);
     expect(Array.from(bytes.subarray(0, 8))).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+  });
+});
+
+describe("image pipeline (neural decode)", () => {
+  it("fails decode until a frozen decoder is integrated", async () => {
+    const parsed = imageCodec.parse(
+      JSON.stringify({
+        intent: "test",
+        subject: "x",
+        decoder: { latentResolution: [16, 16] },
+      }),
+    );
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) {
+      return;
+    }
+
+    await expect(
+      renderImagePipeline(parsed.value, {
+        runId: "test-run",
+        runDir: ".",
+        seed: null,
+        outPath: "out.png",
+        logger: {
+          debug: () => {},
+          info: () => {},
+          warn: () => {},
+          error: () => {},
+        },
+      }),
+    ).rejects.toMatchObject({ code: "NOT_IMPLEMENTED" });
   });
 });
