@@ -48,6 +48,16 @@ Second prerelease. No API surface changes; this cut is about making the project
   `chore/repo-root-wittgenstein`, `feat/foundation-framework`,
   `docs/root-docs-readme-changelog`
 
+### Removed
+- `.claude/skills/site-clone/`, `.codex/skills/site-clone/`, `.cursor/commands/site-clone.md`
+  — generic website-cloning skill files, unrelated to Wittgenstein
+- `Kimi_Agent_克隆 aquin/` (91 files, ~6.8 MB) — standalone Vite app unrelated to the project
+- `DESIGN.md` (20 KB) — Claude design-system notes used as input for the removed
+  site-clone skill; not referenced by any Wittgenstein doc or code path
+- `research/chat2svg-lora/__pycache__/` — Python bytecode cache, never belongs in git
+- `.gitignore` hardened: `.claude/`, `.codex/`, `.cursor/`, `**/__pycache__/`, `**/*.pyc`
+  added so these categories do not leak back
+
 ### Maintenance
 - Root `package.json` version bumped `0.0.0` → `0.1.0-alpha.2` to match the tag
 
