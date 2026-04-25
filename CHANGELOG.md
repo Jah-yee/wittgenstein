@@ -88,6 +88,22 @@ SHA for the doctrine surface while M0/M1 work begins on top of it.
 - `.github/workflows/release.yml` — tag-driven GitHub Release with
   CHANGELOG-section body; `-alpha`/`-beta`/`-rc`/`-pre` versions
   auto-marked as prerelease
+- `.github/workflows/auto-merge-dependabot.yml` — auto-squash-merge
+  Dependabot PRs that are minor/patch or grouped, after required
+  checks pass. Major-version bumps still require human review.
+
+### Changed — CI hygiene
+- `.github/workflows/ci.yml` split into `verify-code` (full Node +
+  Python suite) and `verify-docs` (prettier-only fast lane), gated by
+  `dorny/paths-filter` so docs-only PRs no longer pay for the full
+  Node + Python verify. Pattern: pre-launch had been merging on red
+  because docs PRs always tripped CI on irrelevant signal; the new
+  shape gives green-on-green on docs-only changes in &lt;30s and full
+  validation on code touches.
+- `.prettierrc` — added `proseWrap: "preserve"` so prose markdown is
+  no longer reflowed (was the recurring source of red docs CI).
+- `format:check:maintained` — dropped `docs/research/briefs/**/*.md`
+  from the prettier glob; briefs are prose, not config.
 
 ## [0.1.0-alpha.2] — 2026-04-20 — Early-adopter polish
 
