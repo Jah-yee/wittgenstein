@@ -6,7 +6,7 @@ The current doctrine surface for v0.2. Read top-to-bottom for an onboarding pass
 
 Read these two files before any task:
 
-- [`.claude/AGENT_PROMPT.md`](../.claude/AGENT_PROMPT.md) — orientation (what the project is, how to find information, exact working discipline)
+- [`../PROMPT.md`](../PROMPT.md) — public agent handoff prompt (what the project is, how to find information, exact working discipline)
 - [`engineering-discipline.md`](engineering-discipline.md) — working standards (code style, robustness, testing, reporting, constraints)
 
 ## Then understand the thesis and governance
@@ -52,6 +52,7 @@ Read these two files before any task:
 
 ## Long-form research notes (predate the briefs)
 
+- [`research/README.md`](research/README.md) — what counts as a research note, how notes differ from briefs, and how research promotes into decisions
 - [`research/google-stack-scope-2026-04.md`](research/google-stack-scope-2026-04.md) — current-stage research scope plus the first Google / Gemini stack findings
 - [`research/compression-view-of-llms.md`](research/compression-view-of-llms.md)
 - [`research/frozen-llm-multimodality.md`](research/frozen-llm-multimodality.md)
