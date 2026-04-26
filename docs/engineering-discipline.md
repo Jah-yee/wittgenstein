@@ -9,6 +9,7 @@ This document establishes the working principles for Wittgenstein development, a
 The foundational directive is to **inspect the relevant code, tests, config, and nearby patterns before editing.**
 
 This means:
+
 - Understanding existing implementation patterns before adding to them
 - Knowing what tests already exist and what they cover
 - Seeing how the build, lint, and type-check systems are configured
@@ -56,7 +57,7 @@ Avoid broad rewrites or speculative architecture. If you find the problem is big
 
 **Reuse existing patterns** before inventing new ones. Don't create utility modules without clear justification.
 
-**Avoid premature abstraction.** Every abstraction must solve a real *present* problem. Direct implementations are preferable when they're easier to understand and maintain.
+**Avoid premature abstraction.** Every abstraction must solve a real _present_ problem. Direct implementations are preferable when they're easier to understand and maintain.
 
 **Extend existing code paths** over building parallel systems. Make data flow and side effects explicit and visible. Enable local reasoning rather than creating distributed indirection.
 
@@ -74,15 +75,19 @@ Avoid broad rewrites or speculative architecture. If you find the problem is big
 All failures must preserve diagnostic information and remain inspectable.
 
 ### Input validation
+
 External data (LLM outputs, user prompts, config) must be scrutinized:
+
 - Treat incoming information as potentially compromised
 - Validate all assumptions at system boundaries
 - Make invalid states architecturally difficult to create
 
 ### Behavioral consistency
+
 Maintain established functionality unless change is explicitly needed. Select straightforward approaches over sophisticated but fragile solutions. Avoid unintended degradation unless it represents a deliberate product choice.
 
 ### Debuggability
+
 **Printability is a feature.** Code should be straightforward to log, test, examine, and troubleshoot. Operational clarity matters for production systems.
 
 Manifests and run records are not overhead — they are the evidence that reproducibility holds.
@@ -116,6 +121,7 @@ Prioritize code that future developers can act correctly from without asking que
 **State exactly what you verified, and do not imply checks you did not run.**
 
 Meaningful behavior changes require validation. Preference order:
+
 1. Specific tests (unit, integration, round-trip)
 2. Type checking and linting
 3. Building
@@ -133,6 +139,18 @@ Meaningful behavior changes require validation. Preference order:
 
 Do not fake confidence when verification is incomplete. Explicitly state what wasn't tested rather than glossing over gaps.
 
+## Review Discipline: No Self-Ratification
+
+For Wittgenstein's doctrine-bearing work, authorship and ratification must be separate.
+
+- The person or agent who writes a PR does **not** count as the sole reviewer of that PR.
+- Any PR that changes doctrine, exec plans, port guides, shared protocol contracts, or codec-shape assumptions requires a **second independent review pass** before merge.
+- In the current maintainer setup, the default pair is **Max + Moapacha**. Equivalent agent-assisted work is acceptable only if the two review passes are genuinely independent.
+- "Independent" means the second pass can disagree, request changes, or block merge; it is not a rubber stamp from the same authoring context.
+- If a second reviewer is unavailable, the PR can be prepared and validated, but it should not be treated as ratified.
+
+This rule exists to prevent silent doctrine drift, premature lock-in, and author-blind spots. A green CI run is necessary; it is not sufficient.
+
 ### Wittgenstein checklist
 
 - [ ] `pnpm typecheck` green across relevant packages
@@ -145,6 +163,7 @@ Do not fake confidence when verification is incomplete. Explicitly state what wa
 ## No Drive-By Refactor
 
 **Stay on task.** Avoid:
+
 - Renaming unrelated symbols
 - Moving files unnecessarily
 - Reformatting unrelated code sections
@@ -199,6 +218,7 @@ run. That is correct behavior.
 ## Success Looks Like This
 
 You finish the task, and:
+
 - The code is minimal, readable, and testable
 - Behavior is preserved unless change was required
 - Errors surface as structured data with context
