@@ -13,6 +13,8 @@ Keep reading it as a historical receipt, not as a claim that every artifact alre
 matches the fully post-lock `v0.2` architecture one-for-one. As Codec v2, decoder
 contracts, and the manifest spine continue to harden, this gallery will be refreshed
 with newer curated outputs instead of silently rewriting the original snapshot.
+Use it as a human-browsable artifact gallery, not as the current execution brief for
+agents; active implementation guidance lives in the codec-v2 plan and the agent guides.
 
 - **Pack root** — [`artifacts/showcase/workflow-examples/`](artifacts/showcase/workflow-examples/)
 - **Hand-picked samples** — [`artifacts/showcase/workflow-examples/samples/`](artifacts/showcase/workflow-examples/samples/)

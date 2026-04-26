@@ -91,6 +91,8 @@ It is intentionally kept as a historical receipt, not a claim that every artifac
 matches the post-lock `v0.2` architecture one-for-one. As the codec-v2 port, decoder
 contracts, and manifest spine continue to harden, this showcase pack will be refreshed
 with newer curated outputs rather than silently rewritten in place.
+Treat it as a human-browsable artifact gallery, not as the active execution brief for
+agents; current implementation guidance lives in the codec-v2 plan and agent guides.
 
 **One click per modality (curated `samples/` picks):**
 

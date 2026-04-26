@@ -16,6 +16,9 @@ audio, and sensor routes.
 > the exact post-lock `v0.2` implementation surface. As Codec v2 ports and decoder
 > contracts land, newer curated packs will replace it as the active baseline.
 >
+> This directory is for human browsing and reproducibility receipts, not for agent task
+> routing; active implementation guidance lives in the codec-v2 exec plan and agent guides.
+>
 > For a nicer rendered gallery, see the top-level [`SHOWCASE.md`](../../../SHOWCASE.md).
 
 ---
