@@ -16,6 +16,13 @@ only with a written trigger (a "what would flip this" line is mandatory).**
 | RP-001 | Two-round LLM interaction (prompt-expansion → schema JSON)      | `codec-image` M1 | One-round + schema-in-preamble + `--expand` flag covers the same ground without 2× cost.  |
 | RP-002 | Image-with-text composition at L5 (pixel-grid char correctness) | `codec-image` M1 | Out of scope for v0.2 image goals; better solved at the codec/L5 boundary if ever needed. |
 
+**Note:** video backend selection is intentionally **not** listed here yet. The current
+HyperFrames seam is a real hackathon-era implementation reference, but the repo has not
+ratified "HyperFrames forever" as a reserve-path decision or a locked backend choice.
+If multiple serious video backend options start competing, add them here or promote the
+question into a dedicated brief / RFC instead of treating today's integration seam as
+already settled.
+
 ---
 
 ## RP-001 — Two-round LLM interaction

@@ -2,6 +2,40 @@
 
 Video owns a composition-first JSON IR and a render seam for HyperFrames.
 
+## Status and backend stance
+
+At the current stage, **HyperFrames is the first hackathon-era backend reference**, not
+the permanent doctrine for video.
+
+That distinction matters:
+
+- the **video codec shape** is real and worth keeping
+- the **current HyperFrames integration seam** is real and useful
+- but the **future backend choice for FOMO/video is not locked**
+
+In other words, "video owns a composition-first JSON IR" is the durable part. "Video
+renders through HyperFrames forever" is not.
+
+Until a later RFC / brief / exec-plan says otherwise, treat HyperFrames as:
+
+- the first concrete backend we wired
+- a useful local rendering reference
+- a valid benchmark and packaging reference
+
+Do **not** treat it as proof that every future video path must remain HyperFrames-shaped.
+
+## External-system classification
+
+If a future video backend is added, classify it deliberately:
+
+- **reference** — studied in docs/research, but not integrated
+- **dependency** — called or wrapped by `codec-video`, but source stays upstream
+- **vendored / third-party source** — only if we carry patched upstream code inside this
+  repo and accept the license / update / divergence burden explicitly
+
+HyperFrames is currently in the **dependency / reference** zone, not the "vendored
+third-party source" zone.
+
 ## IR
 
 The model emits scene blocks, timing, and composition metadata.
