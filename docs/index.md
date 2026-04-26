@@ -9,6 +9,8 @@ Read these two files before any task:
 - [`.claude/AGENT_PROMPT.md`](../.claude/AGENT_PROMPT.md) — orientation (what the project is, how to find information, exact working discipline)
 - [`engineering-discipline.md`](engineering-discipline.md) — working standards (code style, robustness, testing, reporting, constraints)
 
+For doctrine-bearing PRs, also remember the review rule now locked in `engineering-discipline.md`: authoring a PR does not count as ratifying it; a second independent review pass is required before merge.
+
 ## Then understand the thesis and governance
 
 - [`THESIS.md`](THESIS.md) — smallest locked statement of the project
