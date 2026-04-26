@@ -4,22 +4,33 @@ This guide is for a contributor or coding agent picking up the **image codec por
 
 It is deliberately narrow:
 
-- **in scope:** porting `codec-image` to the v2 protocol shape; landing the eight engineering practices from Brief H; preserving v0.1 goldens for all three internal routes (svg, ascii-png, raster).
-- **out of scope:** L4 adapter training (that is M1B and has its own forthcoming guide); audio / sensor / video; the streaming/parallel-compile decoder bridge beyond stub seams; doctrine relitigation.
+- **in scope:** porting `codec-image` (the **raster** modality only) to the v2 protocol shape; landing the eight engineering practices from Brief H; preserving v0.1 goldens for the raster baseline tiles.
+- **out of scope:** L4 adapter training (that is M1B and has its own forthcoming guide); the `codec-svg` and `codec-asciipng` packages (those are sibling ports — see §0 below); audio / sensor / video; the streaming/parallel-compile decoder bridge beyond stub seams; doctrine relitigation.
 
 Read `docs/agent-guides/image-to-audio-port.md` first for the cross-line context. This guide is the M1A specialization.
+
+## 0. Plan-vs-reality findings (2026-04-26)
+
+This guide originally framed M1A as "porting `codec-image` with three internal routes (svg, ascii-png, raster)." A read-before-write pass against the actual repo (per `docs/engineering-discipline.md` §"Read before you write") surfaced three corrections worth flagging up front. They do not invalidate the protocol or Brief H — they narrow the M1A blast radius.
+
+1. **`codec-image` is single-route raster.** `codec-svg` and `codec-asciipng` are **separate packages** under `packages/`, not internal routes within `codec-image`. M1A ports the raster codec only; svg + asciipng are sibling ports tracked in the M1 row of `docs/exec-plans/active/codec-v2-port.md` and may land in their own follow-up PRs. The `Route<Req>[]` shape in the v2 protocol still applies — the image codec just exposes one route at v0.2.
+2. **`RunManifest` is a single object per run, not `ManifestRow[]`.** RFC-0001's "codec authors its own manifest rows" remains the doctrine; the implementation lands as `Codec.manifestRows()` returning rows that the harness folds into the existing one-object `RunManifest` shape exported from `@wittgenstein/schemas`. Reshaping `RunManifest` itself is **not** an M1A change.
+3. **LLM-call ownership transfers from harness to codec.** The v1 `WittgensteinCodec.render(parsed, ctx)` consumes pre-parsed JSON the harness obtained from the LLM. The v2 `Codec.produce(req, ctx)` owns the LLM call inside `expand()`. This is structurally bigger than "rename `render` to `produce`" — the M1A port absorbs the LLM client, prompt assembly, and JSON parsing currently living in `packages/core/src/runtime/harness.ts` lines 123–172.
+
+These findings are reflected in §4 deliverables and §8 manifest invariants below.
 
 ---
 
 ## 1. Mission
 
-Port `codec-image` from the v0.1 surface to the Codec v2 protocol shape ratified by ADR-0008 and amended by RFC-0001 §Addendum 2026-04-26, while:
+Port `codec-image` (raster modality) from the v0.1 surface to the Codec v2 protocol shape ratified by ADR-0008 and amended by RFC-0001 §Addendum 2026-04-26, while:
 
-- preserving every shipping artifact's goldens for all three internal routes (svg, ascii-png, raster);
-- proving the protocol holds on the **hardest** modality (only one with both a real L4 adapter slot and a non-trivial L5 packaging step);
-- moving manifest authorship into the codec's `package` stage;
-- landing the eight Brief H practices in their canonical home (`BaseCodec`, `Codec` interface, `HarnessCtx`) so M2 (audio) and M3 (sensor) inherit them rather than re-deriving them;
-- adding a `palette` field to `ImageSceneSpec` (M1 idea 5a);
+- preserving the v0.1 raster goldens byte-for-byte under cached-LLM replay;
+- proving the protocol holds on the modality with both a real L4 adapter slot and a non-trivial L5 packaging step;
+- absorbing the LLM call into the codec (per finding #3 in §0);
+- moving manifest-row authorship into the codec via `manifestRows()`; the harness folds into the existing one-object `RunManifest` (per finding #2);
+- landing the eight Brief H practices in their canonical home (`BaseCodec`, `Codec` interface, `HarnessCtx`) so M2 (audio), M3 (sensor), and the sibling svg / asciipng ports inherit them rather than re-deriving them;
+- confirming the existing nested `style.palette` field on `ImageSceneSpec` is sufficient for the v2 `adapt` stage (M1 idea 5a is partially in tree already; M1A lifts a top-level `palette: string[]` on `ImageArtifact.metadata` only if a downstream consumer needs it);
 - introducing **stub seams** for streaming + parallel compilation (M1 idea 1) — the hooks land at M1A; the streaming decoder bridge lives at M1B.
 
 You are not allowed to:
@@ -41,48 +52,55 @@ You are not allowed to:
 7. `docs/exec-plans/active/codec-v2-port.md` §M1 — per-package diff and gate.
 8. `docs/agent-guides/image-to-audio-port.md` §6 — cross-line image guidance.
 
-If M0 has already landed (types in `packages/core/src/codec/v2/`), read its merged diff — your changes extend it.
+M0 has landed: the v2 protocol types live under `packages/core/src/codec/v2/` and are exported under the `codecV2` namespace from `@wittgenstein/core`. Read that diff (and the smoke test at `packages/core/test/codec-v2.test.ts`) before extending — your M1A changes consume those types, they do not redefine them.
 
 ## 3. Why image first
 
-Image has both a real L4 adapter and a non-trivial L5 packaging step. Audio has L4 collapsed into per-route inline calls; sensor has no L4 at all. If the protocol fits image, it fits everything. If it does not fit image, the protocol is wrong, and that finding belongs in M1A — not M2.
+Image has both a real L4 adapter slot and a non-trivial L5 packaging step. Audio has L4 collapsed into per-route inline calls; sensor has no L4 at all. If the protocol fits image (raster), it fits everything. If it does not fit image, the protocol is wrong, and that finding belongs in M1A — not M2.
 
 Concretely:
 
 - if `ImageCodec.adapt` cannot be expressed in ≤20 lines of dispatch + a delegate to the existing `pipeline/adapter.ts`, the seam is wrong;
-- if `ImageCodec.package` cannot author all manifest rows the v0.1 harness was overriding post-hoc, the manifest design is wrong;
-- if any of the three internal routes (svg / ascii-png / raster) needs a special case in `harness.ts` after the port, the dispatch design is wrong.
+- if `ImageCodec.manifestRows()` cannot author all rows the v0.1 harness was overriding post-hoc, the manifest design is wrong;
+- if image still needs a special case in `harness.ts` after the port, the dispatch design is wrong.
+
+The svg + asciipng sibling ports are deliberately NOT first — they are simpler (no L4, no LLM round-trip in the case of `--source local`) and would understate the protocol's load-bearing claims.
 
 ## 4. M1A deliverables
 
-In order:
+Items 1–4 already landed in M0 and are not your concern; they are listed for traceability so you know where to import from. Items 5–12 are the M1A delta.
 
-1. **`BaseCodec<Req, Art>`** in `packages/core/src/codec/v2/base.ts` — abstract base implementing `produce` as the four-stage pipeline. Lands the eight Brief H practices (see §6 below).
-2. **`HarnessCtx` fork helper** in `packages/core/src/codec/v2/ctx.ts` — `ctx.fork(phaseName: string): HarnessCtx` returns a child with fresh `runId` and `parentRunId` set. _(Brief H Practice 7)_
-3. **`CodecWarning` type + lifecycle constants** in `packages/core/src/codec/v2/codec.ts` — per RFC-0001 §Addendum 2026-04-26 F2; constants `EXPAND`, `ADAPT`, `DECODE`, `PACKAGE`. _(F2; Practice 8)_
-4. **`Codec.schema` typed as `StandardSchemaV1<unknown, Req>`** — the F1 amendment lands here; zod stays the canonical implementation.
-5. **`ImageCodec extends BaseCodec<ImageRequest, ImageArtifact>`** in `packages/codec-image/src/codec.ts` — the actual port. Internal routes (svg / ascii-png / raster) move to `ImageCodec.route(req)`.
-6. **`palette` field on `ImageSceneSpec`** in `packages/schemas/src/image.ts` — optional `string[]` of hex colors; codec's `expand` populates it; downstream consumers may use it for quantization. _(M1 idea 5a)_
-7. **Streaming + parallel-compile stub seams** — `ImageCodec.decode` accepts an optional `onChunk` callback shape in its signature (callback is unused at M1A; lands as a no-op). The stub seam lives in `packages/codec-image/src/pipeline/decoder.ts` next to the existing decoder call. _(M1 idea 1, hook only — bridge lands at M1B)_
-8. **Manifest authorship** moves into `ImageCodec.package` — the `quality.structural`, `quality.partial`, `metadata.warnings`, L4-hash and L5-hash rows are written here, not by the harness.
-9. **Image branch deletion** in `packages/core/src/runtime/harness.ts` — image flows through generic dispatch.
-10. **ADR-0005 addendum** — Brief A's "VQ decoder" → "LFQ-family discrete-token decoder" rename lands as a short addendum; the manifest decoder-slot string changes from `"VQ-decoder"` to `"LFQ-family-decoder"`.
-11. **Migration tests** under `packages/codec-image/test/` — see §8.
+| #   | Deliverable                                                                                                                                                                                                                                                                                                                                    | Status          |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| 1   | `BaseCodec<Req, Art>` in `packages/core/src/codec/v2/base.ts` — abstract base implementing `produce` as the four-stage pipeline; folds sidecar warnings into `Art.metadata.warnings` exactly once. Lands rejected-practices comment block (§6).                                                                                                | ✅ M0 (landed)  |
+| 2   | `HarnessCtx` + `fork()` in `packages/core/src/codec/v2/ctx.ts` — child runs derive a fresh `runId` and set `parentRunId` to the current run. _(Brief H Practice 7)_                                                                                                                                                                            | ✅ M0 (landed)  |
+| 3   | `CodecWarning` + `CodecPhase` constants in `packages/core/src/codec/v2/warning.ts` — per RFC-0001 §Addendum 2026-04-26 F2. _(F2; Practice 8)_                                                                                                                                                                                                  | ✅ M0 (landed)  |
+| 4   | `Codec.schema: StandardSchemaV1<unknown, Req>` in `packages/core/src/codec/v2/codec.ts` — F1 amendment landed via inline minimal `StandardSchemaV1` interface. Zod stays the canonical implementation; codecs hand the harness `mySchema['~standard']`.                                                                                        | ✅ M0 (landed)  |
+| 5   | `ImageCodec extends BaseCodec<ImageRequest, ImageArtifact>` in `packages/codec-image/src/codec.ts` — the actual raster port. Absorbs the LLM call (§0 finding 3): the existing `WittgensteinCodec.render` becomes the `decode + package` portion; new code in the codec replaces the harness's LLM call + `parse`.                             | M1A (your work) |
+| 6   | Define `ImageArtifact extends BaseArtifact` with the bytes / outPath / mime / dimensions the existing `RenderResult` already exposes, plus the mandatory `metadata.warnings: CodecWarning[]` channel.                                                                                                                                          | M1A (your work) |
+| 7   | A single `Route<ImageRequest>` registered on the codec (`{ id: "raster", match: () => true }`). The `Route<Req>[]` shape exists for codecs that need internal dispatch (audio); image does not, but the seam is still concrete.                                                                                                                | M1A (your work) |
+| 8   | `manifestRows()` returns the codec-authored rows the v0.1 harness used to override post-hoc — `quality.structural`, `quality.partial`, `metadata.warnings`, `L4.adapterHash`, `L5.decoderHash`, `artifact.sha256`. The harness folds these into the existing one-object `RunManifest` (§0 finding 2). Do **not** reshape `RunManifest` itself. | M1A (your work) |
+| 9   | Image-branch deletion in `packages/core/src/runtime/harness.ts` lines 123–172 — image dispatch goes through the generic `Codec.produce(req, ctx)` path. The post-hoc manifest-override block (lines 139–172) for image is removed in the same commit.                                                                                          | M1A (your work) |
+| 10  | Streaming + parallel-compile stub seams: `ImageCodec.decode` accepts an optional `onChunk` callback shape in its signature (no-op at M1A). The seam lives in `packages/codec-image/src/pipeline/decoder.ts`. _(M1 idea 1, hook only — bridge lands at M1B)_                                                                                    | M1A (your work) |
+| 11  | ADR-0005 addendum — Brief A's "VQ decoder" → "LFQ-family discrete-token decoder" rename lands as a short addendum; the manifest decoder-slot string changes from `"VQ-decoder"` to `"LFQ-family-decoder"`.                                                                                                                                     | M1A (your work) |
+| 12  | Migration tests under `packages/codec-image/test/` — see §9.                                                                                                                                                                                                                                                                                   | M1A (your work) |
+
+Note on idea 5a (`palette` on `ImageSceneSpec`): the schema **already** has `style.palette: string[]` nested inside `ImageSceneSpec`. M1A does not add a new top-level field unless `ImageCodec.adapt` finds it needs one — flag any change in the PR body if so.
 
 ## 5. The eight Brief H practices, where they land
 
 These are the operational practices for M1A. Each row is one practice from Brief H §"Practices to adopt"; the "where" column is the file you edit.
 
-| #   | Practice                                                     | Where it lands                                                                             | How a reviewer greps for it                                |
-| --- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------ | ---------------------------------------------------------- |
-| 1   | Output schema validation inside `produce`                    | `BaseCodec.produce` — runs `Codec.outputSchema['~standard'].validate(art)` before return   | grep `outputSchema` in `base.ts`                           |
-| 2   | Typed `warnings: CodecWarning[]` on Art                      | `CodecWarning` in `codec/v2/codec.ts`; `metadata.warnings: CodecWarning[]` on every Art    | grep `CodecWarning` in `packages/codec-image/src/types.ts` |
-| 3   | `messageId` dictionary per codec                             | `ImageCodec.warnings = { palette_overflow: "...", svg_truncated: "..." }` declared upfront | grep `warnings:` in `image/src/codec.ts`                   |
-| 4   | `prepare(ctx) => { expand, adapt, decode, package }` factory | `BaseCodec.prepare(ctx)` returns the four phase functions; default impl exists             | grep `prepare(ctx)` in `base.ts`                           |
-| 5   | Standard Schema typing                                       | `Codec.schema: StandardSchemaV1<unknown, Req>` (F1 amendment)                              | grep `StandardSchemaV1` in `codec/v2/codec.ts`             |
-| 6   | VFile-style sidecar threaded through phases                  | `RunSidecar` in `codec/v2/sidecar.ts`; threaded as ctx field; drained in `package`         | grep `RunSidecar` in `base.ts`                             |
-| 7   | Forkable `HarnessCtx` with `parentRunId`/`runId`             | `ctx.fork(phase)` helper in `codec/v2/ctx.ts`                                              | grep `ctx.fork` in `base.ts`                               |
-| 8   | Named lifecycle phases as protocol-level constants           | `export const EXPAND = "expand" as const` etc. in `codec/v2/codec.ts`                      | grep `as const` in phase constants file                    |
+| #   | Practice                                           | Where it lands                                                                                                                                                                                                                                                                                                              | How a reviewer greps for it                                                                    |
+| --- | -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| 1   | Input schema validation at the boundary            | `Codec.schema['~standard'].validate(req)` runs in the harness (or in `ImageCodec.produce` head) before any LLM call. There is no protocol-level output schema in v2 — LLM JSON parsing is internal to `expand()`.                                                                                                           | grep `schema['~standard'].validate` in `harness.ts` or `codec-image/src/codec.ts`              |
+| 2   | Typed `warnings: CodecWarning[]` on Art            | `CodecWarning` in `codec/v2/warning.ts`; `BaseArtifactMetadata.warnings: CodecWarning[]` on every Art (already in M0)                                                                                                                                                                                                       | grep `CodecWarning` in `packages/codec-image/src/types.ts` (or wherever `ImageArtifact` lands) |
+| 3   | `messageId` dictionary per codec                   | `ImageCodec.warnings = { palette_overflow: "image/palette-overflow", ... }` declared upfront as a `const` map; the codec emits via `ctx.sidecar.warnings.push({ code: this.warnings.palette_overflow, ... })`.                                                                                                              | grep `warnings = {` in `image/src/codec.ts`                                                    |
+| 4   | Sidecar-driven phase factory                       | `BaseCodec.produce` already runs `expand → adapt → decode → package` in order via the four protected hooks; subclasses override the hooks rather than re-implementing the lifecycle. The "phases-as-functions" intent of Brief H Practice 4 is satisfied by the hook contract — no separate `prepare(ctx)` factory shipped. | grep `protected abstract expand` etc. in `base.ts`                                             |
+| 5   | Standard Schema typing                             | `Codec.schema: StandardSchemaV1<unknown, Req>` (F1 amendment, M0)                                                                                                                                                                                                                                                           | grep `StandardSchemaV1` in `codec/v2/codec.ts`                                                 |
+| 6   | VFile-style sidecar threaded through phases        | `RunSidecar` in `codec/v2/sidecar.ts`; on `ctx.sidecar`; drained in `BaseCodec.package` (M0)                                                                                                                                                                                                                                | grep `ctx.sidecar` in `base.ts`                                                                |
+| 7   | Forkable `HarnessCtx` with `parentRunId`/`runId`   | `ctx.fork(childRunId)` on `HarnessCtx` (M0)                                                                                                                                                                                                                                                                                 | grep `fork:` in `codec/v2/ctx.ts`                                                              |
+| 8   | Named lifecycle phases as protocol-level constants | `CodecPhase = { Expand, Adapt, Decode, Package } as const` in `codec/v2/warning.ts` (M0)                                                                                                                                                                                                                                    | grep `CodecPhase` in `codec/v2/warning.ts`                                                     |
 
 A reviewer who cannot find every row in its declared place fails the PR.
 
@@ -115,8 +133,8 @@ If you find yourself reaching for any of these in M1A, stop and re-read Brief H.
 
 Pin the v0.1 baseline at PR-open:
 
-- `artifacts/showcase/workflow-examples/image/` — 6 baseline tiles, all three internal routes represented.
-- `artifacts/showcase/workflow-examples/samples/svg/` and `samples/asciipng/` — also pinned.
+- `artifacts/showcase/workflow-examples/image/` — raster baseline tiles (the M1A scope).
+- `artifacts/showcase/workflow-examples/samples/svg/` and `samples/asciipng/` belong to the sibling `codec-svg` and `codec-asciipng` ports and are **not** in M1A scope.
 
 **Parity policy.** The decoder is deterministic at the L3/L5 seam; the LLM stage is not. Therefore:
 
@@ -129,7 +147,7 @@ If a SHA changes on a cached-LLM run, you have a real bug. Bisect, do not regene
 
 The codec's `package` stage must write:
 
-- `route` — one of `svg / ascii-png / raster` (the codec-internal route id).
+- `route` — `"raster"` (the only route at v0.2; the field still ships so audio / sibling ports share the schema).
 - `seed`, `model`, `prompt`, full LLM I/O for round 1 and (if `--expand`) round 2.
 - `L4.adapterHash` — even if M1B has not trained a real adapter yet, a stable placeholder hash with `quality.partial: { reason: "adapter-stub" }` is required.
 - `L5.decoderHash` with `frozen: true` and the new `LFQ-family-decoder` slot name (per ADR-0005 addendum).
@@ -144,9 +162,9 @@ The harness must NOT touch any of these post-hoc. If you see manifest-row mutati
 
 Under `packages/codec-image/test/`:
 
-- `parity-byte.test.ts` — SHA-256 against goldens for cached-LLM baseline tiles, all three routes.
+- `parity-byte.test.ts` — SHA-256 against raster goldens for cached-LLM baseline tiles.
 - `parity-structural.test.ts` — Brief E structural metrics on live-LLM tiles.
-- `round-trip.test.ts` — for each of {svg, ascii-png, raster}, build a fake `ImageRequest`, run `codec.produce(req, ctx)`, assert artifact + manifest match. Each route case ≤20 lines.
+- `round-trip.test.ts` — build a fake `ImageRequest`, run `codec.produce(req, ctx)`, assert artifact + manifest rows match. ≤20 lines.
 - `expand-flag.test.ts` — with `{ rounds: 2 }`, the second round runs and the manifest records both LLM calls.
 - `output-validation.test.ts` — assert `BaseCodec.produce` runs the output schema validation. Practice 1 invariant.
 - `warnings-channel.test.ts` — synthesize a palette-overflow case; assert `metadata.warnings` carries the declared `palette_overflow` messageId. Practice 2 + 3 invariant.
@@ -163,10 +181,10 @@ Under `packages/codec-image/test/`:
 
 ### Hacker hat
 
-- All three internal routes pass byte-for-byte goldens on cached-LLM replay.
-- `harness.ts` no longer branches on `request.modality === "image"`.
-- `ImageCodec.package` writes every manifest row; harness writes none.
-- Round-trip test for each route fits in ≤20 lines.
+- The raster baseline tiles pass byte-for-byte goldens on cached-LLM replay.
+- `harness.ts` no longer branches on `request.modality === "image"` (and the post-hoc manifest-override block for image is gone).
+- `ImageCodec.manifestRows()` returns every row the harness used to override; the harness folds them in without modification.
+- Round-trip test fits in ≤20 lines.
 - The four reject-practice comment block exists at the head of `BaseCodec`.
 - ADR-0005 addendum is merged in the same PR as the manifest slot rename.
 
