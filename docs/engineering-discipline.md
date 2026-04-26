@@ -36,6 +36,46 @@ Because Wittgenstein's doctrine is load-bearing:
 - Do not add a second image path, a new operator, or a new modality without an RFC
 - Do not make the harness modality-branch again (M4 cleanup is scheduled; don't jump it early)
 
+## Agency and Scope
+
+High agency is encouraged here, but it must be applied with the right target.
+
+### Distinguish three kinds of truth
+
+- **Locked doctrine** — thesis, hard constraints, ratified ADR decisions, and active protocol invariants. Do not quietly override these inside a task.
+- **Execution hypothesis** — the current best implementation path written in a brief, exec plan, port guide, or issue. This is expected to be challenged if code reality, tests, or prior art prove it weak.
+- **Open exploration** — research notes, engineering options, and broad scans where widening scope is explicitly useful.
+
+The most common failure mode is treating an execution hypothesis like locked doctrine. Do not do that.
+
+### What high agency means in this repo
+
+Even if a task is already decomposed in a plan or issue, you are expected to widen the frame when you find:
+
+- a document assumption that no longer matches the code
+- a local fix that would create obvious follow-on debt
+- a shared pattern that should be extracted or, conversely, an abstraction that is premature
+- a stronger external engineering precedent or research result
+
+When that happens, do not just mechanically complete the assigned slice. Surface the better path and classify it.
+
+### How to widen scope without causing drift
+
+If you expand beyond the original task, name the expansion as one of:
+
+- `bug fix`
+- `drift correction`
+- `engineering improvement`
+- `doctrine challenge`
+
+And then act accordingly:
+
+- `bug fix` / `drift correction` — may be folded into the current change if tightly coupled
+- `engineering improvement` — acceptable when it makes the current work materially safer or clearer
+- `doctrine challenge` — do not smuggle this through implementation; route it through a brief, RFC, ADR, or explicit maintainer discussion
+
+High agency is not license to relitigate doctrine. It is permission to improve the system when the evidence is strong.
+
 ## Code Standards
 
 Target minimal diffs, clear structure, robust behavior, correct logic, and consistency with surrounding code.
