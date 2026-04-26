@@ -3,6 +3,10 @@
 This folder holds research material that is useful to Wittgenstein but does not all
 play the same role.
 
+If you want the top-level aggregation first, start with:
+
+- [`program.md`](program.md)
+
 The most important distinction is:
 
 - a **Research Note** is a scoped working note or broad scan
