@@ -50,6 +50,14 @@ describe("@wittgenstein/codec-audio", () => {
     expect(art.mime).toBe("audio/wav");
     expect(art.outPath.endsWith(".wav")).toBe(true);
     expect(art.metadata.route).toBe("speech");
+    expect(art.metadata.audioRender).toMatchObject({
+      sampleRateHz: 22_050,
+      channels: 1,
+      container: "wav",
+      bitDepth: 16,
+      determinismClass: "byte-parity",
+      decoderId: "procedural-audio-runtime",
+    });
     expect(art.metadata.artifactSha256).toHaveLength(64);
     expect((await stat(art.outPath)).size).toBeGreaterThan(44);
   });

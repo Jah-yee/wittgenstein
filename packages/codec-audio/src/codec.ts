@@ -13,6 +13,7 @@ import { renderSpeechRoute } from "./routes/speech/index.js";
 import { renderSoundscapeRoute } from "./routes/soundscape/index.js";
 import { renderMusicRoute } from "./routes/music/index.js";
 import type { AudioArtifact, AudioRoute } from "./types.js";
+import { AUDIO_SAMPLE_RATE } from "./runtime.js";
 
 interface AudioCodecLlmService {
   readonly provider: string;
@@ -100,6 +101,12 @@ function hashString(value: string): string {
 
 function hashBytes(value: Uint8Array): string {
   return createHash("sha256").update(value).digest("hex");
+}
+
+function wavDurationSec(bytes: Uint8Array): number {
+  const pcm16BytesPerFrame = 2;
+  const dataBytes = Math.max(0, bytes.byteLength - 44);
+  return dataBytes / (AUDIO_SAMPLE_RATE * pcm16BytesPerFrame);
 }
 
 function asServices(services: codecV2.HarnessCtx["services"]): AudioCodecServices {
@@ -242,6 +249,17 @@ export class AudioCodec extends codecV2.BaseCodec<AudioRequest, AudioArtifact> {
           : await renderMusicRoute(payload.plan, renderCtx);
     const bytes = await readFile(result.artifactPath);
     const route = payload.plan.route;
+    const decoderHash = hashString("procedural-audio-runtime");
+    const audioRender = {
+      sampleRateHz: AUDIO_SAMPLE_RATE,
+      channels: 1,
+      durationSec: wavDurationSec(bytes),
+      container: "wav" as const,
+      bitDepth: 16,
+      determinismClass: "byte-parity" as const,
+      decoderId: "procedural-audio-runtime",
+      decoderHash,
+    };
 
     return {
       outPath: result.artifactPath,
@@ -262,14 +280,15 @@ export class AudioCodec extends codecV2.BaseCodec<AudioRequest, AudioArtifact> {
           structural: {
             schemaValidated: true,
             route,
-            deterministicClass: "cpu-byte-parity",
+            determinismClass: audioRender.determinismClass,
           },
           partial: {
             reason: "procedural-runtime",
           },
         },
+        audioRender,
         decoderHash: {
-          value: hashString("procedural-audio-runtime"),
+          value: decoderHash,
           frozen: true,
           slot: "procedural-audio-runtime",
         },
@@ -288,6 +307,7 @@ export class AudioCodec extends codecV2.BaseCodec<AudioRequest, AudioArtifact> {
   manifestRows(art: AudioArtifact): ReadonlyArray<codecV2.ManifestRow> {
     return [
       { key: "route", value: art.metadata.route },
+      { key: "audioRender", value: art.metadata.audioRender },
       { key: "quality.structural", value: art.metadata.quality.structural },
       { key: "quality.partial", value: art.metadata.quality.partial },
       { key: "metadata.warnings", value: art.metadata.warnings.length },
