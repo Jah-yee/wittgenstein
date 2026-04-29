@@ -13,6 +13,7 @@ import {
 export async function renderSpeechRoute(
   plan: AudioPlan,
   ctx: RenderCtx,
+  options: { allowHostTts?: boolean } = {},
 ): Promise<RenderResult> {
   const startedAt = Date.now();
   const durationSec = Math.max(2, inferSpeechDurationSec(plan.script));
@@ -21,7 +22,7 @@ export async function renderSpeechRoute(
     plan.ambient.category === "auto" ? ambientRecommendation.category : plan.ambient.category;
 
   let speechSamples = synthSpeech(plan.script, durationSec);
-  if (await renderMacSpeech(plan.script, ctx.outPath)) {
+  if (options.allowHostTts === true && (await renderMacSpeech(plan.script, ctx.outPath))) {
     speechSamples = decodeWavToFloat32(await readFile(ctx.outPath));
   }
 

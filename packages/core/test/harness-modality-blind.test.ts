@@ -10,4 +10,9 @@ describe("harness modality blindness", () => {
     const source = await readFile(resolve(testDir, "../src/runtime/harness.ts"), "utf8");
     expect(source.includes('request.modality === "image"')).toBe(false);
   });
+
+  it("does not branch on request.modality === audio", async () => {
+    const source = await readFile(resolve(testDir, "../src/runtime/harness.ts"), "utf8");
+    expect(source.includes('request.modality === "audio"')).toBe(false);
+  });
 });
