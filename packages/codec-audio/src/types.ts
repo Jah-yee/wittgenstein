@@ -1,4 +1,4 @@
-import type { codecV2 } from "@wittgenstein/schemas";
+import type { AudioRenderManifest, codecV2 } from "@wittgenstein/schemas";
 import type { AudioPlan } from "./schema.js";
 
 export type AudioRoute = "speech" | "soundscape" | "music";
@@ -18,12 +18,13 @@ export interface AudioArtifactMetadata extends codecV2.BaseArtifactMetadata {
     readonly structural: {
       readonly schemaValidated: boolean;
       readonly route: AudioRoute;
-      readonly deterministicClass: "cpu-byte-parity" | "gpu-structural-parity";
+      readonly determinismClass: "byte-parity" | "structural-parity";
     };
     readonly partial: {
       readonly reason: "procedural-runtime";
     };
   };
+  readonly audioRender: AudioRenderManifest;
   readonly decoderHash: {
     readonly value: string;
     readonly frozen: true;

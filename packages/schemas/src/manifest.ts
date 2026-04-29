@@ -1,5 +1,16 @@
 import { z } from "zod";
 
+export const AudioRenderManifestSchema = z.object({
+  sampleRateHz: z.number().int().positive(),
+  channels: z.number().int().positive(),
+  durationSec: z.number().nonnegative(),
+  container: z.literal("wav"),
+  bitDepth: z.number().int().positive(),
+  determinismClass: z.enum(["byte-parity", "structural-parity"]),
+  decoderId: z.string(),
+  decoderHash: z.string().optional(),
+});
+
 export const RunManifestSchema = z.object({
   runId: z.string(),
   gitSha: z.string().nullable(),
@@ -30,6 +41,7 @@ export const RunManifestSchema = z.object({
 
   artifactPath: z.string().nullable(),
   artifactSha256: z.string().nullable(),
+  audioRender: AudioRenderManifestSchema.optional(),
 
   startedAt: z.string(),
   durationMs: z.number().nonnegative(),
@@ -44,4 +56,5 @@ export const RunManifestSchema = z.object({
     .optional(),
 });
 
+export type AudioRenderManifest = z.infer<typeof AudioRenderManifestSchema>;
 export type RunManifest = z.infer<typeof RunManifestSchema>;
