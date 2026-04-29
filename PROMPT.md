@@ -24,7 +24,7 @@ surface (`polyglot-mini/`), with a manifest-spine reproducibility contract.
 1. [`docs/THESIS.md`](docs/THESIS.md) — the smallest locked statement (≤1 page)
 2. [`docs/glossary.md`](docs/glossary.md) — locked vocabulary; do not invent alternatives
 3. [`docs/hard-constraints.md`](docs/hard-constraints.md) — what will not change
-4. [`docs/exec-plans/active/codec-v2-port.md`](docs/exec-plans/active/codec-v2-port.md) — the live P6 workstream (M0 → M5b); M0 is the active migration target
+4. [`docs/exec-plans/active/codec-v2-port.md`](docs/exec-plans/active/codec-v2-port.md) — the live P6 workstream (M0 → M5b); M0 and M1A are landed, and M2 audio is the active execution line
 
 That's enough to start. Pull deeper docs **only when the task forces you to**.
 

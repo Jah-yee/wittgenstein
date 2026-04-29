@@ -10,7 +10,7 @@
  * `ZodType<Req>` lets userland codecs ship with any conformant validator. See
  * `docs/research/briefs/H_codec_engineering_prior_art.md`.
  *
- * @experimental — part of the v2 codec protocol surface; M0 lands types only, no runtime.
+ * @experimental — part of the live v2 codec protocol surface.
  */
 export interface StandardSchemaV1<Input = unknown, Output = Input> {
   readonly "~standard": StandardSchemaV1.Props<Input, Output>;

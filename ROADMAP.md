@@ -3,7 +3,7 @@
 > **Status:** high-level release / product roadmap. For the active execution order and
 > migration gates, use `docs/exec-plans/active/codec-v2-port.md`.
 >
-> As of 2026-04-26:
+> As of 2026-04-29:
 >
 > - `M0` is landed
 > - `M1A` is landed (`PR #68`)

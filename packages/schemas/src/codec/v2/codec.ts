@@ -20,7 +20,7 @@
  *
  * `ManifestRow` is intentionally narrow: the v0.2 `RunManifest` is one big object per
  * run, not an array. Codecs return rows; the harness folds them into the existing
- * manifest object during the eventual port (see `docs/agent-guides/image-port.md`).
+ * manifest object during codec-v2 ports (see `docs/agent-guides/image-port.md`).
  *
  * @experimental
  */
@@ -47,8 +47,8 @@ export interface BaseArtifact {
 /**
  * A single dispatchable strategy within a codec (e.g. "raster" for `codec-image`,
  * or "speech" / "soundscape" / "music" once `codec-audio` collapses its routes).
- * `match` decides whether this route handles a given request; the harness picks
- * the first matching route, in declaration order.
+ * `match` decides whether this route handles a given request; `BaseCodec.pickRoute`
+ * selects the first matching route in declaration order.
  */
 export interface Route<Req> {
   readonly id: string;

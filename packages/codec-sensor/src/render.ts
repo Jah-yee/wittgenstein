@@ -63,7 +63,11 @@ export async function renderSignalBundle(
   };
 }
 
-export function makeEcgSignal(sampleRateHz: number, durationSec: number, seed: number | null): Float32Array {
+export function makeEcgSignal(
+  sampleRateHz: number,
+  durationSec: number,
+  seed: number | null,
+): Float32Array {
   return expandSensorAlgorithm(
     {
       signal: "ecg",
@@ -83,7 +87,11 @@ export function makeEcgSignal(sampleRateHz: number, durationSec: number, seed: n
   );
 }
 
-export function makeGyroSignal(sampleRateHz: number, durationSec: number, seed: number | null): Float32Array {
+export function makeGyroSignal(
+  sampleRateHz: number,
+  durationSec: number,
+  seed: number | null,
+): Float32Array {
   return expandSensorAlgorithm(
     {
       signal: "gyro",
@@ -152,9 +160,8 @@ function expandSensorAlgorithm(
     }
 
     if (operator.type === "noise") {
-      const noise = operator.color === "pink"
-        ? pinkNoise(frameCount, rng)
-        : whiteNoise(frameCount, rng);
+      const noise =
+        operator.color === "pink" ? pinkNoise(frameCount, rng) : whiteNoise(frameCount, rng);
       for (let i = 0; i < frameCount; i += 1) {
         signal[i] = (signal[i] ?? 0) + (noise[i] ?? 0) * operator.amplitude;
       }
@@ -170,8 +177,14 @@ function expandSensorAlgorithm(
     }
 
     if (operator.type === "pulse") {
-      const start = Math.max(0, Math.floor((operator.centerSec - operator.widthSec / 2) * sampleRateHz));
-      const end = Math.min(frameCount, Math.ceil((operator.centerSec + operator.widthSec / 2) * sampleRateHz));
+      const start = Math.max(
+        0,
+        Math.floor((operator.centerSec - operator.widthSec / 2) * sampleRateHz),
+      );
+      const end = Math.min(
+        frameCount,
+        Math.ceil((operator.centerSec + operator.widthSec / 2) * sampleRateHz),
+      );
       for (let i = start; i < end; i += 1) {
         const phase = (i - start) / Math.max(1, end - start);
         signal[i] = (signal[i] ?? 0) + Math.sin(Math.PI * phase) * operator.amplitude;
@@ -214,7 +227,7 @@ function toCsv(rows: SensorSample[]): string {
   return ["timeSec,value", ...rows.map((row) => `${row.timeSec},${row.value}`)].join("\n");
 }
 
-const __dir = dirname(fileURLToPath(import.meta.url));
+const moduleDir = dirname(fileURLToPath(import.meta.url));
 
 async function renderLoupeDashboard(
   csvPath: string,
@@ -223,18 +236,29 @@ async function renderLoupeDashboard(
 ): Promise<boolean> {
   // Search for loupe.py: repo root → package dir → cwd → polyglot-mini sub-project
   const candidates = [
-    resolvePath(__dir, "../../../../loupe.py"),           // repo root
-    resolvePath(__dir, "../loupe.py"),                    // package root
-    resolvePath(process.cwd(), "loupe.py"),               // cwd
+    resolvePath(moduleDir, "../../../../loupe.py"), // repo root
+    resolvePath(moduleDir, "../loupe.py"), // package root
+    resolvePath(process.cwd(), "loupe.py"), // cwd
     resolvePath(process.cwd(), "polyglot-mini/loupe.py"), // sub-project
   ];
   let loupePath: string | null = null;
   for (const c of candidates) {
-    try { await access(c); loupePath = c; break; } catch { /* skip */ }
+    try {
+      await access(c);
+      loupePath = c;
+      break;
+    } catch {
+      /* skip */
+    }
   }
   if (!loupePath) {
     // Try `loupe` on PATH
-    try { await spawnChecked("python3", ["-m", "loupe_cli", csvPath, "-o", htmlPath]); return true; } catch { /* continue to fallback */ }
+    try {
+      await spawnChecked("python3", ["-m", "loupe_cli", csvPath, "-o", htmlPath]);
+      return true;
+    } catch {
+      /* continue to fallback */
+    }
   }
   try {
     await spawnChecked("python3", [loupePath ?? "loupe.py", csvPath, "-o", htmlPath]);

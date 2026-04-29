@@ -27,6 +27,13 @@ import type { IR } from "./ir.js";
 import type { StandardSchemaV1 } from "./standard-schema.js";
 import type { Modality } from "../../modality.js";
 
+export class CodecRouteError extends Error {
+  constructor(codecId: string) {
+    super(`Codec "${codecId}" did not match any declared route for this request.`);
+    this.name = "CodecRouteError";
+  }
+}
+
 export abstract class BaseCodec<Req, Art extends BaseArtifact> implements Codec<Req, Art> {
   abstract readonly id: string;
   abstract readonly modality: Modality;
@@ -64,7 +71,16 @@ export abstract class BaseCodec<Req, Art extends BaseArtifact> implements Codec<
     return art;
   }
 
+  protected pickRoute(req: Req): Route<Req> {
+    const route = this.routes.find((candidate) => candidate.match(req));
+    if (!route) {
+      throw new CodecRouteError(this.id);
+    }
+    return route;
+  }
+
   async produce(req: Req, ctx: HarnessCtx): Promise<Art> {
+    this.pickRoute(req);
     const ir0 = await this.expand(req, ctx);
     const ir1 = await this.adapt(ir0, ctx);
     const art = await this.decode(ir1, ctx);

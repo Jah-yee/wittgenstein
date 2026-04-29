@@ -8,6 +8,11 @@ versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Aligned top-level onboarding/status docs with the `v0.2.0-alpha.2` pre-M2
+  state instead of the older M0/M1A wording.
+- Made `BaseCodec.produce()` validate that a declared route matches before
+  running codec phases, and exported `CodecRouteError` for typed route failures.
+- Cleaned the lingering sensor-render lint warning so `pnpm lint` is warning-free.
 - Repaired frontend build drift found during the final pre-M2 check:
   - `apps/site` now keeps React and `react-dom` on the same React 18 line while
     using Tailwind v4's `@tailwindcss/postcss` plugin.

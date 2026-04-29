@@ -21,14 +21,17 @@ of it can plan. Wittgenstein's response is to extend what the model can **expres
 files** — schemas, codec IR, latent codes — rather than what it can **say in tokens**. The
 expressive contract lives in code, not prompt copy.
 
-> **🧪 Project status — early-stage, doctrine-locked.** Wittgenstein is a prerelease
-> (`v0.2.0-alpha.1`) with a working Python surface, a production-shaped TypeScript
-> harness, and a few intentionally unfinished surfaces clearly flagged with ⚠️ or 🔴 in
-> [`docs/implementation-status.md`](docs/implementation-status.md). The v0.2 cut locks
-> the thesis, vocabulary, and codec protocol (RFC-0001 / ADR-0008); the next phase is
-> the M0 → M5b execution against [`docs/exec-plans/active/codec-v2-port.md`](docs/exec-plans/active/codec-v2-port.md).
-> Breaking changes are still possible before `0.1.0`. **We are actively looking for
-> early adopters and contributors** — see [How to help](#how-to-help) below.
+> **🧪 Project status — early-stage, doctrine-locked, pre-M2 implementation.**
+> Wittgenstein is a prerelease (`v0.2.0-alpha.2`) with a working Python
+> surface, a production-shaped TypeScript harness, and a few intentionally
+> unfinished surfaces clearly flagged with ⚠️ or 🔴 in
+> [`docs/implementation-status.md`](docs/implementation-status.md). The v0.2
+> cut locks the thesis, vocabulary, and codec protocol (RFC-0001 / ADR-0008);
+> M0 and M1A have landed; M2 audio is the next implementation line against
+> [`docs/exec-plans/active/codec-v2-port.md`](docs/exec-plans/active/codec-v2-port.md).
+> Breaking changes are still possible before a stable release. **We are
+> actively looking for early adopters and contributors** — see
+> [How to help](#how-to-help) below.
 
 > **First time here? Pick your route.**
 >

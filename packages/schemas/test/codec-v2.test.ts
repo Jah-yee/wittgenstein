@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   BaseCodec,
+  CodecRouteError,
   CodecPhase,
   createRunSidecar,
   isHybridIR,
@@ -125,6 +126,18 @@ describe("codec v2 protocol surface", () => {
     expect(art.metadata.warnings).toHaveLength(1);
     expect(art.metadata.warnings[0]?.code).toBe("echo/decoded");
     expect(art.metadata.warnings[0]?.phase).toBe(CodecPhase.Decode);
+  });
+
+  it("BaseCodec.produce fails loudly when no declared route matches", async () => {
+    class NoRouteCodec extends EchoCodec {
+      override readonly routes: ReadonlyArray<Route<EchoReq>> = [
+        { id: "never", match: () => false },
+      ];
+    }
+
+    await expect(new NoRouteCodec().produce({ prompt: "hello" }, makeCtx())).rejects.toThrow(
+      CodecRouteError,
+    );
   });
 
   it("schema validates good and rejects bad input", async () => {
