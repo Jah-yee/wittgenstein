@@ -10,6 +10,10 @@ versioning follows [Semantic Versioning](https://semver.org/).
 
 - Aligned top-level onboarding/status docs with the `v0.2.0-alpha.2` pre-M2
   state instead of the older M0/M1A wording.
+- Added a top-level research program map that closes the pre-M2 engineering-borrow
+  and model/literature research audit without creating new doctrine.
+- Reclassified the hackathon launch checklist as an archived historical receipt
+  rather than active pre-M2 execution guidance.
 - Made `BaseCodec.produce()` validate that a declared route matches before
   running codec phases, and exported `CodecRouteError` for typed route failures.
 - Cleaned the lingering sensor-render lint warning so `pnpm lint` is warning-free.

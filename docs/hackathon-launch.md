@@ -1,5 +1,13 @@
 # Hackathon Launch
 
+**Status:** archived historical receipt
+**Superseded by:** `README.md`, `ROADMAP.md`,
+`docs/exec-plans/active/codec-v2-port.md`, and `docs/research/program.md`
+**Usage rule:** kept for provenance from the original launch phase; do not use this as
+active pre-M2 execution guidance.
+
+---
+
 This repo is closest to a strong hackathon launch when we optimize for artifacts, demos, and reproducibility rather than polishing every abstraction.
 
 ## What To Ship

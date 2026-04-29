@@ -66,6 +66,7 @@ If either hat dissents, the brief iterates; otherwise the verdict lands in an AD
 
 ## Companion docs
 
+- [`docs/research/program.md`](../program.md) — top-level map of engineering-borrow research, model/literature research, and pre-M2 closure status
 - `docs/THESIS.md` — master statement these briefs pressure-test (lands in PR #6)
 - `docs/inheritance-audit.md` — Keep/Promote/Revise/Retire table (lands in PR #6)
 - `docs/rfcs/` — engineering decisions that ratify brief verdicts

@@ -43,6 +43,7 @@ For doctrine-bearing PRs, also remember the review rule now locked in `engineeri
 
 ## Research briefs
 
+- [`research/program.md`](research/program.md) — top-level research program map: engineering-borrow review, model/literature review, and pre-M2 closure status
 - [`research/briefs/README.md`](research/briefs/README.md) — index, status legend, four-station methodology
 - [`research/briefs/A_vq_vlm_lineage_audit.md`](research/briefs/A_vq_vlm_lineage_audit.md) — VQ / VLM lineage 2026 refresh
 - [`research/briefs/B_compression_vs_world_models.md`](research/briefs/B_compression_vs_world_models.md) — Ilya ↔ LeCun stance (critical-path)
@@ -94,7 +95,6 @@ For doctrine-bearing PRs, also remember the review rule now locked in `engineeri
 
 ## Launch & benchmarks
 
-- [`hackathon-launch.md`](hackathon-launch.md) — launch checklist and demo script
 - [`benchmark-standards.md`](benchmark-standards.md) — quality bar and acceptance criteria
 - [`modality-launch-surface.md`](modality-launch-surface.md) — per-modality external API surface
 - [`implementation-status.md`](implementation-status.md) — what ships now vs typed stub
@@ -104,6 +104,7 @@ For doctrine-bearing PRs, also remember the review rule now locked in `engineeri
 - [`SYNTHESIS_v0.2.md`](SYNTHESIS_v0.2.md) — end-of-phase rollup
 - [`v02-alignment-review.md`](v02-alignment-review.md) — first-pass drift review (2026-04-24)
 - [`v02-final-audit.md`](v02-final-audit.md) — pre-lock audit ledger (2026-04-25)
+- [`hackathon-launch.md`](hackathon-launch.md) — archived historical launch checklist; kept for provenance, not current execution
 
 ## Extended primers (long-form)
 
