@@ -126,4 +126,86 @@ describe("@wittgenstein/codec-audio", () => {
     ]);
     expect((await stat(art.outPath)).size).toBeGreaterThan(44);
   });
+
+  it("routes soundtrack-style dry-run prompts to music without a deprecation warning", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "witt-audio-"));
+    const warnings: string[] = [];
+    const art = await audioCodec.produce(
+      {
+        modality: "audio",
+        prompt: "A lightweight launch soundtrack with a slow synthetic pulse.",
+      },
+      {
+        runId: "test-run",
+        parentRunId: null,
+        runDir: dir,
+        seed: 7,
+        outPath: join(dir, "intent-music.wav"),
+        logger: {
+          debug: () => {},
+          info: () => {},
+          warn: (message) => {
+            warnings.push(message);
+          },
+          error: () => {},
+        },
+        clock: {
+          now: () => Date.now(),
+          iso: () => new Date().toISOString(),
+        },
+        sidecar: codecV2.createRunSidecar(),
+        services: {
+          dryRun: true,
+        },
+        fork: () => {
+          throw new Error("not used in this test");
+        },
+      },
+    );
+
+    expect(art.metadata.route).toBe("music");
+    expect(art.metadata.warnings).toEqual([]);
+    expect(warnings).toEqual([]);
+  });
+
+  it("routes ambient no-route dry-run prompts to soundscape without a deprecation warning", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "witt-audio-"));
+    const warnings: string[] = [];
+    const art = await audioCodec.produce(
+      {
+        modality: "audio",
+        prompt: "Forest rain ambience with a soft morning texture.",
+      },
+      {
+        runId: "test-run",
+        parentRunId: null,
+        runDir: dir,
+        seed: 7,
+        outPath: join(dir, "intent-soundscape.wav"),
+        logger: {
+          debug: () => {},
+          info: () => {},
+          warn: (message) => {
+            warnings.push(message);
+          },
+          error: () => {},
+        },
+        clock: {
+          now: () => Date.now(),
+          iso: () => new Date().toISOString(),
+        },
+        sidecar: codecV2.createRunSidecar(),
+        services: {
+          dryRun: true,
+        },
+        fork: () => {
+          throw new Error("not used in this test");
+        },
+      },
+    );
+
+    expect(art.metadata.route).toBe("soundscape");
+    expect(art.metadata.warnings).toEqual([]);
+    expect(warnings).toEqual([]);
+  });
 });

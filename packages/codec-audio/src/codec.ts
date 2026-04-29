@@ -123,7 +123,33 @@ function asAudioPlanPayload(ir: codecV2.IR): AudioPlanPayload {
 }
 
 function routeFromRequest(req: AudioRequest): AudioRoute {
-  return req.route ?? "speech";
+  if (req.route) {
+    return req.route;
+  }
+
+  return inferIntentRoute(req.prompt);
+}
+
+function inferIntentRoute(prompt: string): AudioRoute {
+  const normalized = prompt.toLowerCase();
+
+  if (
+    /\b(music|soundtrack|score|melody|song|cue|theme|pulse|beat|chord|motif)\b/.test(
+      normalized,
+    )
+  ) {
+    return "music";
+  }
+
+  if (
+    /\b(soundscape|ambient|ambience|rain|wind|forest|city|ocean|waves|birds|noise|texture)\b/.test(
+      normalized,
+    )
+  ) {
+    return "soundscape";
+  }
+
+  return "speech";
 }
 
 function createDryRunPlan(req: AudioRequest): AudioPlan {
@@ -182,8 +208,8 @@ export class AudioCodec extends codecV2.BaseCodec<AudioRequest, AudioArtifact> {
   readonly schema = standardSchema;
   readonly routes: ReadonlyArray<codecV2.Route<AudioRequest>> = [
     { id: "speech", match: (req) => routeFromRequest(req) === "speech" },
-    { id: "soundscape", match: (req) => req.route === "soundscape" },
-    { id: "music", match: (req) => req.route === "music" },
+    { id: "soundscape", match: (req) => routeFromRequest(req) === "soundscape" },
+    { id: "music", match: (req) => routeFromRequest(req) === "music" },
   ];
 
   protected override async expand(req: AudioRequest, ctx: codecV2.HarnessCtx): Promise<codecV2.IR> {
