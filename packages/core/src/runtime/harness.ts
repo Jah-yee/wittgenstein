@@ -491,7 +491,6 @@ function createDryRunGeneration(request: WittgensteinRequest): LlmGenerationResu
   }
 
   if (
-    request.modality !== "audio" &&
     request.modality !== "video" &&
     request.modality !== "sensor" &&
     request.modality !== "asciipng"
