@@ -97,7 +97,7 @@ pnpm --filter @wittgenstein/cli exec wittgenstein sensor \
   "stable ECG with mild baseline noise" --dry-run --out artifacts/demo/ecg.json
 
 pnpm --filter @wittgenstein/cli exec wittgenstein audio \
-  "lightweight launch soundtrack" --dry-run --out artifacts/demo/music.wav
+  "lightweight launch audio artifact" --dry-run --out artifacts/demo/audio.wav
 
 pnpm --filter @wittgenstein/cli exec wittgenstein doctor
 ```

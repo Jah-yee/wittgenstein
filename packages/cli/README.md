@@ -25,7 +25,7 @@ npx @wittgenstein/cli doctor
 ```bash
 wittgenstein image  "editorial product shot" --out out.png
 wittgenstein tts    "launch voiceover" --ambient rain --out out.wav
-wittgenstein audio  "ambient launch soundtrack" --out out.wav
+wittgenstein audio  "launch audio artifact" --out out.wav
 wittgenstein sensor "stable ECG trace" --out out.json
 wittgenstein video  "architecture teaser" --out out.mp4
 wittgenstein doctor
