@@ -7,6 +7,7 @@ The current doctrine surface for v0.2. Read top-to-bottom for an onboarding pass
 Read these two files before any task:
 
 - [`../PROMPT.md`](../PROMPT.md) — public agent handoff prompt (what the project is, how to find information, exact working discipline)
+- [`../WORKFLOW.md`](../WORKFLOW.md) — orchestration contract: agent-eligible labels, per-issue workspace, prompt-template auto-load, retry policy (ratified by ADR-0017)
 - [`engineering-discipline.md`](engineering-discipline.md) — working standards (code style, robustness, testing, reporting, constraints)
 - [`archive-policy.md`](archive-policy.md) — how to decide delete vs archive vs refresh vs reclassify when old files drift
 

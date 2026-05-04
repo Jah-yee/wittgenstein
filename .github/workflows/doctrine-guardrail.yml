@@ -50,6 +50,7 @@ jobs:
               /^PROMPT\.md$/,
               /^CONTRIBUTING\.md$/,
               /^README\.md$/,
+              /^WORKFLOW\.md$/,
               /^\.github\/CODEOWNERS$/,
               /^\.github\/PULL_REQUEST_TEMPLATE\.md$/,
               /^docs\/adrs\//,
