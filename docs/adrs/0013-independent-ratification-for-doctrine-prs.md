@@ -21,7 +21,7 @@ For any PR that touches a **doctrine-bearing surface**, authorship and ratificat
    - any file under `docs/exec-plans/active/`
    - any file under `docs/agent-guides/` (per-port execution briefs)
    - `docs/codec-protocol.md`, `docs/reproducibility.md`
-   - `AGENTS.md`, `PROMPT.md`, `CONTRIBUTING.md`, `docs/labels.md`
+   - `AGENTS.md`, `PROMPT.md`, `CONTRIBUTING.md`, `docs/labels.md`, `WORKFLOW.md`
    - any change to a shared protocol contract under `packages/schemas/src/codec/v2/*`
    - any change that materially alters the `BaseCodec` lifecycle
 

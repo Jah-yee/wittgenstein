@@ -61,6 +61,7 @@ The repo runs on **two separate decision lanes**. Pick the right one before you 
 <!-- prettier-ignore-start -->
 **Start here for any task:**
 0. [`PROMPT.md`](PROMPT.md) — public agent handoff prompt: what you are, where to find answers, how to work here
+0a. [`WORKFLOW.md`](WORKFLOW.md) — orchestration contract: which issues are agent-eligible, per-issue workspace shape, prompt-template auto-load order, retry policy (ratified by ADR-0017)
 1. [`docs/engineering-discipline.md`](docs/engineering-discipline.md) — code style, robustness, testing, reporting standards
 
 **Then context:**

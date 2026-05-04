@@ -33,6 +33,16 @@ Every CLI invocation creates `artifacts/runs/<run-id>/manifest.json`.
 
 The `polyglot-mini` adapter-training data pipeline emits its own deterministic receipt: `polyglot-mini/train/data_manifest.json` records the seed, the requested sample count, the actual write count, the SHA-256 of the produced `data.jsonl`, and the SHA-256 of the canonical (sorted) prompt list. Re-running `build_dataset_coco.py` against the same Karpathy split with the same seed reproduces the same hashes. See `polyglot-mini/train/data_manifest.py` for the helper and Issue #114 for context.
 
+## The manifest spine is Wittgenstein's session contract
+
+Per Brief K §K.1 (ratified by ADR-0017), the manifest spine is functionally the equivalent of [Anthropic Managed Agents](https://www.anthropic.com/engineering/managed-agents)' Brain / Hands / Session split, with the durable append-only **Session** mapping to `artifacts/runs/<id>/manifest.json`:
+
+- **Brain** = the harness (`packages/core/src/runtime/`) — decision loop.
+- **Hands** = the codecs (`packages/codec-*`) and `packages/sandbox` — uniform `Codec<Req, Art>.produce` is our `execute(name, input) → string` analog.
+- **Session** = manifest spine — append-only durable trace; replay via `--manifest <path>` per RFC-0002.
+
+The mapping is currently **per-run**, not cross-run: each CLI invocation writes one manifest. Anthropic's `wake(sessionId)` cross-run linkage would require a `parentRunId` field and an explicit `events[]` slot in the manifest schema; both are deferred to v0.4 per Brief K. The equivalence above is honest about the gap.
+
 ## Why This Exists
 
 The manifest spine is the main quality bar in this scaffold. A failing run is still useful if it leaves a complete trace.
