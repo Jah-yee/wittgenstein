@@ -5,7 +5,15 @@
 **Hats:** Researcher / Builder / Hacker
 **Purpose:** Pressure-test the repo against world-class research-engineering standards before v0.3 release.
 
-This memo preserves the findings of the 2026-05-03 staff-level external review. Action items are tracked in `docs/exec-plans/active/v0.3-roadmap.md` and as GitHub issues. The memo itself does not ratify any decision — it is the audit artifact, not doctrine.
+This memo preserves the findings of the 2026-05-03 staff-level external review. The memo itself does not ratify any decision; it is the audit artifact, not doctrine or an execution plan. Follow-up work is tracked as GitHub issues and, when accepted, by the canonical execution surfaces already in the repo.
+
+Maintainer calibration after review:
+
+- The audit is useful because it points toward evidence gaps, especially cold-checkout verification, byte-for-byte goldens, and manifest-spine invariant coverage.
+- The proposed `~6x` token comparison is not accepted as a replacement for the unsupported `~52,000x` claim; the right fix is either a repo-local reproducer or a qualitative paradigm framing.
+- The proposed `core >= 0.4` / `cli >= 0.25` test ratios are diagnostics, not release doctrine. Follow-up should target invariant coverage and test mix first.
+- The VQ decoder bridge is tracker-gated on a license-clean decoder and weights event; it is not normal sprint work until that external gate trips.
+- Calendar-based doctrine freeze is not accepted as a new process rule. ADR-0014's existing kill criterion and maintainer review norms are sufficient unless evidence says otherwise.
 
 ---
 
@@ -170,21 +178,4 @@ Two postures: (a) keep 6 rows (educational density, mixed signal) or (b) trim to
 
 ## Action mapping
 
-Each finding maps to the v0.3 roadmap (`docs/exec-plans/active/v0.3-roadmap.md`):
-
-- §1.1 → P0.2 README receipts tightening.
-- §1.2 → P0.1 sensor goldens.
-- §1.3 → P2.1 dataset reproducibility lock.
-- §1.4 → P2.3 brief lineage mermaid.
-- §2.1 → P1.1 core/cli test ratio raise.
-- §2.2 → P0.1 sensor goldens (cross-cutting).
-- §2.3 → P2.5 doctrine freeze sprint.
-- §2.4 → P0.3 hygiene cleanup.
-- §2.5 → P1.3 codec-cruiser CI rule.
-- §2.6 / §3.2 → P1.2 supply-chain CI hardening.
-- §3.1 → P1.2 (lock-down comment + engineering-discipline rule).
-- §3.3 → P1.2 (CodeQL upgrade).
-- §3.4 → P2.4 ADR-0016.
-- §3.5 → P2.2 kimi workspace extraction.
-
-The roadmap is the single source of truth for what gets executed and when. This memo is the source of truth for **why**.
+Accepted follow-up items should live in GitHub issues and in the canonical execution surfaces already present in the repo. This memo is a source of audit context, not the source of truth for what gets executed and when.
