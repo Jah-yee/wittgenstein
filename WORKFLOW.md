@@ -116,6 +116,8 @@ Before dispatch, the maintainer or orchestrator should do one quick **freshness 
 
 If those surfaces disagree, narrow or refresh the issue before dispatching. Do not make the agent spend its first turns reconciling stale repo state that a maintainer could have corrected in one minute.
 
+One more classification step matters before dispatch: is this issue **research-first**? Per [ADR-0019](docs/adrs/0019-research-first-development-discipline.md), many Wittgenstein tasks should not start with code. If the issue depends on broad path choice, external-object comparison, shared contract semantics, benchmark design, or large structural reshaping, the first deliverable should be the research artifact or decision note that narrows the path. When the decision surface is large, that research step should be correspondingly substantial. Do not dispatch "implement the thing" when the repo still needs "choose the path honestly."
+
 ## 5. `agent` — concurrency, turn budget, retry policy
 
 ```yaml
@@ -162,6 +164,8 @@ One more maintainer responsibility sits just outside the orchestrator boundary: 
 
 If a primary path blocks during execution, the agent may only take a fallback branch that is already named by the relevant brief / ADR / exec-plan / issue scope. Per [ADR-0018](docs/adrs/0018-explicit-fallback-discipline.md), allowed fallback classes are `same-contract`, `partial-output`, `evaluation`, and `hard-stop`; every engaged fallback must leave receipts, and "stop with a structured failure" is the correct move when no ratified branch exists.
 
+Symmetrically, if the agent discovers the issue was misclassified and actually requires research-first treatment, it should stop broad implementation, produce the missing comparison / note / recommendation artifact, and hand the narrowed path back through the issue rather than improvising architecture in code.
+
 ---
 
 ## What this file is not
@@ -181,3 +185,4 @@ If a primary path blocks during execution, the agent may only take a fallback br
 - [ADR-0014](docs/adrs/0014-governance-lane-for-meta-process-doctrine.md) — governance lane this file landed through.
 - [ADR-0017](docs/adrs/0017-orchestration-workflow-contract.md) — ratification ADR for this contract.
 - [ADR-0018](docs/adrs/0018-explicit-fallback-discipline.md) — shared fallback discipline for agents and maintainers.
+- [ADR-0019](docs/adrs/0019-research-first-development-discipline.md) — default research-first posture for non-local work.

@@ -43,6 +43,7 @@ Read [`docs/architecture.md`](docs/architecture.md) before changing structure.
 - Schema-first: every external boundary gets a zod schema.
 - Fail loudly: use structured errors, not magic strings.
 - If a primary path is blocked, only take a ratified fallback branch and leave receipts; do not invent convenience fallbacks under delivery pressure. See [ADR-0018](docs/adrs/0018-explicit-fallback-discipline.md).
+- For non-local work, assume research first: path choice, external-object comparison, shared contracts, benchmark/backend design, and large reshaping should usually be researched before code. See [ADR-0019](docs/adrs/0019-research-first-development-discipline.md).
 - Keep package boundaries clean: `schemas` has no runtime logic; codecs do not own harness code.
 - If output semantics change, update docs and goldens together.
 - Put future architectural choices in ADRs instead of burying them in PR text.

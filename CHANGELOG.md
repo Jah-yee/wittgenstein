@@ -17,6 +17,12 @@ versioning follows [Semantic Versioning](https://semver.org/).
   under delivery pressure. `WORKFLOW.md` and
   `docs/engineering-discipline.md` now point implementers at ADR-0018's
   same-contract / partial-output / evaluation / hard-stop taxonomy.
+- Ratified a research-first development posture for non-local work: `AGENTS.md`,
+  `PROMPT.md`, `WORKFLOW.md`, and the research surfaces now explicitly tell
+  contributors to do broad research, engineering-borrow comparison, or
+  implementation-facing investigation before hardening path, contract, or
+  structural decisions into code, and to let substantial questions produce
+  correspondingly substantial research artifacts.
 - Isolated `apps/wittgenstein-kimi` from the root `pnpm` workspace (Issue #112).
   The Kimi-flavored agent demo (~7,400 LOC of React / Radix / Vite) now carries
   its own `pnpm-lock.yaml` under `apps/wittgenstein-kimi/`, so its 70+ transitive

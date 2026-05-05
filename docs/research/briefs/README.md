@@ -134,6 +134,28 @@ Every brief ships with the four-station loop as grep-able headings:
 
 Plus a dated header and a version tag (`v0.1`, `v0.2`, …) so iteration is visible.
 
+## When to write a brief vs something smaller
+
+Per [ADR-0019](../adrs/0019-research-first-development-discipline.md), Wittgenstein is
+research-first for non-local work — but not every research question needs a full brief.
+
+Write a **brief** when the question is broad enough to shape path choice:
+
+- decoder / backend / model-family selection,
+- benchmark or evaluation-stack design,
+- external object study with multiple plausible routes,
+- modality-boundary or thesis-adjacent framing,
+- engineering-borrow work that needs explicit adopt / reject reasoning.
+
+Write something smaller when the question is narrower:
+
+- **implementation-facing investigation** -> dated research note, handoff brief, or issue note,
+- **already-ratified slice prep** -> handoff brief or implementation memo,
+- **tiny local unknown** -> issue comment / PR note may be enough.
+
+The rule is not "maximize ceremony." The rule is "do not skip the research step when
+the work is non-local."
+
 ## Status legend
 
 - 🟢 Ratified by ADR-NNNN (verdict final, cited by an ADR)

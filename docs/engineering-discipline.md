@@ -17,6 +17,8 @@ This means:
 
 Then: make the smallest effective change that solves your problem.
 
+For Wittgenstein, "read before write" often means **research before code**. If the task is non-local — object selection, external-practice borrowing, shared contract change, benchmark/backend choice, or large structural reshaping — do enough research to establish the path before implementing it. When the question is large, the research should be correspondingly substantial rather than a shallow scan. Leave that research in a durable downstream surface (brief, note, handoff, issue, RFC, ADR, exec-plan), not only in chat, and make sure it flows back into the active execution surface. See [ADR-0019](adrs/0019-research-first-development-discipline.md).
+
 ## Change Discipline
 
 **Make the smallest effective change.** This is not a preference; it's a discipline.

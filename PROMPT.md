@@ -55,6 +55,11 @@ The bullets below are Wittgenstein-doctrine on top of it:
   Failures return structured errors with a manifest — no silent fallbacks.
 - **Schema at every LLM boundary.** Preamble injected, zod-parsed on return.
   Free-form prose is not accepted as structured output.
+- **Research first for non-local work.** If the task touches path choice, external
+  objects/libraries, shared contracts, benchmark/backend design, or large structural
+  changes, do enough research to narrow the path before writing code. Broad research,
+  engineering-borrow research, and implementation-facing investigation are all valid;
+  leave the result in a durable repo surface. See ADR-0019.
 - **No new public API, modality, IR variant, or image path without an ADR.** If
   it looks settled, [check the ADRs](docs/adrs/) before proposing otherwise.
 - **Path C is rejected through v0.4** (ADR-0007). No Chameleon / LlamaGen-style

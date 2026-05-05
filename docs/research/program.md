@@ -16,23 +16,35 @@ exec-plans, agent guides, and code.
 
 ## Research posture
 
-Wittgenstein uses research in two different ways.
+Per [ADR-0019](adrs/0019-research-first-development-discipline.md), Wittgenstein treats
+research as a default precursor to non-local engineering work. The repo uses three
+research shapes.
 
-1. **Engineering-borrow research** looks at working systems and copies the smallest
+1. **Broad research** evaluates path choice, object studies, decoder families,
+   modality boundaries, benchmark framing, and thesis-adjacent background. It should
+   name kill criteria and preserve uncertainty instead of sounding more settled than
+   the evidence.
+2. **Engineering-borrow research** looks at working systems and copies the smallest
    robust practice that fits this repo. It should prefer concrete source/docs over
    vibes, and it should say what not to copy.
-2. **Model / literature research** evaluates decoder families, modality boundaries,
-   benchmarks, and thesis-level hypotheses. It should name kill criteria and preserve
-   uncertainty instead of sounding more settled than the evidence.
+3. **Implementation-facing investigation** resolves a concrete unknown inside an active
+   slice: package choice, helper cut line, manifest receipt shape, verification plan,
+   or reproducibility probe design.
 
-Both kinds of research are useful only when they feed a specific downstream surface:
+All three kinds of research are useful only when they feed a specific downstream surface:
 
 ```text
 finding -> note / brief -> RFC or ADR -> exec-plan / agent-guide -> code / issue
 ```
 
+When the question is large, the research should also be large enough to settle it
+honestly. A major decoder choice, benchmark stack, architectural cut line, or external
+object comparison should not be reduced to a quick skim. The repo wants substantial
+research where the decision surface is substantial.
+
 Governance decisions use the separate lane from ADR-0014. This page does not create a
-third lane.
+third lane; it names the research work that should happen before decisions and before
+non-local implementation.
 
 ---
 
@@ -54,7 +66,7 @@ Important nuance: this repo has **borrowed patterns**, not vendored external cod
 the right choice at this stage. Pulling framework code into the repo before M2 would add
 license and maintenance surface without solving the immediate audio-port problem.
 
-### 2. Model / literature research
+### 2. Broad research
 
 The model/literature requirement is also satisfied for the pre-M2 boundary.
 
@@ -71,6 +83,19 @@ The remaining unknowns are execution checks, not missing research:
 - Kokoro CPU byte-parity must be verified in M2.
 - Piper fallback must be concretely pinned if Kokoro fails the gate.
 - The sweep-level verdict must be recorded honestly in the manifest/docs surface before v0.3 cuts.
+
+### 3. Implementation-facing investigation
+
+This third research shape is easy to miss because it often looks like "execution prep,"
+but it is one of the repo's most valuable habits. These are not broad object studies;
+they are narrow investigations that make the next slice materially safer or clearer.
+
+| Area                        | Evidence                                                 | Downstream use                                                             | Current judgment                         |
+| --------------------------- | -------------------------------------------------------- | -------------------------------------------------------------------------- | ---------------------------------------- |
+| M2 slice boundaries         | `docs/research/m2-implementation-design-2026-04.md`      | Drew the actual cut lines for Slice A/B/C1/C2/C3 before implementation.    | Landed and justified its keep.           |
+| Cold-checkout verification  | `docs/research/2026-05-04-cold-checkout-verification.md` | Found the CLI entrypoint drift and turned it into a concrete follow-up PR. | Strong example of research serving code. |
+| Per-slice handoff briefs    | `docs/handoff/*.md`                                      | Convert broad context into execution-ready prompts and bounded reads.      | Valuable when a slice is non-trivial.    |
+| Slice E preflight reasoning | Issue #118 staged checklist and receipts plan            | Narrows the sweep before platform work begins.                             | Active and appropriately narrow.         |
 
 ---
 
@@ -112,7 +137,10 @@ Run Slice E as planned: cross-platform sweep verification and honest verdict cap
 
 Do not start another broad research sweep before Slice E. The next research-like action
 should happen inside M2 implementation only when code forces a concrete question, such
-as the exact Kokoro/Piper package, weights, hash, or deterministic backend pin.
+as the exact Kokoro/Piper package, weights, hash, or deterministic backend pin. That is
+not a retreat from ADR-0019; it is the right-sized application of it for the current
+stage. The broad research is already done here, so the remaining research should be the
+narrow, implementation-facing kind that feeds Slice E directly.
 
 If a future contributor wants to broaden the research surface, require one of:
 
