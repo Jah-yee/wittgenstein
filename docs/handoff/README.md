@@ -13,7 +13,7 @@ If the issue does not have a matching handoff brief, the agent falls back to `AG
 ## Current handoffs
 
 - [`workflow-md-spec.md`](workflow-md-spec.md) — Symphony-shaped `WORKFLOW.md` orchestration contract. **Closed**: the WORKFLOW.md it specified now lives at the repo root (ratified by ADR-0017).
-- [`m2-slice-c2-kokoro.md`](m2-slice-c2-kokoro.md) — M2 Slice C2: Kokoro-82M backend wiring via `kokoro-js`. Tracks Issue #116. Open.
+- [`m2-slice-c2-kokoro.md`](m2-slice-c2-kokoro.md) — M2 Slice C2: Kokoro-82M backend wiring via `kokoro-js`. **Closed**: landed via PR #158 / Issue #116.
 
 ## When to add a handoff
 

@@ -1,6 +1,6 @@
 # Handoff — M2 Slice C2: Kokoro-82M backend wiring
 
-**Tracked:** Issue #116. **Phase:** v0.3 / Phase 2 (Audio codec v2).
+**Tracked:** Issue #116. **Phase:** v0.3 / Phase 2 (Audio codec v2). **Status:** landed via PR #158; retained as historical handoff input for the now-active Slice E follow-up.
 **Predecessors (merged):** Slice A codec-owned routing (#93), Slice B route helpers (#94), Slice C1 audioRender manifest schema (#95), Slice C3 parity goldens (#121), Slice D soft-warn (#96).
 **Successor:** Slice E sweep verification (#118) — cross-platform determinism gate.
 

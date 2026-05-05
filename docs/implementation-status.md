@@ -10,7 +10,7 @@
 > - `docs/agent-guides/`
 > - `docs/archive-policy.md` if a row here starts to drift into historical-only status
 >
-> Last updated: 2026-04-20. "Ships" = produces real output today. "Stub" = typed interface,
+> Last updated: 2026-05-05. "Ships" = produces real output today. "Stub" = typed interface,
 > throws `NotImplementedError`, waiting for a renderer. "Partial" = some routes work.
 
 ---
@@ -78,14 +78,15 @@ codecs are wired. Image and video codecs are typed stubs — intentional until t
 
 ### @wittgenstein/codec-audio
 
-| Component                                  | Status   | Notes                        |
-| ------------------------------------------ | -------- | ---------------------------- |
-| Schema + Zod validation                    | ✅ Ships |                              |
-| Speech route (`renderSpeechRoute`)         | ✅ Ships | WAV via stdlib encoder       |
-| Soundscape route (`renderSoundscapeRoute`) | ✅ Ships | Procedural ambient synthesis |
-| Music route (`renderMusicRoute`)           | ✅ Ships | Symbolic → synth             |
-| Ambient adapter (`ambient-adapter.ts`)     | ✅ Ships | BoW → category heuristic     |
-| WAV encoding runtime                       | ✅ Ships | `runtime.ts`, zero deps      |
+| Component                                  | Status   | Notes                                                                                     |
+| ------------------------------------------ | -------- | ----------------------------------------------------------------------------------------- |
+| Schema + Zod validation                    | ✅ Ships |                                                                                           |
+| Speech route (`renderSpeechRoute`)         | ✅ Ships | Procedural default; Kokoro-82M opt-in via `WITTGENSTEIN_AUDIO_BACKEND=kokoro`             |
+| Soundscape route (`renderSoundscapeRoute`) | ✅ Ships | Procedural ambient synthesis                                                              |
+| Music route (`renderMusicRoute`)           | ✅ Ships | Symbolic → synth                                                                          |
+| Kokoro backend wrapper                     | ✅ Ships | `src/decoders/kokoro/`; fp32 CPU path landed in PR #158, default flip gated on Issue #118 |
+| Ambient adapter (`ambient-adapter.ts`)     | ✅ Ships | BoW → category heuristic                                                                  |
+| WAV encoding runtime                       | ✅ Ships | `runtime.ts`, zero deps                                                                   |
 
 ### @wittgenstein/codec-image
 
@@ -109,13 +110,13 @@ codecs are wired. Image and video codecs are typed stubs — intentional until t
 
 ### @wittgenstein/cli
 
-| Command               | Status   | Notes                                                     |
-| --------------------- | -------- | --------------------------------------------------------- |
-| `wittgenstein image`  | ✅ Ships | Calls codec-image; renders with available adapter/decoder |
-| `wittgenstein audio`  | ✅ Ships | Full speech + soundscape + music routes                   |
-| `wittgenstein sensor` | ✅ Ships | Full signal expand + Loupe dashboard                      |
-| `wittgenstein video`  | 🔴 Stub  | Codec throws `NotImplementedError`                        |
-| `wittgenstein doctor` | ✅ Ships | Checks node, pnpm, env vars, package links                |
+| Command               | Status   | Notes                                                                              |
+| --------------------- | -------- | ---------------------------------------------------------------------------------- |
+| `wittgenstein image`  | ✅ Ships | Calls codec-image; renders with available adapter/decoder                          |
+| `wittgenstein audio`  | ✅ Ships | Full speech + soundscape + music routes; Kokoro speech path is opt-in at v0.3      |
+| `wittgenstein sensor` | ✅ Ships | Full signal expand + Loupe dashboard                                               |
+| `wittgenstein video`  | 🔴 Stub  | Codec throws `NotImplementedError`; `.mp4` remains the target artifact, not a ship |
+| `wittgenstein doctor` | ✅ Ships | Checks node, pnpm, env vars, package links                                         |
 
 ### @wittgenstein/sandbox
 
