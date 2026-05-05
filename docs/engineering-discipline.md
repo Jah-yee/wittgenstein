@@ -116,6 +116,7 @@ Avoid broad rewrites or speculative architecture. If you find the problem is big
 - The harness routes to `Codec<Req, Art>.produce()` — don't work around this primitive
 - Codec manifest authorship is now codec-owned (not harness-overridden) — respect this split
 - The `quality.partial` invariant protects against silent fallbacks — use it
+- If a primary path is blocked, first classify the fallback shape (`same-contract`, `partial-output`, `evaluation`, or `hard-stop`) and check whether that branch is already ratified; do not invent ad hoc fallback behavior in implementation work. Every engaged fallback must leave receipts. See [ADR-0018](adrs/0018-explicit-fallback-discipline.md).
 - Goldens are the regression baseline — byte-for-byte for deterministic, structural for LLM-driven
 - Parallel modality lines may explore locally, but shared shape converges explicitly later — do not silently promote modality-local practice into shared contract
 

@@ -21,6 +21,7 @@ Architecture Decision Records capture decisions that should survive chat history
 - 0015 audio decoder family — ratifies Brief I (Kokoro-82M-family default, Piper fallback, no tokenizer at v0.3, procedural soundscape/music, CPU byte-parity / GPU structural-parity)
 - 0016 untrusted-code execution boundary — locks `polyglot-mini`'s subprocess+timeout+safe-globals as research-grade only; names `@wittgenstein/sandbox` (nsjail / bubblewrap / Pyodide-WASM) as the production-path entrypoint; production engagement of the painter path is a hard error until that lands
 - 0017 orchestration workflow contract — ratifies Brief K §Verdict 1; adds `WORKFLOW.md` at the repo root as the Symphony-shaped agent-dispatch contract; runtime stays unspecified at v0.3
+- 0018 explicit fallback discipline — ratifies the shared rule that fallbacks must be planned, typed, and receipt-bearing; names same-contract / partial-output / evaluation / hard-stop fallback classes
 
 ## Lanes
 

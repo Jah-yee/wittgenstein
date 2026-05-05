@@ -111,7 +111,8 @@ Before dispatch, the maintainer or orchestrator should do one quick **freshness 
 
 - confirm the issue is still actionable on `main` and has not already been partially closed by a newer PR,
 - confirm any paired handoff brief is still an open brief rather than a historical receipt,
-- confirm the active repo-facing status surfaces (`README.md`, `docs/implementation-status.md`, active exec-plan / roadmap) do not obviously contradict the issue's starting assumptions.
+- confirm the active repo-facing status surfaces (`README.md`, `docs/implementation-status.md`, active exec-plan / roadmap) do not obviously contradict the issue's starting assumptions,
+- confirm whether the task already has a ratified fallback tree; if it does, name that tree in the dispatch context, and if it does not, do not ask the agent to improvise one under delivery pressure.
 
 If those surfaces disagree, narrow or refresh the issue before dispatching. Do not make the agent spend its first turns reconciling stale repo state that a maintainer could have corrected in one minute.
 
@@ -159,6 +160,8 @@ If you are pairing with an agent today, **you** are the orchestrator. The contra
 
 One more maintainer responsibility sits just outside the orchestrator boundary: if an agented slice changes active repo-facing truth surfaces, close the loop. Update the affected status pages (`README.md`, `docs/implementation-status.md`, active roadmap / exec-plan notes, handoff state) in the same PR or open an immediate successor issue. A green implementation PR that leaves the repo telling the old story is not actually closed out.
 
+If a primary path blocks during execution, the agent may only take a fallback branch that is already named by the relevant brief / ADR / exec-plan / issue scope. Per [ADR-0018](docs/adrs/0018-explicit-fallback-discipline.md), allowed fallback classes are `same-contract`, `partial-output`, `evaluation`, and `hard-stop`; every engaged fallback must leave receipts, and "stop with a structured failure" is the correct move when no ratified branch exists.
+
 ---
 
 ## What this file is not
@@ -177,3 +180,4 @@ One more maintainer responsibility sits just outside the orchestrator boundary: 
 - [ADR-0013](docs/adrs/0013-independent-ratification-for-doctrine-prs.md) — independent-ratification rule (this file's amendments are doctrine-bearing).
 - [ADR-0014](docs/adrs/0014-governance-lane-for-meta-process-doctrine.md) — governance lane this file landed through.
 - [ADR-0017](docs/adrs/0017-orchestration-workflow-contract.md) — ratification ADR for this contract.
+- [ADR-0018](docs/adrs/0018-explicit-fallback-discipline.md) — shared fallback discipline for agents and maintainers.

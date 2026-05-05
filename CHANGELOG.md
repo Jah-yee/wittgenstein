@@ -12,6 +12,11 @@ versioning follows [Semantic Versioning](https://semver.org/).
   `README.md` now leads with the harness thesis before the quickstart, `AGENTS.md`
   points cold readers at `WORKFLOW.md`, and the active-status docs now name
   Slice E / Issue #118 as the live v0.3 gate instead of the pre-merge C2 state.
+- Ratified a shared fallback discipline for agents and maintainers: fallback
+  branches must now be planned, typed, and receipt-bearing rather than improvised
+  under delivery pressure. `WORKFLOW.md` and
+  `docs/engineering-discipline.md` now point implementers at ADR-0018's
+  same-contract / partial-output / evaluation / hard-stop taxonomy.
 - Isolated `apps/wittgenstein-kimi` from the root `pnpm` workspace (Issue #112).
   The Kimi-flavored agent demo (~7,400 LOC of React / Radix / Vite) now carries
   its own `pnpm-lock.yaml` under `apps/wittgenstein-kimi/`, so its 70+ transitive
