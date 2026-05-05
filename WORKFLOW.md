@@ -107,6 +107,14 @@ Open the PR per the standard branch / PR conventions (Engineering lane: Brief �
 
 The handoff-brief auto-discovery rule (`docs/handoff/<slice>.md`) is the load-bearing piece: when an issue has a paired handoff brief, that brief is the only doc the agent needs beyond the issue body. This makes per-issue context self-contained and survives orchestrator changes.
 
+Before dispatch, the maintainer or orchestrator should do one quick **freshness pass**:
+
+- confirm the issue is still actionable on `main` and has not already been partially closed by a newer PR,
+- confirm any paired handoff brief is still an open brief rather than a historical receipt,
+- confirm the active repo-facing status surfaces (`README.md`, `docs/implementation-status.md`, active exec-plan / roadmap) do not obviously contradict the issue's starting assumptions.
+
+If those surfaces disagree, narrow or refresh the issue before dispatching. Do not make the agent spend its first turns reconciling stale repo state that a maintainer could have corrected in one minute.
+
 ## 5. `agent` — concurrency, turn budget, retry policy
 
 ```yaml
@@ -116,7 +124,7 @@ max_retry_backoff_ms: 300000 # Symphony default — 5 minutes
 stall_timeout_ms: 600000 # 10 minutes — single-step turns can be slow on cold checkouts
 ```
 
-**Why 2 concurrent agents:** review capacity is the binding constraint, not compute. We have 2 maintainers per CODEOWNERS; review-vs-execution backpressure should match. If maintainer count grows, this number grows; not before.
+**Why 2 concurrent agents:** review capacity is the binding constraint, not compute. We currently review work as a maintainer pair; review-vs-execution backpressure should match. If maintainer capacity grows, this number can grow with it; not before.
 
 **Why 600 s stall timeout:** the cold-checkout verification (PR #127, 2026-05-04) measured 40 s for a fresh `pnpm install + typecheck + lint + test`. Adding a single substantive turn brings that to multi-minute territory; 10 minutes is the right threshold for "definitely stalled, not just slow."
 
@@ -144,10 +152,12 @@ candidates: [symphony, github-actions, bash]
 
 The contract above is what matters. The orchestrator runtime is a separate adoption decision deferred to v0.4 or later. Recommended evaluation triggers:
 
-- **Issue volume crosses ~50 simultaneously open** — at our current 16 open, the polling-and-reconciliation loop pays for itself only if there is a real queue. Below the threshold, a human dispatching by hand to Codex / Claude Code is cheaper than the orchestrator.
+- **Issue volume crosses ~50 simultaneously open** — at that scale, the polling-and-reconciliation loop pays for itself as a real queue rather than a convenience layer. Below that threshold, a human dispatching by hand to Codex / Claude Code is often cheaper than the orchestrator.
 - **A contributor opens an RFC for a specific runtime** — the choice goes through the engineering lane. Until then, the contract stands and the runtime is the consumer's choice.
 
 If you are pairing with an agent today, **you** are the orchestrator. The contract above is what you owe the agent (correct workspace, correct prompt template, correct retry policy if it stalls). It is also what the agent owes the repo (no PR mutation rules outside the agent's own tooling, no auto-dispatch on excluded labels).
+
+One more maintainer responsibility sits just outside the orchestrator boundary: if an agented slice changes active repo-facing truth surfaces, close the loop. Update the affected status pages (`README.md`, `docs/implementation-status.md`, active roadmap / exec-plan notes, handoff state) in the same PR or open an immediate successor issue. A green implementation PR that leaves the repo telling the old story is not actually closed out.
 
 ---
 
