@@ -3,22 +3,6 @@
 # Wittgenstein
 
 **The modality harness for text-first LLMs.**
-Give a text LLM a prompt and Wittgenstein turns the structured plan into real files:
-`.png`, `.wav`, `.csv`, `.html`, or `.svg`, with run manifests that record the seed,
-artifact hash, and model I/O. No fused multimodal model is required for the local
-30-second sensor demo.
-
-```bash
-git clone https://github.com/p-to-q/wittgenstein.git && cd wittgenstein
-cd polyglot-mini && pip install -r requirements.txt
-python3 -m polyglot.cli sensor "ECG 72 bpm resting" --dry-run --out /tmp/ecg.json
-open /tmp/ecg.html   # macOS; or xdg-open on Linux
-```
-
-You get a real ECG dashboard (`~117 KB` self-contained HTML), a 2,500-sample CSV, and
-a manifest tying the artifact to a git SHA + seed. That is the smallest end-to-end
-shape. Image, audio, and SVG follow the same harness/codec/manifest contract, with
-different maturity levels called out in `docs/implementation-status.md`.
 
 [![CI](https://img.shields.io/github/actions/workflow/status/p-to-q/wittgenstein/ci.yml?branch=main&label=CI)](./.github/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/p-to-q/wittgenstein?include_prereleases&label=release)](https://github.com/p-to-q/wittgenstein/releases)
@@ -36,6 +20,15 @@ The limits of a language model's expression are the limits of what a harness bui
 of it can plan. Wittgenstein's response is to extend what the model can **express as structured
 files** — schemas, codec IR, latent codes — rather than what it can **say in tokens**. The
 expressive contract lives in code, not prompt copy.
+
+Give a text LLM a prompt and Wittgenstein turns the structured plan into real files:
+`.png`, `.wav`, `.csv`, `.html`, or `.svg`, with run manifests that record the seed,
+artifact hash, and model I/O.
+
+The smallest end-to-end proof is the local 30-second sensor demo: a real ECG dashboard
+(`~117 KB` self-contained HTML), a 2,500-sample CSV, and a manifest tied to a git SHA +
+seed. Image, audio, and SVG follow the same harness/codec/manifest contract, with
+different maturity levels called out in `docs/implementation-status.md`.
 
 > **🧪 Project status — early-stage, doctrine-locked, M2 audio in progress.**
 > Wittgenstein is a prerelease (`v0.2.0-alpha.2`) with a working Python
@@ -67,8 +60,20 @@ expressive contract lives in code, not prompt copy.
 
 ## Why this exists
 
-Most "multimodal AI" stacks hide the hard parts in a fused frontier model, a paid cloud
-API, or the slide deck. None of those are portable, inspectable, or reproducible.
+Most multimodal stacks buy capability at the model layer: larger fused models,
+modality-specific pretraining, expensive adapter training, or paid cloud APIs. That path
+works, but it makes artifact generation hard to inspect, replay, and extend outside the
+model vendor's boundary.
+
+Wittgenstein explores a different allocation of labor. The text-first LLM remains the
+planner: it emits typed structure. The repo supplies the modality machinery: schemas,
+codecs, deterministic renderers, frozen decoders, adapters where needed, and a manifest
+spine that records what happened.
+
+The hypothesis is not that text-first LLMs secretly contain every modality as pixels or
+waveforms. It is that they compress enough world structure to plan across modalities, so
+some multimodal generation work can move from model-scale pretraining into typed runtime
+interfaces.
 
 Wittgenstein makes three architectural bets instead:
 
