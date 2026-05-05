@@ -58,6 +58,7 @@ For doctrine-bearing PRs, also remember the review rule now locked in `engineeri
 - [`research/briefs/I_audio_codec_landscape.md`](research/briefs/I_audio_codec_landscape.md) — M2 TTS decoder family selection + reproducibility verdict (feeds ADR-0015)
 - [`research/briefs/J_audio_engineering_and_routes.md`](research/briefs/J_audio_engineering_and_routes.md) — M2 route shape, manifest rows, fixture strategy, and deprecation contract
 - [`research/briefs/K_orchestration_prior_art.md`](research/briefs/K_orchestration_prior_art.md) — 2026 orchestration prior art survey (Symphony / Trellis / Anthropic); recommends adopting `WORKFLOW.md` spec, defers other primitives to v0.4
+- [`research/briefs/L_sensor_codec_landscape.md`](research/briefs/L_sensor_codec_landscape.md) — v0.4+ sensor route: deterministic chaotic operators (Lorenz / Rössler / Chua / Hopfield-osc), TimesFM as horizon-track only, λ_max + sample entropy + surrogate testing as receipts
 
 ## Long-form research notes (predate the briefs)
 
