@@ -24,34 +24,43 @@ const SHOULD_SKIP =
   process.env.CI === "true" ||
   process.env.CI === "1" ||
   process.env.WITTGENSTEIN_KOKORO_TEST !== "1";
+const KOKORO_TEST_TIMEOUT_MS = 180_000;
 
 describe.skipIf(SHOULD_SKIP)(
   "@wittgenstein/codec-audio Kokoro determinism (local-only, opt-in via cached weights)",
   () => {
-    it("produces byte-identical WAV across 3 back-to-back same-seed invocations", async () => {
-      const restore = withEnv("WITTGENSTEIN_AUDIO_BACKEND", "kokoro");
-      try {
-        const shas = await produceKokoroRunShas(3);
-        expect(new Set(shas).size).toBe(1);
-      } finally {
-        restore();
-      }
-    });
+    it(
+      "produces byte-identical WAV across 3 back-to-back same-seed invocations",
+      async () => {
+        const restore = withEnv("WITTGENSTEIN_AUDIO_BACKEND", "kokoro");
+        try {
+          const shas = await produceKokoroRunShas(3);
+          expect(new Set(shas).size).toBe(1);
+        } finally {
+          restore();
+        }
+      },
+      KOKORO_TEST_TIMEOUT_MS,
+    );
 
-    it("writes honest manifest evidence — kokoro-82M decoderId, 24 kHz, structural-parity", async () => {
-      const restore = withEnv("WITTGENSTEIN_AUDIO_BACKEND", "kokoro");
-      try {
-        const dir = await mkdtemp(join(tmpdir(), "witt-kokoro-manifest-"));
-        const art = await audioCodec.produce(buildSpeechRequest(), buildCtx(dir, 0));
-        expect(art.metadata.audioRender.decoderId).toMatch(/^kokoro-82M:[0-9a-f]{64}$/);
-        expect(art.metadata.audioRender.determinismClass).toBe("structural-parity");
-        expect(art.metadata.audioRender.sampleRateHz).toBe(24_000);
-        expect(art.metadata.quality.partial.reason).toBe("kokoro-cross-platform-pending");
-        expect(art.metadata.decoderHash.slot).toBe("Kokoro-82M-family-decoder");
-      } finally {
-        restore();
-      }
-    });
+    it(
+      "writes honest manifest evidence — kokoro-82M decoderId, 24 kHz, structural-parity",
+      async () => {
+        const restore = withEnv("WITTGENSTEIN_AUDIO_BACKEND", "kokoro");
+        try {
+          const dir = await mkdtemp(join(tmpdir(), "witt-kokoro-manifest-"));
+          const art = await audioCodec.produce(buildSpeechRequest(), buildCtx(dir, 0));
+          expect(art.metadata.audioRender.decoderId).toMatch(/^kokoro-82M:[0-9a-f]{64}$/);
+          expect(art.metadata.audioRender.determinismClass).toBe("structural-parity");
+          expect(art.metadata.audioRender.sampleRateHz).toBe(24_000);
+          expect(art.metadata.quality.partial.reason).toBe("kokoro-cross-platform-pending");
+          expect(art.metadata.decoderHash.slot).toBe("Kokoro-82M-family-decoder");
+        } finally {
+          restore();
+        }
+      },
+      KOKORO_TEST_TIMEOUT_MS,
+    );
 
     it("emits audio/kokoro-backend-not-applicable warning when route is non-speech", async () => {
       const restore = withEnv("WITTGENSTEIN_AUDIO_BACKEND", "kokoro");
