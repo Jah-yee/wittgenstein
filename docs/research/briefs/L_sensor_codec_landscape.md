@@ -30,6 +30,35 @@ It does decide:
 
 ---
 
+## Paradigm landscape — sensor's design space is wider than image's
+
+Image deliberately narrows to **VQ-token + frozen decoder + scene-spec adapter** (locked in ADR-0005, Brief A, M1A code). That choice is right for image because the dominant prior art (LFQ-family decoders) already exists at production grade.
+
+Sensor inherits **none** of that lock-in. The decoder-not-generator boundary is preserved, but the route is free to pick from a much wider paradigm space. The table below names what is on the design table; this brief's §S1–S3 then justifies the specific picks within it.
+
+| #   | Paradigm                                      | Bit-determinism               | Needs L4 adapter? | ADR-0005 (decoder ≠ generator)  | This brief's stance                                        |
+| --- | --------------------------------------------- | ----------------------------- | ----------------- | ------------------------------- | ---------------------------------------------------------- |
+| P1  | Procedural operators (current v0.3 surface)   | ✅ bit-det                    | ❌ no             | ✅ compatible                   | Already shipping — preserved unchanged                     |
+| P2  | Procedural + chaotic operators                | ✅ bit-det (fixed-step + f64) | ❌ no             | ✅ compatible                   | **Brief L §S1 — adopt at v0.4 post-M3**                    |
+| P3  | Implicit Neural Representations (INR / SIREN) | ⚠️ float-backend dependent    | ✅ yes            | ⚠️ needs carve-out              | Out of scope; would mean opening sensor's first L4 adapter |
+| P4  | VQ-tokens for time series (TimesFM-class)     | ❌ GPU non-deterministic      | ✅ yes            | ❌ violates                     | **Brief L §S2 — rejected**; horizon tracker only           |
+| P5  | State-space models (S4 / Mamba) as decoder    | ⚠️ better than transformer    | ✅ yes            | ⚠️ needs carve-out              | Same family as P3; out of scope                            |
+| P6  | Symbolic regression / program synthesis       | ✅ bit-det                    | ❌ no             | ✅ compatible                   | **The paradigm we already chose** — P1 / P2 are instances  |
+| P7  | Physics-informed solvers (PINN, FEM)          | ⚠️ depends on solver          | ⚠️ optional       | ✅ compatible (if solver fixed) | Domain-narrow (vibration / thermal); not v0.4              |
+| P8  | Real-data lookup + edits                      | ✅ if library SHA-pinned      | ❌ no             | ✅ compatible                   | Rejected — collapses LLM-as-planner thesis                 |
+| P9  | Gaussian Processes (seeded)                   | ✅ with fixed seed            | ❌ no             | ✅ compatible                   | **Sibling to P2** — worth opening as a future Brief        |
+
+### What this means
+
+- **The route's actual paradigm choice is P6 — symbolic-compositional.** The `SensorSpec` shape (operators + parameters + seed) IS program synthesis: the LLM emits a small program; the codec evaluates it. P1 and P2 are different operator-vocabulary instances within P6.
+- **VQ-token (P4) is one paradigm among many.** Image needs it because of decoder availability; sensor does not. Rejecting P4 here is not abandoning a default — it never was a default.
+- **The neural-decoder family (P3 / P4 / P5) is coupled.** All three would require opening sensor's first L4 adapter. That is a single architectural decision that deserves its own brief, not a casual addition. Brief L explicitly does NOT make that decision — it stays inside P6.
+- **P9 (Gaussian Processes) is a clean parallel direction to P2.** Both extend P6's vocabulary; both preserve bit-determinism; both could be operator-library entries. Brief L scopes to chaotic operators because they map most cleanly to the "real biological signals show positive Lyapunov" literature; GP-class extensions are a natural follow-up brief if the chaos extension proves out.
+
+The rest of this brief is the analysis **within paradigm P6** of which specific operators / metrics / validation methods to add. It does not pretend P6 is the only choice; it argues that P6 is the right choice for v0.4 given (a) current architectural commitments, (b) determinism doctrine, (c) the bounded scope of the work.
+
+---
+
 ## The three candidate directions
 
 ### S1 — Deterministic chaotic operators
@@ -164,8 +193,10 @@ Net for v0.4 trajectory: **chaotic operators land as opt-in extensions with meas
 | v0.4 (post-M3) | Chaotic operator extension (5 operators, opt-in, byte-parity goldens)                                      | `packages/codec-sensor/src/operators/chaos/`                      | spike issue, opened with this PR     |
 | v0.4 (paired)  | Integrator + precision audit (cross-platform RK4 byte-identical)                                           | `packages/codec-sensor/test/integrator-determinism.test.ts`       | folded into operator-extension issue |
 | v0.4 / v0.5    | Downstream-task measurement (chaos-extended vs procedural fixtures, classifier accuracy on real benchmark) | new `packages/codec-sensor/research/` or polyglot-mini equivalent | second issue, opened with this PR    |
-| Horizon        | TimesFM tracker                                                                                            | (this brief §L.2)                                                 | tracker issue, opened with this PR   |
-| Horizon        | ADR ratifying the operator extension when measurement passes                                               | `docs/adrs/00XX-sensor-chaos-operators.md`                        | not opened until measurement returns |
+| Horizon        | TimesFM tracker (P4 in paradigm landscape)                                                                 | (this brief §L.2)                                                 | tracker issue, opened with this PR   |
+| Horizon        | Gaussian-Process operators (P9 — sibling to P2 within paradigm P6)                                         | future Brief if chaos extension proves out                        | not opened in this brief             |
+| Horizon        | Sensor's first L4 adapter (would unlock P3 / P5 paradigms)                                                 | future Brief — explicit architectural decision                    | not opened in this brief             |
+| Horizon        | ADR ratifying the chaos operator extension when measurement passes                                         | `docs/adrs/00XX-sensor-chaos-operators.md`                        | not opened until measurement returns |
 
 ---
 
