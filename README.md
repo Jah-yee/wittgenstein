@@ -25,10 +25,10 @@ Give a text LLM a prompt and Wittgenstein turns the structured plan into real fi
 `.png`, `.wav`, `.csv`, or `.mp4`, with run manifests that record the seed,
 artifact hash, and model I/O.
 
-The smallest end-to-end proof is the local 30-second sensor demo: a real ECG dashboard
-(`~117 KB` self-contained HTML), a 2,500-sample CSV, and a manifest tied to a git SHA +
-seed. Image, audio, and SVG follow the same harness/codec/manifest contract, with
-different maturity levels called out in `docs/implementation-status.md`.
+Image, audio, and sensor routes already produce real artifacts with the same
+harness/codec/manifest contract. Video targets `.mp4` once its codec slot opens. The
+local 30-second sensor quickstart below is the smallest no-API-key proof; maturity levels
+are called out in `docs/implementation-status.md`.
 
 > **🧪 Project status — early-stage, doctrine-locked, M2 audio in progress.**
 > Wittgenstein is a prerelease (`v0.2.0-alpha.2`) with a working Python
