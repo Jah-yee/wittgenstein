@@ -22,7 +22,7 @@ files** — schemas, codec IR, latent codes — rather than what it can **say in
 expressive contract lives in code, not prompt copy.
 
 Give a text LLM a prompt and Wittgenstein turns the structured plan into real files:
-`.png`, `.wav`, `.csv`, `.html`, or `.svg`, with run manifests that record the seed,
+`.png`, `.wav`, `.csv`, or `.mp4`, with run manifests that record the seed,
 artifact hash, and model I/O.
 
 The smallest end-to-end proof is the local 30-second sensor demo: a real ECG dashboard
