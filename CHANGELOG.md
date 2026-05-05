@@ -8,6 +8,10 @@ versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Clarified the repo's first-contact and status surfaces after M2 Slice C2 landed:
+  `README.md` now leads with the harness thesis before the quickstart, `AGENTS.md`
+  points cold readers at `WORKFLOW.md`, and the active-status docs now name
+  Slice E / Issue #118 as the live v0.3 gate instead of the pre-merge C2 state.
 - Isolated `apps/wittgenstein-kimi` from the root `pnpm` workspace (Issue #112).
   The Kimi-flavored agent demo (~7,400 LOC of React / Radix / Vite) now carries
   its own `pnpm-lock.yaml` under `apps/wittgenstein-kimi/`, so its 70+ transitive
@@ -17,6 +21,13 @@ versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Landed the opt-in Kokoro speech backend for `@wittgenstein/codec-audio` (PR #158,
+  Issue #116), with honest `audioRender` manifest evidence and local-only
+  determinism probing while the cross-platform sweep remains gated on Issue #118.
+- Corrected the public implementation/status story for video: the codec and CLI now
+  report the real current behavior (deterministic HyperFrames HTML by default,
+  local MP4 encode as an opt-in path) instead of the older "stub / not implemented"
+  wording.
 - Aligned top-level onboarding/status docs with the `v0.2.0-alpha.2` pre-M2
   state instead of the older M0/M1A wording.
 - Added a top-level research program map that closes the pre-M2 engineering-borrow

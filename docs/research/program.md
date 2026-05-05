@@ -1,9 +1,9 @@
 # Research Program
 
 **Status:** non-doctrine program map
-**Stage:** post-v0.2 doctrine lock, post-M2 preflight, pre-M2 implementation
+**Stage:** post-v0.2 doctrine lock, post-M2 Slice C2 implementation, pre-Slice E verification
 **Purpose:** show how engineering-borrow research, model/literature research, and
-implementation-facing investigation fit together before M2 code starts.
+implementation-facing investigation fit together before the next execution gate.
 
 This page is not a new decision surface. It is a map over existing surfaces so agents,
 humans, and maintainers can see what has been investigated, what was adopted, and what
@@ -36,19 +36,19 @@ third lane.
 
 ---
 
-## Pre-M2 closure assessment
+## Current closure assessment
 
 ### 1. Engineering-borrow review
 
 The engineering-borrow requirement is mostly satisfied for the pre-M2 boundary.
 
-| Area                     | Evidence                                                                                                                 | Adopted or preserved                                                                                                                             | Current judgment                                      |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------- |
-| Codec Protocol v2        | Brief H surveyed unified, tRPC, LangChain Runnable, MCP SDK, Vercel AI SDK provider spec, unplugin, PostCSS, and ESLint. | Standard Schema input typing; typed warnings; sidecar; forkable context; stable lifecycle phases; declared warning ids; rejected practice block. | Closed enough for M0/M1A and safe to carry into M2.   |
-| Image port               | `docs/agent-guides/image-port.md`, PR #68, and current `packages/codec-image` implementation.                            | `ImageCodec extends BaseCodec`; codec-authored manifest rows; sidecar warnings; single raster route; no second image path.                       | Closed.                                               |
-| Audio route architecture | Brief J surveyed Express, Hono, Fastify, tRPC, and Apollo Federation against current `codec-audio` code.                 | Flat codec-owned route table; helper-functions-first route collapse; no `BaseAudioRoute` unless duplication remains above threshold.             | Closed for planning; implementation still pending M2. |
-| M2 execution memo        | `docs/research/m2-implementation-design-2026-04.md`.                                                                     | Route-local vs helper cut line; speech backend contract; parity contract; caller migration shape.                                                | Closed enough to start Slice A.                       |
-| Media/runtime references | TEN / Remotion / HyperFrames captured as future references in issue/audit discussion.                                    | Kept as horizon / engineering-borrow objects, not as M2 blockers.                                                                                | Not needed before M2.                                 |
+| Area                     | Evidence                                                                                                                 | Adopted or preserved                                                                                                                             | Current judgment                                           |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------- |
+| Codec Protocol v2        | Brief H surveyed unified, tRPC, LangChain Runnable, MCP SDK, Vercel AI SDK provider spec, unplugin, PostCSS, and ESLint. | Standard Schema input typing; typed warnings; sidecar; forkable context; stable lifecycle phases; declared warning ids; rejected practice block. | Closed enough for M0/M1A and safe to carry into M2.        |
+| Image port               | `docs/agent-guides/image-port.md`, PR #68, and current `packages/codec-image` implementation.                            | `ImageCodec extends BaseCodec`; codec-authored manifest rows; sidecar warnings; single raster route; no second image path.                       | Closed.                                                    |
+| Audio route architecture | Brief J surveyed Express, Hono, Fastify, tRPC, and Apollo Federation against current `codec-audio` code.                 | Flat codec-owned route table; helper-functions-first route collapse; no `BaseAudioRoute` unless duplication remains above threshold.             | Closed in doctrine and now implemented through M2 Slice D. |
+| M2 execution memo        | `docs/research/m2-implementation-design-2026-04.md`.                                                                     | Route-local vs helper cut line; speech backend contract; parity contract; caller migration shape.                                                | Executed through Slice C2; Slice E is the remaining gate.  |
+| Media/runtime references | TEN / Remotion / HyperFrames captured as future references in issue/audit discussion.                                    | Kept as horizon / engineering-borrow objects, not as M2 blockers.                                                                                | Not needed before M2.                                      |
 
 Important nuance: this repo has **borrowed patterns**, not vendored external code. That is
 the right choice at this stage. Pulling framework code into the repo before M2 would add
@@ -66,17 +66,17 @@ The model/literature requirement is also satisfied for the pre-M2 boundary.
 | Audio decoder family       | Brief I, ADR-0015.                              | Kokoro-82M-family default; Piper-family fallback; no v0.3 audio tokenizer; procedural soundscape/music. | Closed enough for M2, with parity tests as execution gate. |
 | Audio engineering shape    | Brief J, #87 inventory, M2 implementation memo. | Helper-first route collapse; audio manifest fields; route deprecation window; parity split.             | Closed for M2 planning.                                    |
 
-The remaining unknowns are implementation checks, not missing research:
+The remaining unknowns are execution checks, not missing research:
 
 - Kokoro CPU byte-parity must be verified in M2.
 - Piper fallback must be concretely pinned if Kokoro fails the gate.
-- Public route-first examples should be updated in M2 Slice C, not before.
+- The sweep-level verdict must be recorded honestly in the manifest/docs surface before v0.3 cuts.
 
 ---
 
-## What is not closed before M2
+## What is not closed at the current stage
 
-These items are real, but they should not block M2 Slice A.
+These items are real, but they should not preempt Slice E.
 
 | Item                                    | Why it stays open                                                          | Owner                                                        |
 | --------------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------ |
@@ -88,28 +88,29 @@ These items are real, but they should not block M2 Slice A.
 
 ---
 
-## Engineering-quality gate before M2
+## Engineering-quality gate before Slice E
 
-Before starting M2 implementation, the repo should satisfy the following. As of
-2026-04-29, it does.
+Before running the sweep verdict, the repo should satisfy the following. As of
+2026-05-05, it mostly does.
 
-- No open PRs block M2.
-- `README.md`, `PROMPT.md`, `AGENTS.md`, and `ROADMAP.md` point to the same pre-M2
-  state.
+- No open PR blocks `#118`.
+- `README.md`, `PROMPT.md`, `AGENTS.md`, `WORKFLOW.md`, implementation-status, and roadmap
+  surfaces point to the same post-#116 / pre-#118 state.
 - Brief I is ratified by ADR-0015.
 - Brief J and the M2 implementation memo are subordinate to ADR-0015 and the active
   exec-plan, not standalone doctrine.
 - Codec Protocol v2 is not types-only scaffolding: `BaseCodec.produce()` validates
   route matching and fails loudly when no route matches.
-- `pnpm lint`, `pnpm typecheck`, `pnpm test`, site build, and Kimi build pass on main.
+- `pnpm lint`, `pnpm typecheck`, and `pnpm test` pass on main; release-facing receipts
+  still need the final cold-checkout rerun and release-note pass.
 
 ---
 
 ## Recommendation
 
-Start M2 as planned, beginning with Slice A: codec-owned routing and harness thinning.
+Run Slice E as planned: cross-platform sweep verification and honest verdict capture.
 
-Do not start another broad research sweep before Slice A. The next research-like action
+Do not start another broad research sweep before Slice E. The next research-like action
 should happen inside M2 implementation only when code forces a concrete question, such
 as the exact Kokoro/Piper package, weights, hash, or deterministic backend pin.
 

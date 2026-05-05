@@ -150,7 +150,7 @@ Then return to the original Read Order above for engineering discipline, codec p
 ### What's currently active
 
 - **Doctrine:** locked at v0.2.0-alpha.1; M2 preflight closure cut at v0.2.0-alpha.2; governance lane introduced in ADRs 0012–0014 (see below).
-- **Code:** Codec Protocol v2 port — sequenced **M0 image → M1 image refinement → M2 audio → M3 sensor → M4 video stub → M5a/b benchmarks**. M0 and M1A are landed; M2 audio is the active execution line. M2 Slices A/B/C1/C2 are merged; C3 audio parity/golden work is in review; Kokoro/Piper backend wiring remains a follow-up, not an already-landed behavior.
+- **Code:** Codec Protocol v2 port — sequenced **M0 image → M1 image refinement → M2 audio → M3 sensor → M4 video stub → M5a/b benchmarks**. M0 and M1A are landed; M2 audio is the active execution line. M2 Slices A/B/C1/C2/C3/D are merged, including the opt-in Kokoro backend path. **Slice E (#118)** is now the active gate: cross-platform sweep verification decides whether Kokoro flips to default, Piper is needed as fallback, or procedural remains the honest v0.3 default.
 - **Out of scope until M5b:** new modalities, diffusion samplers, trained model weights, website rewrite, RFC-0003 renaming.
 
 ### Two decision lanes (v0.2.0-alpha.2 governance addition)

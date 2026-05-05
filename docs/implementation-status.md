@@ -38,7 +38,8 @@ Everything below runs with `python3 -m polyglot.cli <cmd>`.
 ## @wittgenstein/\* TypeScript packages
 
 The TS monorepo is the **production harness layer** (L1–L5). Core, schemas, CLI, and sensor/audio
-codecs are wired. Image and video codecs are typed stubs — intentional until training is complete.
+codecs are wired. Image is a real but still-partial codec path; video already emits deterministic
+HTML compositions today, with local MP4 encoding still opt-in rather than the default artifact path.
 
 ### @wittgenstein/schemas
 
@@ -103,20 +104,20 @@ codecs are wired. Image and video codecs are typed stubs — intentional until t
 
 ### @wittgenstein/codec-video
 
-| Component                | Status   | Notes                                                     |
-| ------------------------ | -------- | --------------------------------------------------------- |
-| Schema + Zod             | ✅ Ships |                                                           |
-| `hyperframes-wrapper.ts` | 🔴 Stub  | Throws `NotImplementedError` — HyperFrames not yet forked |
+| Component                | Status     | Notes                                                                                          |
+| ------------------------ | ---------- | ---------------------------------------------------------------------------------------------- |
+| Schema + Zod             | ✅ Ships   |                                                                                                |
+| `hyperframes-wrapper.ts` | ⚠️ Partial | Emits deterministic HyperFrames-style HTML today; local MP4 encode is opt-in via env + tooling |
 
 ### @wittgenstein/cli
 
-| Command               | Status   | Notes                                                                              |
-| --------------------- | -------- | ---------------------------------------------------------------------------------- |
-| `wittgenstein image`  | ✅ Ships | Calls codec-image; renders with available adapter/decoder                          |
-| `wittgenstein audio`  | ✅ Ships | Full speech + soundscape + music routes; Kokoro speech path is opt-in at v0.3      |
-| `wittgenstein sensor` | ✅ Ships | Full signal expand + Loupe dashboard                                               |
-| `wittgenstein video`  | 🔴 Stub  | Codec throws `NotImplementedError`; `.mp4` remains the target artifact, not a ship |
-| `wittgenstein doctor` | ✅ Ships | Checks node, pnpm, env vars, package links                                         |
+| Command               | Status     | Notes                                                                                            |
+| --------------------- | ---------- | ------------------------------------------------------------------------------------------------ |
+| `wittgenstein image`  | ✅ Ships   | Calls codec-image; renders with available adapter/decoder                                        |
+| `wittgenstein audio`  | ✅ Ships   | Full speech + soundscape + music routes; Kokoro speech path is opt-in at v0.3                    |
+| `wittgenstein sensor` | ✅ Ships   | Full signal expand + Loupe dashboard                                                             |
+| `wittgenstein video`  | ⚠️ Partial | Default artifact is HyperFrames HTML; local `.mp4` encode exists but is opt-in, not default ship |
+| `wittgenstein doctor` | ✅ Ships   | Checks node, pnpm, env vars, package links                                                       |
 
 ### @wittgenstein/sandbox
 
@@ -140,7 +141,9 @@ These are explicit scope decisions, not omissions:
 
 - **LlamaGen / SEED VQ-VAE decoder weights** — neural image codec requires a trained adapter;
   stubs are typed and ready to wire. See `docs/codecs/image.md`.
-- **HyperFrames video integration** — reserved post-hackathon. Schema and codec interface are locked.
+- **Default local MP4 video shipping** — the codec already emits deterministic HTML compositions, but
+  the default `wittgenstein video` path does not yet guarantee a ready-to-play `.mp4` without opting
+  into the local HyperFrames + FFmpeg toolchain.
 - **Real LLM fine-tuning** — the only trained models are the two tiny MLPs (image style adapter +
   audio ambient classifier). No fine-tuning of base models.
 - **Cloud render APIs** — no DALL·E, ElevenLabs, or Runway calls anywhere in the stack.
