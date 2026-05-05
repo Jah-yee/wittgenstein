@@ -48,4 +48,4 @@ This page changes only through an ADR. Prose tweaks to phrasing are fine; alteri
 
 ---
 
-**Dated:** 2026-04-23. **Next review:** after the v0.2 doctrine lock and before major execution work lands.
+**Dated:** 2026-04-23. **Next review:** when a thesis-level ADR reopens one of the locked statements, or at the v0.3 cut if execution evidence forces a narrower claim.

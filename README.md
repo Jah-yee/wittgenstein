@@ -54,7 +54,9 @@ are called out in `docs/implementation-status.md`.
 >   — paste [`PROMPT.md`](PROMPT.md) into your agent. It is a self-contained,
 >   vendor-neutral prompt (Claude Code, Codex, Cursor, custom harnesses) that
 >   gives the smallest correct briefing for landing a PR in this repo. For
->   reference depth, [`AGENTS.md`](AGENTS.md) is the longer primer.
+>   reference depth, [`AGENTS.md`](AGENTS.md) is the longer primer. If you are
+>   dispatching work issue-by-issue, also read [`WORKFLOW.md`](WORKFLOW.md) for
+>   the orchestration contract and agent-eligible label rules.
 
 ---
 
@@ -83,7 +85,8 @@ Wittgenstein makes three architectural bets instead:
 - **Decoder, not generator.** Frozen VQ decoders over diffusion samplers. Reproducibility is
   structural — same IR + same seed → same bytes — not a policy bolt-on. ([research/vq-tokens-as-interface.md](docs/research/vq-tokens-as-interface.md))
 - **Traceable by construction.** Every run writes a manifest with git SHA, lockfile hash,
-  seed, full LLM input/output, and artifact SHA-256. Runs replay bit-exactly. ([reproducibility.md](docs/reproducibility.md))
+  seed, full LLM input/output, and artifact SHA-256. Deterministic paths replay
+  bit-exactly; structural-parity paths declare that class explicitly in the manifest. ([reproducibility.md](docs/reproducibility.md))
 
 ---
 
@@ -235,8 +238,10 @@ artifacts/runs/2026-04-20T14-52-33_a3f9b2/
 └── artifact.{png,wav,json,html}
 ```
 
-Same inputs + same seed + same lockfile → identical artifact bytes. Diffusion sampling
-cannot offer this; frozen VQ decoding does. See [`docs/reproducibility.md`](docs/reproducibility.md).
+Same inputs + same seed + same lockfile → identical artifact bytes on deterministic paths.
+When a path is structural-parity only, the manifest records that contract explicitly instead
+of pretending the bytes should match. Diffusion sampling cannot offer this; frozen VQ decoding
+does. See [`docs/reproducibility.md`](docs/reproducibility.md).
 
 ---
 
@@ -328,11 +333,13 @@ for the full developer setup.
 See [`docs/implementation-status.md`](docs/implementation-status.md) for component-level detail.
 Summary: sensor, audio, polyglot-mini image fallback, and the Python image code-as-painter
 path all ship today; the TS neural image codec has real scene + adapter + placeholder
-latents and is waiting on a frozen VQ decoder bridge; video is a typed stub.
+latents and is waiting on a frozen VQ decoder bridge; video already emits deterministic
+HyperFrames HTML, with local `.mp4` encode still opt-in rather than the default path.
 
 **What's next.** Doctrine is locked; the active workstream is the Codec Protocol v2 port
 across all modalities, sequenced in [`docs/exec-plans/active/codec-v2-port.md`](docs/exec-plans/active/codec-v2-port.md)
-(`M0` and `M1A` are landed; `M2 audio` is next; `M1B image depth` is tracked separately).
+(`M0` and `M1A` are landed; `M2` is in its Slice E sweep-verification gate; `M1B` image
+depth is tracked separately).
 
 Roadmap: [`ROADMAP.md`](ROADMAP.md). Changelog: [`CHANGELOG.md`](CHANGELOG.md).
 Security: [`SECURITY.md`](SECURITY.md).
@@ -348,7 +355,7 @@ is visible, but **do not depend on them in production** until the status matrix 
 | Surface                                       | State             | What works today                                                                      | What's missing                                                                 |
 | --------------------------------------------- | ----------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
 | TS `codec-image` adapter + decoder            | ⚠️ Partial        | Scene JSON, placeholder latents, MLP loader, `renderSky` / `renderTerrain` primitives | Frozen VQ decoder bridge (LlamaGen / SEED); trained adapter weights            |
-| TS `codec-video`                              | 🔴 Stub           | Schema + typed interface                                                              | HyperFrames integration, MP4 encoder                                           |
+| TS `codec-video`                              | ⚠️ Partial        | Deterministic HyperFrames HTML output; local MP4 encode exists behind opt-in tooling  | Default local MP4 shipping path, broader render/eval hardening                 |
 | Benchmark quality scores                      | ⚠️ Proxy          | Structural smoke checks, cost/latency timing                                          | CLIPScore, Whisper WER, UTMOS, discriminative score runners                    |
 | `polyglot-mini` image code-as-painter sandbox | ⚠️ Research-grade | `subprocess` with 20 s timeout + safe globals                                         | Kernel-level isolation for multi-tenant use (see [`SECURITY.md`](SECURITY.md)) |
 

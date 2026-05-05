@@ -17,6 +17,11 @@ Every CLI invocation creates `artifacts/runs/<run-id>/manifest.json`.
 - artifact path and artifact hash
 - duration, success flag, structured error
 
+When a codec has more than one honest reproducibility class, the manifest carries that too
+(for example `audioRender.determinismClass = "byte-parity" | "structural-parity"`). The
+manifest is allowed to say "these bytes should match exactly" or "this path is only
+structural-parity"; it is not allowed to imply stronger determinism than the backend earned.
+
 ## Sibling Files
 
 - `llm-input.txt`
@@ -39,9 +44,14 @@ Per Brief K §K.1 (ratified by ADR-0017), the manifest spine is functionally the
 
 - **Brain** = the harness (`packages/core/src/runtime/`) — decision loop.
 - **Hands** = the codecs (`packages/codec-*`) and `packages/sandbox` — uniform `Codec<Req, Art>.produce` is our `execute(name, input) → string` analog.
-- **Session** = manifest spine — append-only durable trace; replay via `--manifest <path>` per RFC-0002.
+- **Session** = manifest spine — append-only durable trace. A first-class replay command
+  (`wittgenstein run --manifest <path>`) is still an RFC-0002 / future-CLI surface, not a
+  shipped command on `main` yet; the manifest already preserves the durable receipt it would consume.
 
-The mapping is currently **per-run**, not cross-run: each CLI invocation writes one manifest. Anthropic's `wake(sessionId)` cross-run linkage would require a `parentRunId` field and an explicit `events[]` slot in the manifest schema; both are deferred to v0.4 per Brief K. The equivalence above is honest about the gap.
+The mapping is currently **per-run**, not cross-run: each CLI invocation writes one manifest.
+Anthropic's `wake(sessionId)` cross-run linkage would require a `parentRunId` field and an
+explicit `events[]` slot in the manifest schema; both are deferred to v0.4 per Brief K.
+The equivalence above is honest about the gap.
 
 ## Why This Exists
 
