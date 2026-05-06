@@ -355,7 +355,7 @@ export class ImageCodec extends codecV2.BaseCodec<ImageRequest, ImageArtifact> {
     if (message.includes("providerLatents failed validation")) {
       return this.warnings.provider_latents_invalid;
     }
-    if (message.includes("Using placeholder scene-to-latent adapter")) {
+    if (message.includes("Using placeholder seed-expansion adapter")) {
       return this.warnings.adapter_stub;
     }
     if (message.includes("Using narrow-domain reference decoder bridge")) {
