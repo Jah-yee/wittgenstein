@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { imageCodec } from "../src/index.js";
+import { adaptSceneToLatents } from "../src/pipeline/adapter.js";
 import { renderImagePipeline } from "../src/pipeline/index.js";
 
 describe("@wittgenstein/codec-image", () => {
@@ -15,7 +16,69 @@ describe("@wittgenstein/codec-image", () => {
       expect(parsed.value.schemaVersion).toBe("witt.image.spec/v0.1");
       expect(parsed.value.decoder.codebookVersion).toBe("v0");
       expect(parsed.value.constraints.negative).toEqual([]);
+      expect(parsed.value.mode).toBe("semantic-only");
     }
+  });
+
+  it("parses a Visual Seed Code contract and normalizes semantic + seed fields", () => {
+    const parsed = imageCodec.parse(
+      JSON.stringify({
+        mode: "one-shot-vsc",
+        semantic: {
+          intent: "forest poster",
+          subject: "misty pine forest",
+          composition: {
+            framing: "wide",
+            camera: "eye level",
+            depthPlan: ["foreground mist", "forest", "mountains"],
+          },
+          lighting: { mood: "moody", key: "soft dawn" },
+          style: { references: ["landscape"], palette: ["green", "gray"] },
+          constraints: { mustHave: ["trees"], negative: ["people"] },
+        },
+        seedCode: {
+          family: "vqvae",
+          mode: "prefix",
+          tokens: [1, 2, 3, 4],
+        },
+      }),
+    );
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) {
+      throw new Error("Visual Seed Code parse unexpectedly failed");
+    }
+    expect(parsed.value.semantic?.subject).toBe("misty pine forest");
+    expect(parsed.value.subject).toBe("misty pine forest");
+    expect(parsed.value.seedCode?.length).toBe(4);
+    expect(parsed.value.mode).toBe("one-shot-vsc");
+  });
+
+  it("rejects inconsistent visual code lengths", () => {
+    const badSeed = imageCodec.parse(
+      JSON.stringify({
+        seedCode: {
+          family: "vqvae",
+          mode: "prefix",
+          length: 8,
+          tokens: [1, 2, 3, 4],
+        },
+      }),
+    );
+    expect(badSeed.ok).toBe(false);
+
+    const badCoarse = imageCodec.parse(
+      JSON.stringify({
+        coarseVq: {
+          schemaVersion: "witt.image.coarse-vq/v0.1",
+          family: "llamagen",
+          codebook: "stub-codebook",
+          codebookVersion: "v0",
+          tokenGrid: [4, 4],
+          tokens: [1, 2, 3, 4],
+        },
+      }),
+    );
+    expect(badCoarse.ok).toBe(false);
   });
 
   it("renders placeholder latents into a PNG artifact", async () => {
@@ -133,5 +196,149 @@ describe("image pipeline (neural decode)", () => {
     expect(result.bytes).toBeGreaterThan(0);
     const bytes = await readFile(outPath);
     expect(Array.from(bytes.subarray(0, 8))).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+  });
+
+  it("uses coarseVq hints before the placeholder adapter path", async () => {
+    const warnings: string[] = [];
+    const parsed = imageCodec.parse(
+      JSON.stringify({
+        intent: "test",
+        subject: "forest",
+        decoder: {
+          family: "llamagen",
+          codebook: "stub-codebook",
+          codebookVersion: "v0",
+          latentResolution: [16, 16],
+        },
+        coarseVq: {
+          schemaVersion: "witt.image.coarse-vq/v0.1",
+          family: "llamagen",
+          codebook: "stub-codebook",
+          codebookVersion: "v0",
+          tokenGrid: [4, 4],
+          tokens: Array.from({ length: 16 }, (_, index) => index),
+        },
+      }),
+    );
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) {
+      return;
+    }
+
+    const runDir = await mkdtemp(resolve(tmpdir(), "wittgenstein-codec-image-coarse-"));
+    const outPath = resolve(runDir, "out.png");
+    await renderImagePipeline(parsed.value, {
+      runId: "test-run",
+      runDir,
+      seed: null,
+      outPath,
+      logger: {
+        debug: () => {},
+        info: () => {},
+        warn: (message) => warnings.push(message),
+        error: () => {},
+      },
+    });
+
+    expect(warnings.some((message) => message.includes("placeholder seed-expansion adapter"))).toBe(
+      false,
+    );
+  });
+
+  it("preserves decoder-facing coarseVq tokens during expansion", async () => {
+    const parsed = imageCodec.parse(
+      JSON.stringify({
+        subject: "forest",
+        decoder: {
+          family: "llamagen",
+          codebook: "stub-codebook",
+          codebookVersion: "v0",
+          latentResolution: [4, 4],
+        },
+        coarseVq: {
+          schemaVersion: "witt.image.coarse-vq/v0.1",
+          family: "llamagen",
+          codebook: "stub-codebook",
+          codebookVersion: "v0",
+          tokenGrid: [2, 2],
+          tokens: [700, 701, 702, 703],
+        },
+      }),
+    );
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) {
+      return;
+    }
+
+    const latents = await adaptSceneToLatents(parsed.value, {
+      runId: "coarse-preserve",
+      runDir: await mkdtemp(resolve(tmpdir(), "wittgenstein-codec-image-preserve-")),
+      seed: null,
+      outPath: "out.png",
+      logger: {
+        debug: () => {},
+        info: () => {},
+        warn: () => {},
+        error: () => {},
+      },
+    });
+
+    expect(latents.tokens.slice(0, 4)).toEqual([700, 700, 701, 701]);
+  });
+
+  it("uses seedCode before the placeholder adapter path", async () => {
+    const warnings: string[] = [];
+    const parsed = imageCodec.parse(
+      JSON.stringify({
+        mode: "one-shot-vsc",
+        semantic: {
+          intent: "test",
+          subject: "coastal cliffs",
+          composition: {
+            framing: "wide",
+            camera: "neutral camera",
+            depthPlan: ["foreground", "midground", "background"],
+          },
+          lighting: { mood: "neutral", key: "soft" },
+          style: { references: [], palette: ["blue", "gray"] },
+          constraints: { mustHave: [], negative: [] },
+        },
+        decoder: {
+          family: "llamagen",
+          codebook: "stub-codebook",
+          codebookVersion: "v0",
+          latentResolution: [16, 16],
+        },
+        seedCode: {
+          schemaVersion: "witt.image.seed/v0.1",
+          family: "vqvae",
+          mode: "prefix",
+          tokens: [10, 20, 30, 40, 50, 60],
+        },
+      }),
+    );
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) {
+      return;
+    }
+
+    const runDir = await mkdtemp(resolve(tmpdir(), "wittgenstein-codec-image-seed-"));
+    const outPath = resolve(runDir, "out.png");
+    await renderImagePipeline(parsed.value, {
+      runId: "test-run",
+      runDir,
+      seed: null,
+      outPath,
+      logger: {
+        debug: () => {},
+        info: () => {},
+        warn: (message) => warnings.push(message),
+        error: () => {},
+      },
+    });
+
+    expect(warnings.some((message) => message.includes("placeholder seed-expansion adapter"))).toBe(
+      false,
+    );
   });
 });

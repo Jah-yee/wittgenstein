@@ -1,6 +1,14 @@
 import type { RenderCtx } from "@wittgenstein/schemas";
 import { resolveMlpForScene, predictWithResolved } from "../adapters/adapter-resolve.js";
-import { ImageLatentCodesSchema, type ImageLatentCodes, type ImageSceneSpec } from "../schema.js";
+import {
+  ImageCoarseVqSchema,
+  ImageLatentCodesSchema,
+  ImageVisualSeedCodeSchema,
+  type ImageCoarseVq,
+  type ImageLatentCodes,
+  type ImageSceneSpec,
+  type ImageVisualSeedCode,
+} from "../schema.js";
 
 export type { ImageLatentCodes };
 export { ImageLatentCodesSchema };
@@ -21,6 +29,22 @@ export async function adaptSceneToLatents(
     ctx.logger.warn("providerLatents failed validation; falling back to adapter.", {
       issues: validated.error?.issues,
     });
+  }
+
+  if (parsed.coarseVq) {
+    const validated = ImageCoarseVqSchema.safeParse(parsed.coarseVq);
+    if (validated.success) {
+      ctx.logger.info("Using coarseVq hints; expanding to decoder-native latents.");
+      return expandCoarseVqToLatents(parsed, validated.data);
+    }
+  }
+
+  if (parsed.seedCode) {
+    const validated = ImageVisualSeedCodeSchema.safeParse(parsed.seedCode);
+    if (validated.success) {
+      ctx.logger.info("Using Visual Seed Code; expanding to decoder-native latents.");
+      return expandSeedToLatents(parsed, validated.data);
+    }
   }
 
   const resolved = await resolveMlpForScene(parsed, ctx);
@@ -55,6 +79,60 @@ function placeholderLatents(parsed: ImageSceneSpec, ctx: RenderCtx): ImageLatent
     "Using placeholder seed-expansion adapter; set WITTGENSTEIN_IMAGE_ADAPTER_PREFERRED_PATH + WITTGENSTEIN_IMAGE_ADAPTER_LEGACY_PATH (or legacy aliases WITTGENSTEIN_IMAGE_ADAPTER_MLP_PATH + WITTGENSTEIN_IMAGE_ADAPTER_MLP_FALLBACK_PATH).",
   );
   return latentCodes;
+}
+
+function expandCoarseVqToLatents(
+  parsed: ImageSceneSpec,
+  coarseVq: ImageCoarseVq,
+): ImageLatentCodes {
+  const [targetWidth, targetHeight] = parsed.decoder.latentResolution;
+  const [coarseWidth, coarseHeight] = coarseVq.tokenGrid;
+  const totalTokens = targetWidth * targetHeight;
+  const tokens = new Array<number>(totalTokens);
+
+  for (let y = 0; y < targetHeight; y += 1) {
+    const sourceY = Math.min(coarseHeight - 1, Math.floor((y * coarseHeight) / targetHeight));
+    for (let x = 0; x < targetWidth; x += 1) {
+      const sourceX = Math.min(coarseWidth - 1, Math.floor((x * coarseWidth) / targetWidth));
+      const targetIndex = y * targetWidth + x;
+      const sourceIndex = sourceY * coarseWidth + sourceX;
+      tokens[targetIndex] = coarseVq.tokens[sourceIndex] ?? 0;
+    }
+  }
+
+  return ImageLatentCodesSchema.parse({
+    schemaVersion: "witt.image.latents/v0.1",
+    family: parsed.decoder.family,
+    codebook: parsed.decoder.codebook,
+    codebookVersion: parsed.decoder.codebookVersion,
+    tokenGrid: [targetWidth, targetHeight],
+    tokens,
+  });
+}
+
+function expandSeedToLatents(
+  parsed: ImageSceneSpec,
+  seedCode: ImageVisualSeedCode,
+): ImageLatentCodes {
+  const [width, height] = parsed.decoder.latentResolution;
+  const totalTokens = width * height;
+  const codebookSize = 8192;
+  const deterministicSeed = hashSpecToSeed(parsed);
+  const tokens = new Array<number>(totalTokens);
+
+  for (let index = 0; index < totalTokens; index += 1) {
+    const base = seedCode.tokens[index % seedCode.tokens.length] ?? 0;
+    tokens[index] = (base + deterministicSeed + index * 31) % codebookSize;
+  }
+
+  return ImageLatentCodesSchema.parse({
+    schemaVersion: "witt.image.latents/v0.1",
+    family: parsed.decoder.family,
+    codebook: parsed.decoder.codebook,
+    codebookVersion: parsed.decoder.codebookVersion,
+    tokenGrid: [width, height],
+    tokens,
+  });
 }
 
 function annotateLatents(parsed: ImageSceneSpec, latents: ImageLatentCodes): ImageLatentCodes {
