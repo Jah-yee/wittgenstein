@@ -1,4 +1,4 @@
-# RFC-0006 — Hybrid Image Code
+# RFC-0006 — Visual Seed Code Image Route
 
 **Date:** 2026-05-06  
 **Author:** engineering / research consolidation  
@@ -6,7 +6,7 @@
 **Feeds from:** `docs/research/hybrid-image-code.md`, Brief A (VQ / VLM lineage audit), Brief B (compression vs world models), Brief C (H9 patch-grid / next-scale IR, H10 long-code clarity), Brief G (image-network clues), `docs/research/vq-tokens-as-interface.md`  
 **Ratified by:** ADR-0018
 
-**Summary:** Reframe Wittgenstein's image route from `scene-spec JSON as the terminal image IR` to a hybrid architecture where `Semantic IR` remains canonical but `Visual Seed Token` becomes the primary image research layer. Keep one image path, keep the frozen-decoder doctrine, redefine the adapter primarily as a seed expander, and formalize both `one-shot hybrid` and `two-pass compile` as legal lanes.
+**Summary:** Reframe Wittgenstein's image route from `scene-spec JSON as the terminal image IR` to a Visual Seed Code architecture. `Visual Seed Token` becomes the primary image research layer. `Semantic IR` remains supported because pure seed-token output may be opaque, brittle, or hard to diagnose; it is available for model-side concept activation / organization, user inspection, auxiliary conditioning, and high-quality two-pass compile. Keep one image path, keep the frozen-decoder doctrine, redefine the adapter primarily as a seed expander, and formalize both `one-shot VSC` and `two-pass compile` as legal lanes.
 
 ---
 
@@ -62,9 +62,8 @@ The image path should be reframed as:
 
 ```text
 User Prompt
--> Semantic IR
 -> Visual Seed Token / Visual Seed Code
--> optional coarse/full VQ hints
+-> optional Semantic IR / coarse-full VQ hints
 -> Seed Expander / Adapter
 -> full decoder-native token grid
 -> frozen decoder
@@ -78,19 +77,6 @@ It still keeps the harness / codec / decoder split.
 
 ### 2. Role split
 
-#### Semantic IR
-
-`Semantic IR` remains canonical, but its role changes.
-
-It is now primarily:
-
-- model-side semantic organization,
-- user-facing inspection,
-- auxiliary conditioning for seed expansion,
-- a legal fallback when stronger visual code is absent.
-
-It is **not** the primary image-side research object.
-
 #### Visual Seed Token
 
 `Visual Seed Token` / `Visual Seed Code` becomes the primary image-side research object.
@@ -103,16 +89,32 @@ It should be:
 - cheaper than full-grid token prediction,
 - rich enough to expand into a meaningful decoder-native token grid.
 
+#### Semantic IR
+
+`Semantic IR` remains supported, but its role changes.
+
+The reason is practical, not decorative: pure seed-token output may be opaque to humans,
+brittle under formatting errors, and difficult to diagnose when quality fails.
+
+It is now primarily:
+
+- model-side concept activation / semantic organization,
+- user-facing inspection,
+- auxiliary conditioning for seed expansion,
+- a legal fallback when stronger visual code is absent.
+
+It is **not** the primary image-side research object.
+
 ### 3. Two legal output lanes
 
 This RFC ratifies two legal image lanes.
 
-#### Lane A — one-shot hybrid
+#### Lane A — one-shot VSC
 
 One output containing:
 
-- `semantic`
 - `seedCode`
+- optional `semantic`
 - optional `coarseVq`
 - optional `providerLatents`
 - `decoder`
@@ -133,7 +135,8 @@ Pass 2:
 Semantic IR -> Visual Seed Code / VQ hints
 ```
 
-This is the explicit high-quality lane.
+This is the explicit high-quality lane when one-shot seed output is too weak, too opaque,
+or too hard to diagnose.
 
 ### 4. Adapter redefinition
 
@@ -174,16 +177,17 @@ It does, however, define the shape that implementation work should target.
 
 ### Request / output contract
 
-The current `ImageSceneSpec` shape should evolve toward a hybrid image container.
+The current `ImageSceneSpec` shape should evolve toward a Visual Seed Code-bearing image
+contract.
 
 Illustrative shape:
 
 ```ts
-type HybridImageCode = {
+type VisualSeedImageCode = {
   schemaVersion: "witt.image.hybrid/v0.1";
-  mode: "one-shot-hybrid" | "two-pass-compile";
-  semantic: SemanticImageIR;
+  mode: "one-shot-vsc" | "two-pass-compile";
   seedCode?: ImageVisualSeedCode;
+  semantic?: SemanticImageIR;
   coarseVq?: ImageLatentCodes;
   providerLatents?: ImageLatentCodes;
   decoder: DecoderContract;
@@ -241,8 +245,8 @@ Describe semantics and decoder hints only.
 Instead, image preambles should allow:
 
 ```text
-Emit a hybrid image-code object.
-Provide semantic structure plus compact visual seed information.
+Emit a Visual Seed Code-bearing image object.
+Provide compact visual seed information, plus optional semantic structure when it helps inspection or quality.
 Do not emit prose prompts, SVG, HTML, Canvas commands, or raw pixels.
 ```
 
@@ -308,7 +312,7 @@ This migration should happen in four stages.
 ### Stage 2 — schema
 
 - introduce `ImageVisualSeedCodeSchema`
-- introduce a hybrid image-code container
+- introduce a Visual Seed Code-bearing image contract
 - keep current `ImageSceneSpec` compatibility during transition
 
 ### Stage 3 — pipeline
@@ -324,7 +328,7 @@ This migration should happen in four stages.
 - add manifest evidence for seed path used
 - add eval matrix:
   - semantic-only fallback
-  - semantic + seed
+  - seed + optional semantic
   - coarse/full token routes when available
 
 This RFC is intentionally compatible with a gradual migration. It does not require a flag day.
@@ -381,7 +385,7 @@ This RFC should be reconsidered or narrowed if any of the following happens:
    - if all credible seed geometries (prefix tokens, coarse-scale maps, residual-first codes, lexical visual tokens) prove too unstable or too hard to map into a usable decoder route, this RFC should be reduced to "keep optionality" rather than "promote seed to first-class."
 
 3. **Semantic-only path outperforms in practice**
-   - if a strong semantic-to-latent adapter consistently beats hybrid routes at equal budget and complexity, the architecture may need to remain scene-spec centered longer than expected.
+   - if a strong semantic-to-latent adapter consistently beats seed routes at equal budget and complexity, the architecture may need to keep semantic-first routes longer than expected.
 
 4. **The migration explodes surface complexity**
    - if schema, CLI, manifest, and adapter changes cannot be made incrementally and instead require disruptive rewrites, the rollout should be re-scoped into a narrower phase line.
@@ -392,11 +396,11 @@ This RFC should be reconsidered or narrowed if any of the following happens:
 
 This RFC proposes the following architectural correction:
 
-1. `Semantic IR` remains canonical but is no longer the primary image research object.
-2. `Visual Seed Token` becomes first-class.
-3. The image route is explicitly hybrid.
+1. `Visual Seed Token` becomes first-class.
+2. `Semantic IR` remains supported but is no longer the primary image research object.
+3. The image route is explicitly Visual Seed Code-bearing, with optional semantic support.
 4. The adapter is redefined primarily as a seed expander.
-5. `one-shot hybrid` and `two-pass compile` are both legal lanes.
+5. `one-shot VSC` and `two-pass compile` are both legal lanes.
 6. `two-pass compile` is the explicit high-quality lane.
 7. One image path, frozen decoder doctrine, and no-diffusion constraints remain unchanged.
 

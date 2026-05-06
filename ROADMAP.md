@@ -47,7 +47,7 @@ The scaffold and the Python proving ground.
 
 ## Phase 1 — Image neural codec real 🚧 (in progress)
 
-Move the image path from "protocol port landed" to "hybrid image code + real frozen decoder + seed expansion in".
+Move the image path from "protocol port landed" to "Visual Seed Code + real frozen decoder + seed expansion in".
 
 Already landed:
 
@@ -55,10 +55,10 @@ Already landed:
 - codec-owned packaging + manifest rows
 - image branch removed from the harness
 - single-route raster `ImageCodec extends BaseCodec<...>`
-- hybrid image-code direction locked: Semantic IR remains canonical, Visual Seed Token becomes first-class, two-pass compile is the high-quality lane
+- Visual Seed Code direction locked: Semantic IR remains supported and user-facing, Visual Seed Token becomes first-class, two-pass compile is the high-quality lane
 
 - [ ] Land the image doctrine rewrite across README / hard constraints / codec docs / architecture
-- [ ] Add a hybrid image-code container with `semantic`, `seedCode`, optional `coarseVq`, and `providerLatents`
+- [ ] Add a Visual Seed Code-bearing image contract with `seedCode`, optional `semantic`, optional `coarseVq`, and `providerLatents`
 - [ ] Wire a frozen pretrained VQ decoder (LlamaGen, TiTok, FlexTok, or sibling candidate)
 - [ ] Add seed-expansion priority order: `providerLatents -> coarseVq -> seedCode -> semantic -> placeholder`
 - [ ] Train the seed-expansion adapter on tokenizer-derived or paired semantic/seed data

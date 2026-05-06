@@ -21,7 +21,7 @@ Architecture Decision Records capture decisions that should survive chat history
 - 0015 audio decoder family — ratifies Brief I (Kokoro-82M-family default, Piper fallback, no tokenizer at v0.3, procedural soundscape/music, CPU byte-parity / GPU structural-parity)
 - 0016 untrusted-code execution boundary — locks `polyglot-mini`'s subprocess+timeout+safe-globals as research-grade only; names `@wittgenstein/sandbox` (nsjail / bubblewrap / Pyodide-WASM) as the production-path entrypoint; production engagement of the painter path is a hard error until that lands
 - 0017 orchestration workflow contract — ratifies Brief K §Verdict 1; adds `WORKFLOW.md` at the repo root as the Symphony-shaped agent-dispatch contract; runtime stays unspecified at v0.3
-- 0018 hybrid image code and visual seed token — ratifies the image-route correction from `scene-spec JSON as terminal image IR` toward `Semantic IR + Visual Seed Token + seed expansion + frozen decoder`; keeps one image path and decoder-not-generator doctrine intact while promoting `Visual Seed Token` to first-class status
+- 0018 visual seed code image route — ratifies the image-route correction from `scene-spec JSON as terminal image IR` toward `Visual Seed Token + optional Semantic IR + seed expansion + frozen decoder`; keeps one image path and decoder-not-generator doctrine intact while promoting `Visual Seed Token` to first-class status
 
 ## Lanes
 

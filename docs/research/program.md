@@ -136,10 +136,10 @@ as the terminal image IR. That is now corrected by:
 
 The locked direction is:
 
-- `Semantic IR` remains canonical, but not as the terminal image research object
+- `Semantic IR` remains supported for concept activation / organization, inspection, and optional conditioning, but not as the terminal image research object
 - `Visual Seed Token` becomes first-class
 - the adapter is redefined primarily as a seed expander / visual-code compiler
-- one-shot hybrid is the default lane
+- one-shot VSC is the default lane
 - two-pass compile is the high-quality lane
 
 The main research variables that remain open are:

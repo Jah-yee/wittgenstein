@@ -17,7 +17,7 @@ This page defines the locked vocabulary for v0.2 in one place. It is the shortes
 - **Route** — a codec-internal strategy path chosen by the codec, not by harness-level modality branching.
 - **RunManifest** — the receipts file that records git SHA, seed, artifact hashes, model/provider info, cost, latency, and errors.
 - **`produce`** — the canonical codec primitive from RFC-0001 that owns artifact generation end-to-end.
-- **`IR.Text`** — the only inhabited IR variant at v0.2; the text-native planning payload that codecs adapt and decode. For image, this now includes Hybrid Image Code rather than scene JSON alone.
+- **`IR.Text`** — the only inhabited IR variant at v0.2; the text-native planning payload that codecs adapt and decode. For image, this now includes a Visual Seed Code-bearing contract rather than scene JSON alone.
 - **No silent fallback** — any route or model failure must surface as a structured error and a manifest row, never as an invisible replacement path.
 - **Decoder ≠ generator** — the repo allows deterministic or frozen decoders in the default path, not general-purpose image/video generation systems.
 

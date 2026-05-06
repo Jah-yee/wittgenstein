@@ -1,4 +1,4 @@
-# 0018 Hybrid Image Code and Visual Seed Token
+# 0018 Visual Seed Code Image Route
 
 ## Status
 
@@ -50,15 +50,14 @@ This ADR is paired with RFC-0006, which supplies the implementation-facing inter
 
 ### 1. The canonical image route becomes hybrid
 
-Wittgenstein image generation is ratified as a **hybrid image code** architecture.
+Wittgenstein image generation is ratified as a **Visual Seed Code** architecture.
 
 The canonical conceptual path is:
 
 ```text
 User Prompt
--> Semantic IR
 -> Visual Seed Token / Visual Seed Code
--> optional coarse/full VQ hints
+-> optional Semantic IR / coarse-full VQ hints
 -> Seed Expander / Adapter
 -> full decoder-native token grid
 -> frozen decoder
@@ -67,13 +66,19 @@ User Prompt
 
 This supersedes the narrow interpretation that image generation terminates at `SceneSpec JSON`.
 
-### 2. `Semantic IR` remains canonical, but not primary as the image research object
+### 2. `Semantic IR` remains supported because pure seed output is risky
 
-`Semantic IR` remains part of the canonical image path for three reasons:
+`Semantic IR` remains part of the image contract because pure seed-token output can be:
 
-1. model-side semantic organization,
+1. opaque to users and maintainers,
+2. brittle under model formatting errors,
+3. difficult to debug when image quality fails.
+
+It therefore serves three roles:
+
+1. model-side concept activation / semantic organization,
 2. user-facing inspection,
-3. auxiliary conditioning for later expansion.
+3. auxiliary conditioning for later seed expansion or decoder-side networks.
 
 But it is no longer the primary image-side research object.
 
@@ -105,12 +110,12 @@ compact visual code -> fuller decoder-native token grid
 
 Semantic IR may still provide auxiliary conditioning, but semantic-only mapping is no longer the target architecture story.
 
-### 5. Both one-shot hybrid and two-pass compile are legal
+### 5. Both one-shot VSC and two-pass compile are legal
 
 The architecture admits two legal output lanes:
 
-1. **one-shot hybrid**
-   - the LLM emits semantic IR and seed information in one output
+1. **one-shot VSC**
+   - the LLM emits seed code and optional semantic IR in one structured output
 2. **two-pass compile**
    - pass 1 emits semantic IR
    - pass 2 emits seed code / VQ hints from that IR
@@ -119,7 +124,7 @@ This ADR ratifies both as legal.
 
 It further names:
 
-- **one-shot hybrid** as the default lane to optimize first
+- **one-shot VSC** as the default lane to optimize first
 - **two-pass compile** as the explicit high-quality lane
 
 ### 6. Priority order for image execution
@@ -165,7 +170,7 @@ Future schema work may add explicit image seed structures and associated mode fi
 
 ### Prompt / preamble consequence
 
-Future preambles should no longer instruct the model only to emit a semantic scene spec. They may now target hybrid output contracts where semantic and seed layers coexist.
+Future preambles should no longer instruct the model only to emit a semantic scene spec. They may now target Visual Seed Code output contracts where seed code is primary and semantic IR can coexist when useful for inspection, diagnosis, or two-pass quality.
 
 ### Manifest consequence
 
@@ -181,7 +186,7 @@ Future manifest work should preserve which image code path was actually used:
 Future image evaluation should compare at least:
 
 1. semantic-only fallback
-2. semantic + seed hybrid
+2. seed + optional semantic
 3. coarse/full token routes when available
 
 ### CLI consequence
@@ -206,7 +211,7 @@ If accepted, the next follow-up surfaces should be:
 
 1. image RFC and/or image exec-plan updates,
 2. `docs/codecs/image.md` rewrite,
-3. `docs/hard-constraints.md` wording update from scene-only to hybrid image-code container,
+3. `docs/hard-constraints.md` wording update from scene-only to Visual Seed Code-bearing image contract,
 4. `README.md` / architecture-diagram wording update,
 5. schema and adapter implementation work,
 6. manifest / eval updates.

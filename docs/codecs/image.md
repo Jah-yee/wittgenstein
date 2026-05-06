@@ -2,7 +2,7 @@
 
 Image is the strictest modality in Wittgenstein. It has one path and one path only:
 
-`LLM -> structured image-code container -> seed expander / adapter -> frozen decoder -> PNG`
+`LLM -> Visual Seed Code-bearing image contract -> seed expander / adapter -> frozen decoder -> PNG`
 
 ## Position
 
@@ -10,8 +10,8 @@ This codec is intentionally closer to a **VQ / discrete latent token** view of i
 
 That means:
 
-- the LLM should first organize semantic image structure
 - the canonical image contract should carry **Visual Seed Token / Visual Code** as a first-class layer
+- `Semantic IR` may travel beside it to activate / organize concepts, expose intent, improve diagnosis, or condition a higher-quality compile
 - a small seed expander / adapter should map compact visual code into fuller discrete latent codes
 - a frozen decoder should turn those codes into raster pixels
 
@@ -19,36 +19,38 @@ The project is explicitly trying to move as much modality-specific work as possi
 
 ## What the LLM Emits
 
-The model emits a **hybrid image-code container**. In the default lane it should carry:
+The model emits a **Visual Seed Code-bearing image contract**. In the default lane it should carry:
 
-- a `semantic` layer:
+- a `seedCode` layer:
+  - compact visual code / seed tokens
+  - emitted by next-token prediction
+  - closer to decoder token space than prose
+- an optional `semantic` layer:
   - intent and subject
   - composition and framing
   - lighting and mood
   - style cues
   - human-readable constraints
-- a `seedCode` layer:
-  - compact visual code / seed tokens
-  - emitted by next-token prediction
-  - closer to decoder token space than prose
 - optional `coarseVq` / `providerLatents`:
   - when the model or provider can already emit decoder-facing code
 - decoder hints such as family and latent resolution
 
 The model does not emit SVG, HTML, Canvas programs, or raw pixels.
 
-`Semantic IR` remains canonical, but it is no longer the terminal image research object.
-Its role is model-side semantic organization, user-facing inspection, and optional
-auxiliary conditioning. The primary image research layer is `Visual Seed Token`.
+`Visual Seed Token` is the primary image research layer. `Semantic IR` remains supported
+because pure seed-token output can be opaque, brittle, or hard to debug. Its role is
+model-side concept activation / semantic organization, user-facing inspection, optional
+auxiliary conditioning for seed expansion or later decoder-side networks, and a legal
+fallback / high-quality compile support layer.
 
 ## One-shot and two-pass lanes
 
 Two image lanes are legal:
 
-- **one-shot hybrid** — emit `semantic` + `seedCode` in one output object
+- **one-shot VSC** — emit `seedCode` and any optional `semantic` layer in one output object
 - **two-pass compile** — pass 1 emits semantic IR; pass 2 consumes that IR and emits `seedCode` / VQ hints
 
-One-shot hybrid is the default lane to optimize first.
+One-shot VSC is the default lane to optimize first.
 Two-pass compile is the explicit high-quality lane.
 
 ## Optional `providerLatents` (MiniMax / API extensions)
@@ -72,7 +74,7 @@ This is the cleanest version of the thesis:
 
 ## Adapter Role
 
-The adapter is the small learned **seed expander / visual-code compiler** between the LLM-facing image-code container and the decoder's latent vocabulary. It is the only trainable part of the image stack in this scaffold.
+The adapter is the small learned **seed expander / visual-code compiler** between the LLM-facing Visual Seed Code contract and the decoder's latent vocabulary. It is the only trainable part of the image stack in this scaffold.
 
 Planned training shape:
 
@@ -115,7 +117,7 @@ The scaffold now includes:
 
 - a deterministic semantic-to-latent baseline path for validating end-to-end wiring, manifests, and artifact packaging
 - direct provider-latent passthrough for the cleanest text-first-to-decoder thesis
-- a narrow-domain reference decoder bridge for higher-quality local showcase output on the same hybrid image-code path
+- a narrow-domain reference decoder bridge for higher-quality local showcase output on the same Visual Seed Code path
 
 This still does **not** represent the final image thesis. Real generation quality ultimately depends on a properly wired frozen decoder family and a stronger seed-expansion path than the current scaffold uses.
 

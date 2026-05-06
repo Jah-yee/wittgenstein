@@ -37,4 +37,4 @@ Renderers return the file path plus metadata needed for manifests:
 
 ## Why This Matters
 
-This contract is the seam that lets Image, Audio, Sensor, and future codecs work independently while the harness remains shared. For image, the output side is no longer interpreted as semantic JSON alone: the codec contract now needs to admit hybrid image code, where semantic IR and decoder-facing seed/code layers coexist behind the same typed boundary.
+This contract is the seam that lets Image, Audio, Sensor, and future codecs work independently while the harness remains shared. For image, the output side is no longer interpreted as semantic JSON alone: the codec contract now needs to admit Visual Seed Code as the primary decoder-facing layer, with optional semantic IR and VQ hints behind the same typed boundary.

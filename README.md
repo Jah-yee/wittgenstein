@@ -27,10 +27,17 @@ artifact hash, and model I/O.
 
 Image, audio, and sensor routes already produce real artifacts with the same
 harness/codec/manifest contract. Video targets `.mp4` once its codec slot opens. The
-image route is now explicitly framed as **Hybrid Image Code**: `Semantic IR` remains
-canonical, but `Visual Seed Token` is the primary image research layer and feeds the
-decoder-facing path. The local 30-second sensor quickstart below is the smallest no-API-key
-proof; maturity levels are called out in `docs/implementation-status.md`.
+image route is now explicitly framed around **Visual Seed Code**: `Semantic IR` remains
+supported for model-side organization and user-facing inspection, while Visual Seed
+Code / Visual Seed Token is the primary image research layer and feeds the
+decoder-facing path. The local 30-second sensor quickstart below is the smallest
+no-API-key proof; maturity levels are called out in `docs/implementation-status.md`.
+
+The image concern is deliberate: a pure seed-token output may be compact and decoder-facing,
+but it can also become opaque, brittle, or hard to diagnose. `Semantic IR` exists to activate
+and organize model-side visual concepts, make intent inspectable, and provide optional
+conditioning for a seed expander or later decoder-side network. It is important support, but
+not the main image research object.
 
 > **🧪 Project status — early-stage, doctrine-locked, v0.3 prerelease.**
 > Wittgenstein is a prerelease (`v0.3.0-alpha.1`) with a working Python
@@ -40,8 +47,7 @@ proof; maturity levels are called out in `docs/implementation-status.md`.
 > cut locks the thesis, vocabulary, and codec protocol (RFC-0001 / ADR-0008);
 > M0, M1A, and the M2 audio sweep have landed; v0.3 is packaged against
 > [`docs/exec-plans/active/codec-v2-port.md`](docs/exec-plans/active/codec-v2-port.md).
-> The next major correction line is the image-route reframe around Hybrid Image Code
-> and Visual Seed Token.
+> The next major correction line is the image-route reframe around Visual Seed Code.
 > Breaking changes are still possible before a stable release. **We are
 > actively looking for early adopters and contributors** — see
 > [How to help](#how-to-help) below.
@@ -83,8 +89,9 @@ Wittgenstein makes three architectural bets instead:
 
 - **Text LLMs, not fused multimodal giants.** The base model stays text-only. Modality-specific
   work lives in codec layers. Cross-modal grounding is already inside the LLM; for image,
-  `Semantic IR` organizes it and `Visual Seed Token` projects it toward decoder space. The
-  adapter teaches the interface, not the knowledge. ([research/frozen-llm-multimodality.md](docs/research/frozen-llm-multimodality.md))
+  Visual Seed Code is the main decoder-facing output, with `Semantic IR` available to activate
+  and organize concepts, expose intent, and condition the seed-expansion path. The adapter
+  teaches the interface, not the knowledge. ([research/frozen-llm-multimodality.md](docs/research/frozen-llm-multimodality.md))
 - **Decoder, not generator.** Frozen VQ decoders over diffusion samplers. Reproducibility is
   structural — same IR + same seed → same bytes — not a policy bolt-on. ([research/vq-tokens-as-interface.md](docs/research/vq-tokens-as-interface.md))
 - **Traceable by construction.** Every run writes a manifest with git SHA, lockfile hash,
@@ -155,8 +162,8 @@ agents; current implementation guidance lives in the codec-v2 plan and agent gui
   L1 HARNESS          routing · retry · budget · manifest · seed
       │
       ▼
-  L2 CODEC / SPEC     LLM → structured Spec / image-code container
-      │   ▲           image: Semantic IR + Visual Seed Code (VSC) + optional VQ hints
+  L2 CODEC / SPEC     LLM → structured Spec / Visual Seed Code contract
+      │   ▲           image: Visual Seed Code (VSC) primary; Semantic IR / VQ hints optional
       │               audio: AudioPlan / route spec
       │               sensor: SignalSpec / operator spec
       │               IR is a sum type: Text | Latent | Hybrid

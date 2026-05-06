@@ -3,7 +3,7 @@
 The currently wired trainable seam is **`ImageSceneSpec -> ImageLatentCodes`**
 ([`packages/codec-image/src/pipeline/adapter.ts`](../pipeline/adapter.ts)).
 That remains the scaffold entrypoint, but the doctrine has moved: the preferred
-longer-term target is **Hybrid Image Code -> ImageLatentCodes**, where a compact
+longer-term target is **Visual Seed Code -> ImageLatentCodes**, where a compact
 visual seed is expanded into decoder-native latent tokens.
 
 ## v1 (shipped)
@@ -16,7 +16,7 @@ visual seed is expanded into decoder-native latent tokens.
 ## Future
 
 - Keep the current MLP path as a baseline / fallback, not the end-state image story.
-- Introduce Hybrid Image Code fields (`semantic`, `seedCode`, optional `coarseVq`) at the schema boundary before training a stronger adapter.
+- Introduce Visual Seed Code fields (`seedCode`, optional `semantic`, optional `coarseVq`) at the schema boundary before training a stronger adapter.
 - Replace the stub offline encoder with a real frozen tokenizer aligned to your decoder family.
 - Move from the small MLP to a stronger seed expander / visual-code compiler (still not an end-to-end image generator).
 

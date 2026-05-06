@@ -1,8 +1,8 @@
-# Hybrid Image Code
+# Visual Seed Code Image Route
 
 **Status:** active research/design note feeding RFC-0006 and ADR-0018  
 **Stage:** post-v0.3 prerelease closeout, pre-image-route reframe  
-**Purpose:** capture the image-route correction from "scene-spec JSON as the terminal image IR" toward a hybrid architecture where `Semantic IR` remains visible and useful, while `Visual Seed Token` becomes the primary image research layer.
+**Purpose:** capture the image-route correction from "scene-spec JSON as the terminal image IR" toward a Visual Seed Code architecture. `Visual Seed Token` becomes the primary image research layer. `Semantic IR` remains useful because it can activate / organize model-side visual concepts, expose intent, and condition seed expansion, but it is not the main image research object.
 
 This note is not doctrine by itself. It is a consolidation surface for the current correction pass so maintainers and agents can reason from one document instead of reconstructing the path from chat logs, PRs, and scattered brief amendments.
 
@@ -21,13 +21,12 @@ Wittgenstein should not frame image generation as a binary choice between:
 - `structured JSON scene spec`, or
 - `direct full VQ token grid`.
 
-The better target is a **hybrid image code container**:
+The better target is a **Visual Seed Code-bearing image contract**:
 
 ```text
 User Prompt
--> Semantic IR
 -> Visual Seed Token / Visual Seed Code
--> optional coarse/full VQ hints
+-> optional Semantic IR / coarse-full VQ hints
 -> Seed Expander / Adapter
 -> full decoder-native token grid
 -> frozen decoder
@@ -64,8 +63,7 @@ That path is still useful, but its interpretation needs to change.
 
 ### What stays true
 
-- `Semantic IR` is valuable.
-- The LLM should still organize semantics, composition, palette, and constraints.
+- `Semantic IR` is valuable as concept activation / organization, user inspection, and optional conditioning.
 - The image route should still target a frozen decoder, not a diffusion generator.
 - The adapter should remain small.
 
@@ -75,7 +73,7 @@ That path is still useful, but its interpretation needs to change.
 - `Visual Seed Token` / `Visual Seed Code` becomes the **primary image research layer**.
 - The adapter is redefined primarily as a **seed expander / visual-code compiler**, not a scene-description reader.
 - Two legal output lanes exist:
-  - `one-shot hybrid` (default, lighter)
+  - `one-shot VSC` (default, lighter)
   - `two-pass compile` (high-quality lane)
 
 ---
@@ -244,12 +242,12 @@ These priors collectively argue for the same broad move:
 
 This correction should not force a false binary.
 
-### Lane A — one-shot hybrid
+### Lane A — one-shot VSC
 
 The LLM emits one structured object containing:
 
-- `semantic`
 - `seedCode`
+- optional `semantic`
 - optional `coarseVq`
 - optional `providerLatents`
 - `decoder`
@@ -259,7 +257,7 @@ This is the likely default lane because it is:
 - cheaper,
 - faster,
 - simpler to operate,
-- enough to test whether one-call hybrid visual coding is viable.
+- enough to test whether one-call visual seed coding is viable.
 
 ### Lane B — two-pass compile
 
@@ -285,7 +283,7 @@ This is the **high-quality lane**:
 ### Current recommendation
 
 - Keep **both** lanes legal.
-- Treat **one-shot hybrid** as the default path to optimize first.
+- Treat **one-shot VSC** as the default path to optimize first.
 - Treat **two-pass compile** as the explicit high-quality lane.
 
 ---
@@ -416,7 +414,7 @@ This note suggests the following downstream surfaces, in order:
    - extend Brief C's H9/H10 line with a more explicit seed-code framing
 
 2. **RFC**
-   - define `Hybrid Image Code`
+   - define `Visual Seed Code`
    - define role split between `Semantic IR` and `Visual Seed Token`
    - define legal one-shot and two-pass lanes
    - define adapter as seed expander
@@ -438,10 +436,10 @@ This note suggests the following downstream surfaces, in order:
 
 Lock the following now:
 
-1. `Semantic IR` remains in the canonical image route.
+1. `Semantic IR` remains supported in the image contract.
 2. `Semantic IR` is no longer the primary image research object.
 3. `Visual Seed Token` becomes first-class.
-4. `one-shot hybrid` and `two-pass compile` are both valid lanes.
+4. `one-shot VSC` and `two-pass compile` are both valid lanes.
 5. `two-pass compile` is the explicit high-quality lane.
 6. The adapter is redefined primarily as a seed expander / visual-code compiler.
 

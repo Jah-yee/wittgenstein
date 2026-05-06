@@ -17,12 +17,12 @@ When instructions conflict, **trust `AGENTS.md`, `docs/engineering-discipline.md
 Wittgenstein is a **five-layer modality harness**: the LLM plans in text; the repo runtime turns structured IR into **real files** (PNG, audio, video, sensor JSON) via codecs and deterministic or frozen decoders.
 
 1. **L1 Harness / Runtime** — `packages/core`, `packages/sandbox`: routing, config, retry, budget, manifests, telemetry. Every run should leave traces under `artifacts/runs/<run-id>/`.
-2. **L2 IR / Codec** — `packages/schemas`, `packages/codec-*`: zod-validated IR per modality; codecs implement `WittgensteinCodec`.
-3. **L3 Renderer / Decoder** — pipelines inside each codec package turn IR into bytes on disk (image path: scene JSON → adapter → frozen decoder → PNG).
-4. **L4 Adapter (optional)** — small learned bridges when a decoder needs latent alignment (`codec-image` adapter pipeline).
+2. **L2 IR / Codec** — `packages/schemas`, `packages/codec-*`: zod-validated IR per modality; image now uses a Visual Seed Code-bearing contract rather than scene JSON alone.
+3. **L3 Renderer / Decoder** — pipelines inside each codec package turn IR into bytes on disk (image path: Visual Seed Code-bearing contract → seed expander / adapter → frozen decoder → PNG).
+4. **L4 Adapter (optional)** — small learned bridges / seed expanders when a decoder needs code-space alignment (`codec-image` adapter pipeline).
 5. **L5 Packaging** — `packages/cli` (`wittgenstein` CLI), `apps/site`, install scripts, **this package** for long-form agent primers.
 
-**Non-negotiables (scan before refactors):** single image pipeline (no SVG/HTML Canvas “fallback” in this scaffold), decoder allowed / generator posture per ADRs, schema-first boundaries, manifests on success and failure.
+**Non-negotiables (scan before refactors):** single raster image pipeline (no SVG/HTML Canvas “fallback” in this scaffold), Visual Seed Code / Visual Seed Token as the image correction line, decoder allowed / generator posture per ADRs, schema-first boundaries, manifests on success and failure.
 
 ## Contents of this package
 
