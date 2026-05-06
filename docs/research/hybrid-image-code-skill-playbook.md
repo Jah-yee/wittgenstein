@@ -34,10 +34,15 @@ That is closer to a `SKILL.md` than to a one-off prompt string:
 The useful idea from Acontext and similar skills systems is not a vendor dependency. It
 is the shape:
 
+- a skill starts with machine-readable metadata (`name`, `version`, `description`,
+  `keywords`)
 - skills are stored as plain Markdown files
 - they are meant to be portable and version-controlled
-- they define when they apply, what to output, and what rules are non-negotiable
+- they define when they apply, what to output, how to configure the environment, and what
+  rules are non-negotiable
 - they can be paired with scripts or resources, but the contract starts in Markdown
+- they include operational closeout material such as command references and
+  troubleshooting notes
 
 Useful references:
 
@@ -47,6 +52,43 @@ Useful references:
 
 For Wittgenstein, that means the image line should eventually gain a repo-tracked
 skill-like prompt surface rather than leaving the contract implicit inside one function.
+
+The Acontext installer skill also demonstrates a boundary we should keep: installation,
+login, project management, and cloud memory sync are tool-specific operational steps. The
+Wittgenstein image playbook should borrow the durable `SKILL.md` shape, not require
+Acontext, Claude Code, OpenClaw, OAuth, or any external memory service in the runtime
+path.
+
+## Acontext-derived shape, rewritten for Wittgenstein
+
+The Acontext document is effectively organized as:
+
+1. front matter for discovery,
+2. a reuse / persistence instruction,
+3. install or upgrade steps,
+4. login and project selection,
+5. plugin / agent integration,
+6. project-management commands,
+7. skill upload / sync commands,
+8. environment overrides,
+9. tool inventory,
+10. troubleshooting.
+
+For Hybrid Image Code, the equivalent should be:
+
+1. front matter for agent discovery,
+2. a short statement that this file is repo-tracked prompt context, not doctrine,
+3. load conditions for image-planner calls,
+4. the canonical output hierarchy,
+5. the exact JSON contract to emit,
+6. one-shot and two-pass modes,
+7. validation rules and fallback behavior,
+8. optional CLI / agent flags that may expose the semantic layer,
+9. related docs and issues,
+10. troubleshooting for common malformed outputs.
+
+This keeps the useful operational discipline of `SKILL.md` without importing a third-party
+memory product into the codec path.
 
 ## What this prompt surface should do
 
@@ -84,7 +126,7 @@ image line.
 Longer-term, the repo can store an image skill surface in a dedicated location such as:
 
 - `packages/agent-contact-text/skills/image-hybrid-code/SKILL.md`
-- or `docs/handoff/image-hybrid-code-skill.md`
+- or `docs/skills/image-hybrid-code/SKILL.md`
 
 The exact path is less important than the properties:
 
@@ -92,6 +134,37 @@ The exact path is less important than the properties:
 - easy to cite from issues and PRs
 - narrow enough to stay practical
 - clearly linked to doctrine rather than replacing it
+- loadable by agents as prompt context before the user prompt is expanded
+
+If we create a literal skill file, it should be shaped like this:
+
+```md
+---
+name: wittgenstein-image-hybrid-code
+version: 0.1.0
+description: Emit Hybrid Image Code for Wittgenstein's sole neural image path.
+keywords:
+  - image
+  - visual seed code
+  - vsc
+  - hybrid image code
+  - frozen decoder
+  - manifest
+---
+
+# Wittgenstein Image Hybrid Code
+
+Use this skill when an image request must be turned into a structured image-code
+container for Wittgenstein.
+
+This skill is prompt context only. It does not install tools, pick a tokenizer family, or
+change the codec contract by itself.
+
+...
+```
+
+The literal skill may later include small examples and validation checklists, but it
+should not duplicate ADR text or become a second architecture document.
 
 ## Candidate system prompt v0.1
 
@@ -148,6 +221,66 @@ When emitting `providerLatents`:
 - ensure token count matches the declared grid area
 - use it only for direct decoder-native code, not for guessed placeholders
 ```
+
+## Candidate literal `SKILL.md` content
+
+If this proposal graduates into a repo-local skill file, the content can be reduced to a
+portable instruction file like this:
+
+```md
+---
+name: wittgenstein-image-hybrid-code
+version: 0.1.0
+description: Produce Hybrid Image Code containers for Wittgenstein image generation.
+keywords:
+  - image
+  - visual seed code
+  - vsc
+  - semantic ir
+  - vq
+  - decoder
+---
+
+# Wittgenstein Image Hybrid Code
+
+Use this skill when the user asks Wittgenstein to produce a PNG through the image codec.
+
+You are not writing a natural-language image prompt. You are emitting the structured input
+for Wittgenstein's image codec.
+
+## Output
+
+Return valid JSON only.
+
+Prefer this hierarchy:
+
+1. `providerLatents` only when real decoder-native latents are available.
+2. `seedCode` as the normal decoder-facing output.
+3. `coarseVq` only as an optional bridge when stable partial VQ structure is available.
+4. `semantic` as optional paired / user-facing support.
+
+Do not use SVG, HTML, Canvas, pixel arrays, diffusion prompts, or a second image path.
+
+## One-shot mode
+
+Emit `seedCode` and, when useful, a paired `semantic` object in one JSON response.
+
+## Two-pass mode
+
+Pass 1 may emit `semantic`.
+Pass 2 must use that semantic layer as support and emit `seedCode` as the primary result.
+
+## Validation
+
+- `seedCode.length`, when present, must match the token count.
+- `coarseVq.tokens` must match `coarseVq.tokenGrid`.
+- `providerLatents.tokens` must match `providerLatents.tokenGrid`.
+- If visual code is not reliable, emit the strongest valid partial structure and let the
+  codec record the fallback honestly.
+```
+
+This literal form is intentionally shorter than the research note. Agents should load the
+skill, while maintainers should review the research note and controlling ADRs.
 
 ## Candidate one-shot output shape
 
@@ -206,6 +339,20 @@ This prompt playbook should not lock:
 - whether `coarseVq` survives as a lasting first-class bridge or recedes over time
 
 Those remain research and evaluation questions.
+
+## Troubleshooting rules to include later
+
+Acontext's installer skill includes troubleshooting because operational skills fail in
+predictable ways. The image skill should eventually do the same for malformed model
+outputs:
+
+- If the model returns prose, retry with "JSON only; no markdown fences."
+- If `seedCode.length` does not match `tokens.length`, reject and retry.
+- If a VQ grid token count does not match grid area, reject and retry.
+- If the output only contains `semantic`, treat it as semantic fallback and record that
+  path in manifest receipts.
+- If `providerLatents` appears without a known decoder/codebook contract, reject it
+  rather than silently treating guessed tokens as direct latents.
 
 ## Suggested next step
 
