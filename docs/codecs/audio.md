@@ -4,7 +4,7 @@ Audio is the second-priority modality after image. It ships three internal route
 
 `LLM -> structured AudioPlan JSON -> per-route render -> WAV bytes -> manifest`
 
-> **Implementation status (v0.3 in flight, 2026-05-05).** The doctrine below — Kokoro-82M-family default for speech, Piper-family fallback, byte-parity on the pinned CPU backend — is the **ratified target** (ADR-0015). Code-wise, the speech route currently ships `procedural-audio-runtime` as the **default** decoder; **Kokoro-82M is opt-in** via `WITTGENSTEIN_AUDIO_BACKEND=kokoro` (M2 Slice C2, Issue #116). The default flip from procedural to Kokoro is gated on Slice E (#118) cross-platform determinism verification. Until Slice E lands, `audioRender.decoderId` in the manifest is the source of truth for which backend actually ran on a given run; the doctrine and the code converge at the v0.3 cut, not before.
+> **Implementation status (v0.3 in flight, 2026-05-06).** The doctrine below — Kokoro-82M-family default target for speech, Piper-family fallback, byte-parity on a pinned CPU backend — remains the ratified target (ADR-0015), but Slice E found that Kokoro is same-platform deterministic and **not** byte-identical across macOS arm64 and Linux x64. Code-wise, `procedural-audio-runtime` remains the **default** decoder for v0.3; **Kokoro-82M is opt-in** via `WITTGENSTEIN_AUDIO_BACKEND=kokoro` and records `determinismClass: "structural-parity"`. `audioRender.decoderId` in the manifest is the source of truth for which backend actually ran.
 
 ## Position
 
@@ -49,16 +49,18 @@ The LLM does not emit raw audio, MIDI bytes, or sample arrays. It emits a _plan_
 
 ### Speech route
 
-- `Kokoro-82M-family` decoder by default, with `Piper-family` as the fallback speech
-  path only when the Kokoro path is unavailable, cannot initialize, or fails the
-  pinned deterministic CPU gate.
+- Current v0.3 default: `procedural-audio-runtime`.
+- Opt-in neural speech path: `Kokoro-82M-family` via `WITTGENSTEIN_AUDIO_BACKEND=kokoro`.
+- Ratified fallback family: `Piper-family`, not wired at v0.3.
 - Optional ambient layer mixed at a fixed gain.
-- Output: 16-bit mono WAV at 22050 Hz (configurable via the AudioPlan).
+- Output is backend-specific and recorded in `audioRender`. Procedural speech emits
+  16-bit WAV; Kokoro emits 24 kHz float WAV with `determinismClass:
+"structural-parity"`.
 
-Fallback to Piper must leave manifest evidence of the concrete decoder actually used
-(`decoderId`, `determinismClass`). If the Kokoro path was present but rejected by the
-CPU reproducibility gate, the codec should also preserve a structured partial/failure
-reason rather than silently presenting the run as a normal Kokoro render.
+Any future fallback to Piper must leave manifest evidence of the concrete decoder
+actually used (`decoderId`, `determinismClass`). The v0.3 decision is simpler:
+Kokoro does not flip to default because its same-seed WAV bytes differ across the
+tested macOS and Linux targets.
 
 ### Soundscape route
 
@@ -107,10 +109,8 @@ waveform-direct.
 
 - The LLM emits an AudioPlan with an out-of-range route — caught by zod parse, surfaced as a structured error.
 - The TTS engine is unavailable on the host — codec writes `quality.partial: { reason: "tts_engine_missing" }` and a manifest row noting the failure; no silent fallback.
-- The Kokoro path is present but fails the pinned deterministic CPU gate — codec may
-  fall back to Piper, but must record the fallback in manifest evidence and preserve a
-  structured partial/failure reason if the render no longer satisfies the Kokoro path's
-  byte-parity contract.
+- The Kokoro path is present but does not satisfy cross-platform byte identity —
+  the codec keeps it opt-in and reports `structural-parity`; no silent default flip.
 - The music plan specifies a key/tempo combination the synth cannot render — error surfaced to the user with the offending plan field; no down-tuning happens silently.
 - An ambient layer file is missing — fall back to silence with a structured warning, never to a different ambient.
 
