@@ -11,50 +11,95 @@ export const AudioRenderManifestSchema = z.object({
   decoderHash: z.string().optional(),
 });
 
-export const RunManifestSchema = z.object({
-  runId: z.string(),
-  gitSha: z.string().nullable(),
-  lockfileHash: z.string().nullable(),
-  nodeVersion: z.string(),
-  wittgensteinVersion: z.string(),
+const AudioRouteSchema = z.enum(["speech", "soundscape", "music"]);
 
-  command: z.string(),
-  args: z.array(z.string()),
-  seed: z.number().int().nullable(),
+export const RunManifestSchema = z
+  .object({
+    runId: z.string(),
+    gitSha: z.string().nullable(),
+    lockfileHash: z.string().nullable(),
+    nodeVersion: z.string(),
+    wittgensteinVersion: z.string(),
 
-  codec: z.string(),
-  tier: z.string().nullable().optional(),
-  route: z.string().optional(),
+    command: z.string(),
+    args: z.array(z.string()),
+    seed: z.number().int().nullable(),
 
-  llmProvider: z.string(),
-  llmModel: z.string(),
-  llmTokens: z.object({
-    input: z.number().int().nonnegative(),
-    output: z.number().int().nonnegative(),
-  }),
-  costUsd: z.number().nonnegative(),
+    codec: z.string(),
+    tier: z.string().nullable().optional(),
+    route: z.string().optional(),
 
-  promptRaw: z.string(),
-  promptExpanded: z.string().nullable(),
-  llmOutputRaw: z.string().nullable(),
-  llmOutputParsed: z.unknown().nullable(),
+    llmProvider: z.string(),
+    llmModel: z.string(),
+    llmTokens: z.object({
+      input: z.number().int().nonnegative(),
+      output: z.number().int().nonnegative(),
+    }),
+    costUsd: z.number().nonnegative(),
 
-  artifactPath: z.string().nullable(),
-  artifactSha256: z.string().nullable(),
-  audioRender: AudioRenderManifestSchema.optional(),
+    promptRaw: z.string(),
+    promptExpanded: z.string().nullable(),
+    llmOutputRaw: z.string().nullable(),
+    llmOutputParsed: z.unknown().nullable(),
 
-  startedAt: z.string(),
-  durationMs: z.number().nonnegative(),
-  ok: z.boolean(),
-  error: z
-    .object({
-      code: z.string(),
-      message: z.string(),
-      stack: z.string().optional(),
-    })
-    .nullable()
-    .optional(),
-});
+    artifactPath: z.string().nullable(),
+    artifactSha256: z.string().nullable(),
+    audioRender: AudioRenderManifestSchema.optional(),
+
+    startedAt: z.string(),
+    durationMs: z.number().nonnegative(),
+    ok: z.boolean(),
+    error: z
+      .object({
+        code: z.string(),
+        message: z.string(),
+        stack: z.string().optional(),
+      })
+      .nullable()
+      .optional(),
+  })
+  .superRefine((manifest, ctx) => {
+    if (manifest.ok) {
+      if (manifest.artifactPath === null) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["artifactPath"],
+          message: "Successful runs must record artifactPath.",
+        });
+      }
+      if (manifest.artifactSha256 === null) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["artifactSha256"],
+          message: "Successful runs must record artifactSha256.",
+        });
+      }
+      if (manifest.error !== null && manifest.error !== undefined) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["error"],
+          message: "Successful runs must not carry an error payload.",
+        });
+      }
+    } else if (manifest.error === null || manifest.error === undefined) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["error"],
+        message: "Failed runs must record an error payload.",
+      });
+    }
+
+    if (manifest.codec === "audio" && manifest.route !== undefined) {
+      const parsedRoute = AudioRouteSchema.safeParse(manifest.route);
+      if (!parsedRoute.success) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["route"],
+          message: `Audio manifests must use one of: ${AudioRouteSchema.options.join(", ")}.`,
+        });
+      }
+    }
+  });
 
 export type AudioRenderManifest = z.infer<typeof AudioRenderManifestSchema>;
 export type RunManifest = z.infer<typeof RunManifestSchema>;

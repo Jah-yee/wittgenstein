@@ -68,4 +68,114 @@ describe("@wittgenstein/schemas", () => {
       }).success,
     ).toBe(true);
   });
+
+  it("requires artifact evidence on successful manifests", () => {
+    const parsed = RunManifestSchema.safeParse({
+      runId: "run-success",
+      gitSha: "abc123",
+      lockfileHash: "def456",
+      nodeVersion: process.version,
+      wittgensteinVersion: "0.0.0",
+      command: "wittgenstein audio",
+      args: ["hello"],
+      seed: 7,
+      codec: "audio",
+      route: "speech",
+      llmProvider: "anthropic",
+      llmModel: "claude-3-5-haiku-20241022",
+      llmTokens: { input: 1, output: 2 },
+      costUsd: 0,
+      promptRaw: "hello",
+      promptExpanded: "hello",
+      llmOutputRaw: "{}",
+      llmOutputParsed: {},
+      artifactPath: null,
+      artifactSha256: null,
+      audioRender: {
+        sampleRateHz: 24_000,
+        channels: 1,
+        durationSec: 1.2,
+        container: "wav",
+        bitDepth: 32,
+        determinismClass: "structural-parity",
+        decoderId: "kokoro-82m:test",
+      },
+      startedAt: new Date().toISOString(),
+      durationMs: 10,
+      ok: true,
+      error: null,
+    });
+
+    expect(parsed.success).toBe(false);
+  });
+
+  it("requires failed manifests to carry an error payload", () => {
+    const parsed = RunManifestSchema.safeParse({
+      runId: "run-failure",
+      gitSha: "abc123",
+      lockfileHash: "def456",
+      nodeVersion: process.version,
+      wittgensteinVersion: "0.0.0",
+      command: "wittgenstein image",
+      args: ["prompt"],
+      seed: 7,
+      codec: "image",
+      llmProvider: "openai-compatible",
+      llmModel: "gpt-4.1-mini",
+      llmTokens: { input: 1, output: 2 },
+      costUsd: 0,
+      promptRaw: "prompt",
+      promptExpanded: "prompt",
+      llmOutputRaw: "{}",
+      llmOutputParsed: {},
+      artifactPath: null,
+      artifactSha256: null,
+      startedAt: new Date().toISOString(),
+      durationMs: 10,
+      ok: false,
+      error: null,
+    });
+
+    expect(parsed.success).toBe(false);
+  });
+
+  it("rejects invalid audio routes", () => {
+    const parsed = RunManifestSchema.safeParse({
+      runId: "run-audio-route",
+      gitSha: "abc123",
+      lockfileHash: "def456",
+      nodeVersion: process.version,
+      wittgensteinVersion: "0.0.0",
+      command: "wittgenstein audio",
+      args: ["hello"],
+      seed: 7,
+      codec: "audio",
+      route: "spech",
+      llmProvider: "anthropic",
+      llmModel: "claude-3-5-haiku-20241022",
+      llmTokens: { input: 1, output: 2 },
+      costUsd: 0,
+      promptRaw: "hello",
+      promptExpanded: "hello",
+      llmOutputRaw: "{}",
+      llmOutputParsed: {},
+      artifactPath: "/tmp/out.wav",
+      artifactSha256: "sha256",
+      audioRender: {
+        sampleRateHz: 24_000,
+        channels: 1,
+        durationSec: 1.2,
+        container: "wav",
+        bitDepth: 32,
+        determinismClass: "structural-parity",
+        decoderId: "kokoro-82m:test",
+      },
+      startedAt: new Date().toISOString(),
+      durationMs: 10,
+      ok: true,
+      error: null,
+    });
+
+    expect(parsed.success).toBe(false);
+  });
 });
