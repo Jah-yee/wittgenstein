@@ -48,7 +48,7 @@ This ADR makes the repo's intended posture explicit.
    - decoder / backend / model-family selection,
    - external library or framework adoption,
    - benchmark / evaluation / quality-stack design,
-   - shared contract changes (manifest, codec protocol, public semantics, fallback semantics, determinism contract),
+   - shared contract changes (manifest, codec protocol, public semantics, determinism contract),
    - large structural refactors or package-boundary changes,
    - new modality lines,
    - any task whose stated goal is to approach best-in-class or state-of-the-art practice rather than merely restore correctness.
@@ -61,7 +61,7 @@ This ADR makes the repo's intended posture explicit.
 
    The point is not to maximize ceremony. The point is to ensure that non-local work does not skip the object-comparison / path-choice step.
 
-5. **Necessary research should be as large as the question requires.** When the unknown is large — for example decoder-family selection, benchmark design, major architectural cut lines, or best-practice comparison across multiple external systems — contributors should do a correspondingly substantial research pass instead of rushing to code with a shallow scan. "Research first" is not satisfied by a quick vibe check when the decision surface is large.
+5. **Necessary research should be as large as the question requires, but not a reviewer veto.** When the unknown is large — for example decoder-family selection, benchmark design, major architectural cut lines, or best-practice comparison across multiple external systems — contributors should do a correspondingly substantial research pass instead of rushing to code with a shallow scan. "Research first" is not satisfied by a quick vibe check when the decision surface is large. Size the pass by concrete signals: number of unranked external candidates, blast radius, reversibility cost, dependency/license risk, and whether the decision changes a public contract. Reviewers should ask for more research by naming the missing object comparison or decision risk, not by using "research first" as a generic veto.
 
 6. **Every research pass must name its downstream surface and flow back into execution.** Research is only complete when it feeds a durable next object: issue, brief, RFC, ADR, exec-plan, agent guide, handoff brief, test plan, or code path. Chat-only research is not sufficient for repo memory. The expected motion is:
 

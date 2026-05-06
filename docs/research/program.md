@@ -52,7 +52,7 @@ non-local implementation.
 
 ### 1. Engineering-borrow review
 
-The engineering-borrow requirement is mostly satisfied for the pre-M2 boundary.
+The engineering-borrow requirement is mostly satisfied for the current post-M2 Slice C2 boundary.
 
 | Area                     | Evidence                                                                                                                 | Adopted or preserved                                                                                                                             | Current judgment                                           |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------- |
@@ -68,7 +68,7 @@ license and maintenance surface without solving the immediate audio-port problem
 
 ### 2. Broad research
 
-The model/literature requirement is also satisfied for the pre-M2 boundary.
+The model/literature requirement is also satisfied for the current post-M2 Slice C2 boundary.
 
 | Area                       | Evidence                                        | Ratified or downstream owner                                                                            | Current judgment                                           |
 | -------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
