@@ -18,6 +18,7 @@ import { renderImagePipeline } from "./pipeline/index.js";
 import { adaptSceneToLatents } from "./pipeline/adapter.js";
 import { decodeLatentsToRaster } from "./pipeline/decoder.js";
 import { packageRasterAsPng } from "./pipeline/package.js";
+import { imageCodeReceipt } from "./image-code-receipt.js";
 import type { ImageArtifact } from "./types.js";
 
 interface ImageCodecLlmService {
@@ -109,19 +110,38 @@ function hashBytes(value: Uint8Array): string {
   return createHash("sha256").update(value).digest("hex");
 }
 
+function dryRunSeedTokens(prompt: string, length = 32): number[] {
+  const digest = createHash("sha256").update(prompt, "utf8").digest();
+  return Array.from({ length }, (_, index) => digest[index % digest.length] ?? 0);
+}
+
 function createDryRunScene(req: ImageRequest): ImageSceneSpec {
-  return ImageSceneSpecSchema.parse({
-    intent: "Photorealistic wildlife portrait suitable for print",
-    subject: req.prompt,
-    composition: {
-      framing: "tight portrait on subject",
-      camera: "telephoto compression, shallow depth of field",
-      depthPlan: ["sharp subject", "soft bokeh", "clean background"],
+  const raw = JSON.stringify({
+    mode: "one-shot-vsc",
+    semantic: {
+      intent: "Dry-run Visual Seed Code plan",
+      subject: req.prompt,
+      composition: {
+        framing: "centered subject",
+        camera: "neutral camera",
+        depthPlan: ["foreground", "midground", "background"],
+      },
+      lighting: { mood: "neutral", key: "soft" },
+      style: {
+        references: ["local deterministic preview"],
+        palette: ["neutral grey", "soft blue", "warm highlight"],
+      },
+      constraints: {
+        mustHave: [],
+        negative: [],
+      },
     },
-    lighting: { mood: "natural soft daylight", key: "diffused key, gentle fill" },
-    style: {
-      references: ["wildlife photography", "fine-art nature print"],
-      palette: ["neutral grey", "natural fur tones", "cool water highlights"],
+    seedCode: {
+      schemaVersion: "witt.image.seed/v0.1",
+      family: "witt-dry-run",
+      mode: "prefix",
+      length: 32,
+      tokens: dryRunSeedTokens(req.prompt, 32),
     },
     decoder: {
       family: "llamagen",
@@ -130,6 +150,11 @@ function createDryRunScene(req: ImageRequest): ImageSceneSpec {
       latentResolution: [32, 32],
     },
   });
+  const parsed = parseImageSceneSpec(raw);
+  if (!parsed.ok) {
+    throw new Error(parsed.error.message);
+  }
+  return parsed.value;
 }
 
 function asServices(services: codecV2.HarnessCtx["services"]): ImageCodecServices {
@@ -266,6 +291,7 @@ export class ImageCodec extends codecV2.BaseCodec<ImageRequest, ImageArtifact> {
       throw new Error("ImageCodec expected HybridIR after adapt().");
     }
     const payload = asPayload(ir.latent);
+    const imageCode = imageCodeReceipt(payload.scene);
     const raster = await decodeLatentsToRaster(
       payload.latents,
       this.createRenderCtx(ctx, codecV2.CodecPhase.Decode),
@@ -288,10 +314,12 @@ export class ImageCodec extends codecV2.BaseCodec<ImageRequest, ImageArtifact> {
         promptExpanded: payload.promptExpanded,
         llmOutputRaw: payload.llmOutputRaw,
         llmOutputParsed: payload.scene,
+        imageCode,
         quality: {
           structural: {
             schemaValidated: true,
             route: "raster",
+            imageCode,
             paletteCount: payload.scene.style.palette.length,
             palette: [...payload.scene.style.palette],
           },
@@ -320,6 +348,7 @@ export class ImageCodec extends codecV2.BaseCodec<ImageRequest, ImageArtifact> {
   manifestRows(art: ImageArtifact): ReadonlyArray<codecV2.ManifestRow> {
     return [
       { key: "route", value: art.metadata.route },
+      { key: "image.code", value: art.metadata.imageCode },
       { key: "quality.structural", value: art.metadata.quality.structural },
       { key: "quality.partial", value: art.metadata.quality.partial },
       { key: "metadata.warnings", value: art.metadata.warnings.length },

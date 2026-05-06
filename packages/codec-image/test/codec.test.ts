@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { imageCodec } from "../src/index.js";
+import { imageCodeReceipt } from "../src/image-code-receipt.js";
 import { adaptSceneToLatents } from "../src/pipeline/adapter.js";
 import { renderImagePipeline } from "../src/pipeline/index.js";
 
@@ -51,6 +52,46 @@ describe("@wittgenstein/codec-image", () => {
     expect(parsed.value.subject).toBe("misty pine forest");
     expect(parsed.value.seedCode?.length).toBe(4);
     expect(parsed.value.mode).toBe("one-shot-vsc");
+  });
+
+  it("distinguishes emitted semantic from legacy/effective semantic receipts", () => {
+    const emitted = imageCodec.parse(
+      JSON.stringify({
+        semantic: {
+          intent: "poster",
+          subject: "tree",
+          style: { palette: ["green"] },
+        },
+      }),
+    );
+    const legacy = imageCodec.parse(JSON.stringify({ intent: "poster", subject: "tree" }));
+    const absent = imageCodec.parse("{}");
+
+    expect(emitted.ok).toBe(true);
+    expect(legacy.ok).toBe(true);
+    expect(absent.ok).toBe(true);
+    if (!emitted.ok || !legacy.ok || !absent.ok) {
+      throw new Error("image parse unexpectedly failed");
+    }
+
+    expect(imageCodeReceipt(emitted.value)).toMatchObject({
+      hasSemantic: true,
+      hasEmittedSemantic: true,
+      hasEffectiveSemantic: true,
+      semanticSource: "emitted",
+    });
+    expect(imageCodeReceipt(legacy.value)).toMatchObject({
+      hasSemantic: true,
+      hasEmittedSemantic: false,
+      hasEffectiveSemantic: true,
+      semanticSource: "legacy-top-level",
+    });
+    expect(imageCodeReceipt(absent.value)).toMatchObject({
+      hasSemantic: false,
+      hasEmittedSemantic: false,
+      hasEffectiveSemantic: false,
+      semanticSource: "absent",
+    });
   });
 
   it("rejects inconsistent visual code lengths", () => {

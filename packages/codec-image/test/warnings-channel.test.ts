@@ -19,7 +19,20 @@ describe("image v2 warnings channel", () => {
         logger: { debug: () => {}, info: () => {}, warn: () => {}, error: () => {} },
         clock: { now: () => 0, iso: () => new Date(0).toISOString() },
         sidecar: codecV2.createRunSidecar(),
-        services: { dryRun: true, telemetry: { writeText: async () => {} } },
+        services: {
+          telemetry: { writeText: async () => {} },
+          llm: {
+            provider: "test",
+            model: "test",
+            maxOutputTokens: 1024,
+            temperature: 0,
+            generate: async () => ({
+              text: "{}",
+              tokens: { input: 1, output: 1 },
+              costUsd: 0,
+            }),
+          },
+        },
         fork: () => {
           throw new Error("unused");
         },

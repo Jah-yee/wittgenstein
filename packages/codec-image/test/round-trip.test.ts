@@ -38,8 +38,20 @@ describe("image v2 round trip", () => {
     );
     expect(art.mime).toBe("image/png");
     expect(art.metadata.route).toBe("raster");
+    expect(art.metadata.imageCode).toMatchObject({
+      mode: "one-shot-vsc",
+      path: "visual-seed-code",
+      hasSeedCode: true,
+      hasSemantic: true,
+      hasEmittedSemantic: true,
+      hasEffectiveSemantic: true,
+      semanticSource: "emitted",
+      seedFamily: "witt-dry-run",
+      seedLength: 32,
+    });
     expect(imageV2Codec.manifestRows(art).map((row) => row.key)).toEqual([
       "route",
+      "image.code",
       "quality.structural",
       "quality.partial",
       "metadata.warnings",
@@ -47,5 +59,8 @@ describe("image v2 round trip", () => {
       "L5.decoderHash",
       "artifact.sha256",
     ]);
+    expect(imageV2Codec.manifestRows(art).find((row) => row.key === "image.code")?.value).toEqual(
+      art.metadata.imageCode,
+    );
   });
 });

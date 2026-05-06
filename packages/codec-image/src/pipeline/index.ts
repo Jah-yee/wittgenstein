@@ -3,6 +3,7 @@ import { expandSceneSpec } from "./expand.js";
 import { adaptSceneToLatents } from "./adapter.js";
 import { decodeLatentsToRaster } from "./decoder.js";
 import { packageRasterAsPng, toRenderResult } from "./package.js";
+import { imageCodeReceipt } from "../image-code-receipt.js";
 import type { ImageSceneSpec } from "../schema.js";
 import type { ImageArtifact } from "../types.js";
 
@@ -13,6 +14,7 @@ export async function renderImagePipeline(
   const expanded = await expandSceneSpec(parsed, ctx);
   const latentCodes = await adaptSceneToLatents(expanded, ctx);
   const raster = await decodeLatentsToRaster(latentCodes, ctx);
+  const imageCode = imageCodeReceipt(parsed);
   const artifact: ImageArtifact = {
     outPath: ctx.outPath,
     bytes: raster.pngBytes,
@@ -30,10 +32,12 @@ export async function renderImagePipeline(
       promptExpanded: null,
       llmOutputRaw: null,
       llmOutputParsed: parsed,
+      imageCode,
       quality: {
         structural: {
           schemaValidated: true,
           route: "raster",
+          imageCode,
           paletteCount: parsed.style.palette.length,
           palette: [...parsed.style.palette],
         },

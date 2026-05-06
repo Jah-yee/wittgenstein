@@ -157,7 +157,7 @@ export function imageSchemaPreamble(req: ImageRequest): string {
 }
 
 function normalizeImageSceneSpec(spec: ImageSceneSpec): ImageSceneSpec {
-  const semantic = spec.semantic ?? {
+  const semanticDefaults = {
     intent: spec.intent,
     subject: spec.subject,
     composition: spec.composition,
@@ -165,6 +165,8 @@ function normalizeImageSceneSpec(spec: ImageSceneSpec): ImageSceneSpec {
     style: spec.style,
     constraints: spec.constraints,
   };
+  const semantic = spec.semantic;
+  const effectiveSemantic = semantic ?? semanticDefaults;
 
   const mode =
     spec.mode ??
@@ -178,12 +180,12 @@ function normalizeImageSceneSpec(spec: ImageSceneSpec): ImageSceneSpec {
     ...spec,
     mode,
     semantic,
-    intent: semantic.intent,
-    subject: semantic.subject,
-    composition: semantic.composition,
-    lighting: semantic.lighting,
-    style: semantic.style,
-    constraints: semantic.constraints,
+    intent: effectiveSemantic.intent,
+    subject: effectiveSemantic.subject,
+    composition: effectiveSemantic.composition,
+    lighting: effectiveSemantic.lighting,
+    style: effectiveSemantic.style,
+    constraints: effectiveSemantic.constraints,
     seedCode: spec.seedCode
       ? {
           ...spec.seedCode,
