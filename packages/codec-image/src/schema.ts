@@ -8,8 +8,8 @@ export const ImageSeedCodeVersionSchema = z.literal("witt.image.seed/v0.1");
 export const ImageCoarseVqVersionSchema = z.literal("witt.image.coarse-vq/v0.1");
 export const ImageCodeModeSchema = z.enum([
   "semantic-only",
-  "one-shot-hybrid",
-  "two-pass-hybrid",
+  "one-shot-vsc",
+  "two-pass-compile",
   "provider-latents",
 ]);
 
@@ -145,9 +145,9 @@ export function imageSchemaPreamble(req: ImageRequest): string {
   const requestedSize = req.size ? `${req.size[0]}x${req.size[1]}` : "unspecified";
 
   return [
-    "Emit a JSON image-code container for the sole neural image pipeline.",
+    "Emit a JSON Visual Seed Code contract for the sole neural image pipeline.",
     "Prefer seedCode as the primary decoder-facing output.",
-    "Semantic IR is optional and is mainly for user-facing inspection or paired output with seedCode.",
+    "Use Semantic IR to organize concepts, expose the user-facing plan, and optionally condition seed expansion.",
     "Optional coarseVq hints may be included when you can provide stable partial VQ structure.",
     "Use providerLatents only when you can emit decoder-native latent tokens directly.",
     "Do not emit SVG, HTML, Canvas commands, or pixel arrays.",
@@ -171,7 +171,7 @@ function normalizeImageSceneSpec(spec: ImageSceneSpec): ImageSceneSpec {
     (spec.providerLatents
       ? "provider-latents"
       : spec.seedCode || spec.coarseVq
-        ? "one-shot-hybrid"
+        ? "one-shot-vsc"
         : "semantic-only");
 
   return {

@@ -35,7 +35,7 @@ export async function adaptSceneToLatents(
     const validated = ImageCoarseVqSchema.safeParse(parsed.coarseVq);
     if (validated.success) {
       ctx.logger.info("Using coarseVq hints; expanding to decoder-native latents.");
-      return annotateLatents(parsed, expandCoarseVqToLatents(parsed, validated.data));
+      return expandCoarseVqToLatents(parsed, validated.data);
     }
   }
 
@@ -43,7 +43,7 @@ export async function adaptSceneToLatents(
     const validated = ImageVisualSeedCodeSchema.safeParse(parsed.seedCode);
     if (validated.success) {
       ctx.logger.info("Using Visual Seed Code; expanding to decoder-native latents.");
-      return annotateLatents(parsed, expandSeedToLatents(parsed, validated.data));
+      return expandSeedToLatents(parsed, validated.data);
     }
   }
 

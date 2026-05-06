@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { imageCodec } from "../src/index.js";
+import { adaptSceneToLatents } from "../src/pipeline/adapter.js";
 import { renderImagePipeline } from "../src/pipeline/index.js";
 
 describe("@wittgenstein/codec-image", () => {
@@ -19,10 +20,10 @@ describe("@wittgenstein/codec-image", () => {
     }
   });
 
-  it("parses a hybrid image-code container and normalizes semantic + seed fields", () => {
+  it("parses a Visual Seed Code contract and normalizes semantic + seed fields", () => {
     const parsed = imageCodec.parse(
       JSON.stringify({
-        mode: "one-shot-hybrid",
+        mode: "one-shot-vsc",
         semantic: {
           intent: "forest poster",
           subject: "misty pine forest",
@@ -44,12 +45,12 @@ describe("@wittgenstein/codec-image", () => {
     );
     expect(parsed.ok).toBe(true);
     if (!parsed.ok) {
-      throw new Error("hybrid parse unexpectedly failed");
+      throw new Error("Visual Seed Code parse unexpectedly failed");
     }
     expect(parsed.value.semantic?.subject).toBe("misty pine forest");
     expect(parsed.value.subject).toBe("misty pine forest");
     expect(parsed.value.seedCode?.length).toBe(4);
-    expect(parsed.value.mode).toBe("one-shot-hybrid");
+    expect(parsed.value.mode).toBe("one-shot-vsc");
   });
 
   it("rejects inconsistent visual code lengths", () => {
@@ -244,11 +245,52 @@ describe("image pipeline (neural decode)", () => {
     );
   });
 
+  it("preserves decoder-facing coarseVq tokens during expansion", async () => {
+    const parsed = imageCodec.parse(
+      JSON.stringify({
+        subject: "forest",
+        decoder: {
+          family: "llamagen",
+          codebook: "stub-codebook",
+          codebookVersion: "v0",
+          latentResolution: [4, 4],
+        },
+        coarseVq: {
+          schemaVersion: "witt.image.coarse-vq/v0.1",
+          family: "llamagen",
+          codebook: "stub-codebook",
+          codebookVersion: "v0",
+          tokenGrid: [2, 2],
+          tokens: [700, 701, 702, 703],
+        },
+      }),
+    );
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) {
+      return;
+    }
+
+    const latents = await adaptSceneToLatents(parsed.value, {
+      runId: "coarse-preserve",
+      runDir: await mkdtemp(resolve(tmpdir(), "wittgenstein-codec-image-preserve-")),
+      seed: null,
+      outPath: "out.png",
+      logger: {
+        debug: () => {},
+        info: () => {},
+        warn: () => {},
+        error: () => {},
+      },
+    });
+
+    expect(latents.tokens.slice(0, 4)).toEqual([700, 700, 701, 701]);
+  });
+
   it("uses seedCode before the placeholder adapter path", async () => {
     const warnings: string[] = [];
     const parsed = imageCodec.parse(
       JSON.stringify({
-        mode: "one-shot-hybrid",
+        mode: "one-shot-vsc",
         semantic: {
           intent: "test",
           subject: "coastal cliffs",
