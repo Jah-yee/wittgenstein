@@ -7,16 +7,17 @@ Wittgenstein is a harness-first multimodal repo. The LLM is the planner; the run
 Wittgenstein turns text-first LLMs into systems that emit real files through codecs:
 
 - L1 Harness / Runtime: routing, schema injection, retry, budget, telemetry, sandbox, invariants.
-- L2 IR / Codec: one structured IR per modality.
-- L3 Renderer / Decoder: deterministic renderer or frozen decoder turns IR into a file.
-- L4 Optional Adapter: a small learned translator when a decoder needs a latent-code bridge.
+- L2 IR / Codec: one structured modality contract per modality; image now uses a Visual Seed Code-bearing contract rather than scene JSON alone.
+- L3 Renderer / Decoder: deterministic renderer or frozen decoder turns code-bearing IR into a file.
+- L4 Optional Adapter: a small learned bridge / seed expander when a decoder needs latent-code alignment.
 - L5 Packaging / Distribution: CLI, docs, install, agent primers, artifact conventions.
 
 Read [`docs/architecture.md`](docs/architecture.md) before changing structure.
 
 ## Locked Constraints
 
-- Image has exactly one shipping path: `LLM -> structured JSON scene -> adapter -> frozen decoder -> PNG`.
+- Image has exactly one shipping path: `LLM -> Visual Seed Code-bearing image contract -> seed expander / adapter -> frozen decoder -> PNG`.
+- Inside that one image path, `Semantic IR` remains supported for model-side organization and user inspection, but `Visual Seed Token` is the primary image research layer.
 - There is no **raster image** fallback in this scaffold. No SVG-as-PNG, HTML, Canvas, or painter tier for the image codec.
 - A separate **`svg` modality** (`packages/codec-svg`) targets vector output via a local grammar-constrained engine (`research/chat2svg-lora/`); it is not an image-path escape hatch.
 - Decoder is not generator. Frozen pretrained decoders are allowed; diffusion and text-to-image generators are out of scope.
@@ -103,21 +104,22 @@ The repo runs on **two separate decision lanes**. Pick the right one before you 
 
 ### Locked vocabulary (ADR-0011 — supersedes the L1–L5 names above)
 
-| Term          | Layer | Meaning                                                                                            |
-| ------------- | ----- | -------------------------------------------------------------------------------------------------- |
-| **Harness**   | L1    | Routing, retry, seed, validate, budget, record                                                     |
-| **Codec**     | L2    | Modality implementation (owns schema + render)                                                     |
-| **Spec**      | L2    | Structured artifact (`ImageSceneSpec`, `AudioPlan`, …)                                             |
-| **IR**        | L3    | Internal representation; sum type `Text \| Latent \| Hybrid`; **only `Text` is inhabited at v0.2** |
-| **Decoder**   | L3    | IR → bytes; frozen, deterministic, never generative (ADR-0005)                                     |
-| **Adapter**   | L4    | Learned bridge (Spec → latent); optional, image only today                                         |
-| **Packaging** | L5    | CLI · npm · manifests · install (was “Distribution” above)                                         |
+| Term          | Layer | Meaning                                                                                              |
+| ------------- | ----- | ---------------------------------------------------------------------------------------------------- |
+| **Harness**   | L1    | Routing, retry, seed, validate, budget, record                                                       |
+| **Codec**     | L2    | Modality implementation (owns schema + render)                                                       |
+| **Spec**      | L2    | Structured artifact (`ImageSceneSpec`, `AudioPlan`, …)                                               |
+| **IR**        | L3    | Internal representation; sum type `Text \| Latent \| Hybrid`; **only `Text` is inhabited at v0.2**   |
+| **Decoder**   | L3    | IR → bytes; frozen, deterministic, never generative (ADR-0005)                                       |
+| **Adapter**   | L4    | Learned bridge / seed expander (visual seed code → fuller latent tokens); optional, image only today |
+| **Packaging** | L5    | CLI · npm · manifests · install (was “Distribution” above)                                           |
 
 The RFC-0003 alternatives (Loom / Transducer / Score / Handoff) were rejected. Use the table above. Full reference: [`docs/glossary.md`](docs/glossary.md).
 
 ### Constraint deltas (additions to the "Locked Constraints" section above)
 
 - **Codec Protocol v2 is the only codec contract.** Every codec implements `Codec<Req, Art>.produce`. The harness does **not** branch on modality. Source: [`docs/rfcs/0001-codec-protocol-v2.md`](docs/rfcs/0001-codec-protocol-v2.md), ratified by [ADR-0008](docs/adrs/0008-codec-protocol-v2-adoption.md).
+- **Visual Seed Code is the image doctrine.** `Semantic IR` remains supported in the image path for concept activation / organization, user inspection, and optional conditioning, but it is not the terminal image research object; `Visual Seed Token` is first-class, `one-shot VSC` and `two-pass compile` are both legal, and the image adapter is primarily a seed expander / visual-code compiler. Source: [`docs/rfcs/0006-hybrid-image-code.md`](docs/rfcs/0006-hybrid-image-code.md), ratified by [ADR-0018](docs/adrs/0018-hybrid-image-code-and-visual-seed-token.md).
 - **Path C rejected through v0.4.** No Chameleon / LlamaGen-style fused multimodal retrain. Base model stays text-only. ([ADR-0007](docs/adrs/0007-path-c-rejected.md))
 - **The "no raster fallback" rule above applies to the TS `codec-image` core path only.** The `polyglot-mini` Python image code-as-painter sandbox is a documented ⚠️ Research-grade surface (see `README.md` "Experimental surfaces" + [`SECURITY.md`](SECURITY.md)). It is not a TS escape hatch and does not contradict the rule.
 - **Manifest spine is non-negotiable.** Every run writes git SHA, lockfile hash, seed, full LLM I/O, and artifact SHA-256. No silent fallbacks; failures return structured errors with a manifest. Canonical: [`docs/hard-constraints.md`](docs/hard-constraints.md).
@@ -150,7 +152,7 @@ Then return to the original Read Order above for engineering discipline, codec p
 ### What's currently active
 
 - **Doctrine:** locked at v0.2.0-alpha.1; M2 preflight closure cut at v0.2.0-alpha.2; governance lane introduced in ADRs 0012–0014 (see below).
-- **Code:** Codec Protocol v2 port — sequenced **M0 image → M1 image refinement → M2 audio → M3 sensor → M4 video stub → M5a/b benchmarks**. M0 and M1A are landed; M2 audio is the active execution line. M2 Slices A/B/C1/C2 are merged; C3 audio parity/golden work is in review; Kokoro/Piper backend wiring remains a follow-up, not an already-landed behavior.
+- **Code:** Codec Protocol v2 port — sequenced **M0 image → M1 image refinement → M2 audio → M3 sensor → M4 video stub → M5a/b benchmarks**. M0 and M1A are landed; M2 audio has closed its sweep gate. The next image-depth line is no longer framed as `scene-spec -> latent` alone: image now centers Visual Seed Code, with `Semantic IR` as semantic/debug/user-facing support.
 - **Out of scope until M5b:** new modalities, diffusion samplers, trained model weights, website rewrite, RFC-0003 renaming.
 
 ### Two decision lanes (v0.2.0-alpha.2 governance addition)

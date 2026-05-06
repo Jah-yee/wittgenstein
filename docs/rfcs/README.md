@@ -12,13 +12,14 @@ A brief feeds one or more RFCs. An RFC, once accepted, is ratified by an ADR. Co
 
 ## Current RFCs
 
-| ID   | Title                                                            | Status          | Ratifying ADR |
-| ---- | ---------------------------------------------------------------- | --------------- | ------------- |
-| 0001 | [Codec Protocol v2](0001-codec-protocol-v2.md)                   | 🟢 Accepted     | ADR-0008 |
-| 0002 | [CLI ergonomics](0002-cli-ergonomics.md)                         | 🟢 Accepted     | ADR-0009 |
-| 0003 | [Naming pass](0003-naming-pass.md)                               | ⚫ Superseded   | — (by RFC-0005) |
-| 0004 | [Site reconciliation actions](0004-site-reconciliation.md)       | 🟢 Accepted     | — (site-ops) |
-| 0005 | [Naming lock v2](0005-naming-lock-v2.md)                         | 🟢 Accepted     | ADR-0011 |
+| ID   | Title                                                      | Status        | Ratifying ADR   |
+| ---- | ---------------------------------------------------------- | ------------- | --------------- |
+| 0001 | [Codec Protocol v2](0001-codec-protocol-v2.md)             | 🟢 Accepted   | ADR-0008        |
+| 0002 | [CLI ergonomics](0002-cli-ergonomics.md)                   | 🟢 Accepted   | ADR-0009        |
+| 0003 | [Naming pass](0003-naming-pass.md)                         | ⚫ Superseded | — (by RFC-0005) |
+| 0004 | [Site reconciliation actions](0004-site-reconciliation.md) | 🟢 Accepted   | — (site-ops)    |
+| 0005 | [Naming lock v2](0005-naming-lock-v2.md)                   | 🟢 Accepted   | ADR-0011        |
+| 0006 | [Visual Seed Code Image Route](0006-hybrid-image-code.md)  | 🟢 Accepted   | ADR-0018        |
 
 ## Status legend
 

@@ -8,6 +8,6 @@ export function loadPlaceholderAdapter(): AdapterLoaderSpec {
   return {
     name: "placeholder-adapter",
     checkpointUri: "weights://todo",
-    notes: "Reserved for a small scene-to-latent adapter trained after scaffold phase.",
+    notes: "Reserved for a small seed-expansion adapter trained after scaffold phase.",
   };
 }

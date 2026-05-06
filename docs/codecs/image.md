@@ -2,7 +2,7 @@
 
 Image is the strictest modality in Wittgenstein. It has one path and one path only:
 
-`LLM -> structured JSON scene spec -> adapter -> frozen decoder -> PNG`
+`LLM -> Visual Seed Code-bearing image contract -> seed expander / adapter -> frozen decoder -> PNG`
 
 ## Position
 
@@ -10,27 +10,52 @@ This codec is intentionally closer to a **VQ / discrete latent token** view of i
 
 That means:
 
-- the LLM should describe image semantics, composition, and decoder hints
-- a small adapter should map those semantics into discrete latent codes
+- the canonical image contract should carry **Visual Seed Token / Visual Code** as a first-class layer
+- `Semantic IR` may travel beside it to activate / organize concepts, expose intent, improve diagnosis, or condition a higher-quality compile
+- a small seed expander / adapter should map compact visual code into fuller discrete latent codes
 - a frozen decoder should turn those codes into raster pixels
 
 The project is explicitly trying to move as much modality-specific work as possible out of the paid text-token loop and into a local portability layer.
 
 ## What the LLM Emits
 
-The model emits a scene-spec JSON object. It should describe:
+The model emits a **Visual Seed Code-bearing image contract**. In the default lane it should carry:
 
-- intent and subject
-- composition and framing
-- lighting and mood
-- style cues
+- a `seedCode` layer:
+  - compact visual code / seed tokens
+  - emitted by next-token prediction
+  - closer to decoder token space than prose
+- an optional `semantic` layer:
+  - intent and subject
+  - composition and framing
+  - lighting and mood
+  - style cues
+  - human-readable constraints
+- optional `coarseVq` / `providerLatents`:
+  - when the model or provider can already emit decoder-facing code
 - decoder hints such as family and latent resolution
 
 The model does not emit SVG, HTML, Canvas programs, or raw pixels.
 
+`Visual Seed Token` is the primary image research layer. `Semantic IR` remains supported
+because pure seed-token output can be opaque, brittle, or hard to debug. Its role is
+model-side concept activation / semantic organization, user-facing inspection, optional
+auxiliary conditioning for seed expansion or later decoder-side networks, and a legal
+fallback / high-quality compile support layer.
+
+## One-shot and two-pass lanes
+
+Two image lanes are legal:
+
+- **one-shot VSC** — emit `seedCode` and any optional `semantic` layer in one output object
+- **two-pass compile** — pass 1 emits semantic IR; pass 2 consumes that IR and emits `seedCode` / VQ hints
+
+One-shot VSC is the default lane to optimize first.
+Two-pass compile is the explicit high-quality lane.
+
 ## Optional `providerLatents` (MiniMax / API extensions)
 
-If the text API can return discrete VQ indices in the same JSON object, include them under `providerLatents` using the `witt.image.latents/v0.1` shape (`family`, `codebook`, `codebookVersion`, `tokenGrid`, `tokens`). When valid, the runtime **skips** the learned adapter and decodes those tokens directly.
+If the text API can return discrete VQ indices in the same object, include them under `providerLatents` using the `witt.image.latents/v0.1` shape (`family`, `codebook`, `codebookVersion`, `tokenGrid`, `tokens`). When valid, the runtime **skips** seed expansion and decodes those tokens directly.
 
 This is the cleanest version of the thesis:
 
@@ -39,9 +64,9 @@ This is the cleanest version of the thesis:
 ## Pipeline Stages
 
 - `pipeline/expand.ts`
-  Expands or normalizes the scene spec after parsing.
+  Expands or normalizes semantic IR and image-code sections after parsing.
 - `pipeline/adapter.ts`
-  Reserved for the only trainable component. Maps scene semantics into discrete latent tokens.
+  Reserved for the only trainable component. Primarily expands compact visual seed code into fuller discrete latent tokens; semantic-only adaptation is fallback / baseline behavior.
 - `pipeline/decoder.ts`
   Calls a frozen pretrained decoder bridge.
 - `pipeline/package.ts`
@@ -49,18 +74,18 @@ This is the cleanest version of the thesis:
 
 ## Adapter Role
 
-The adapter is the small learned translator between the LLM-friendly scene language and the decoder’s latent vocabulary. It is the only trainable part of the image stack in this scaffold.
+The adapter is the small learned **seed expander / visual-code compiler** between the LLM-facing Visual Seed Code contract and the decoder's latent vocabulary. It is the only trainable part of the image stack in this scaffold.
 
 Planned training shape:
 
-- dataset: captioned image subset with scene-level descriptors
+- dataset: image-aligned semantic/seed pairs or tokenizer-derived seed/code pairs
 - target: decoder codebook indices
-- objective: latent token prediction
+- objective: seed-to-latent token prediction
 - form factor: LoRA or compact translator, not a full image model
 
 In other words, the repo is not trying to train “another image model” here. It is trying to train the smallest possible bridge between:
 
-- text-native semantics
+- compact visual seed code (optionally conditioned on semantic IR)
 - decoder-native latent codes
 
 ## Decoder Candidates
@@ -80,8 +105,9 @@ Wittgenstein is designed around the latter.
 
 ## Failure Modes
 
-- the model emits invalid JSON
-- the scene spec validates but the adapter cannot map semantics to latents
+- the model emits invalid structured image code
+- the semantic layer validates but seed code is absent or malformed
+- the seed code validates but the expander cannot map it to usable latents
 - the decoder family does not match the expected codebook
 - packaging receives bytes in the wrong shape
 
@@ -89,12 +115,13 @@ Wittgenstein is designed around the latter.
 
 The scaffold now includes:
 
-- a deterministic scene-to-latent adapter path for validating end-to-end wiring, manifests, and artifact packaging
-- a narrow-domain reference decoder bridge for higher-quality local showcase output on the same `scene spec -> adapter -> decoder -> PNG` path
+- a deterministic semantic-to-latent baseline path for validating end-to-end wiring, manifests, and artifact packaging
+- direct provider-latent passthrough for the cleanest text-first-to-decoder thesis
+- a narrow-domain reference decoder bridge for higher-quality local showcase output on the same Visual Seed Code path
 
-This still does **not** represent the final image thesis. Real generation quality ultimately depends on a properly wired frozen decoder family and a stronger scene-to-latent adapter than the current scaffold uses.
+This still does **not** represent the final image thesis. Real generation quality ultimately depends on a properly wired frozen decoder family and a stronger seed-expansion path than the current scaffold uses.
 
-## Training the scene→latent adapter (v1)
+## Training the seed-expansion adapter (v1)
 
 1. Prepare `data/image_adapter/raw/metadata.jsonl` and images — see [`data/image_adapter/README.md`](../../data/image_adapter/README.md).
 2. Run `python/image_adapter/prepare_dataset.py` then `encode_offline.py` then `train.py` — see [`python/image_adapter/README.md`](../../python/image_adapter/README.md).
@@ -111,4 +138,4 @@ export WITTGENSTEIN_IMAGE_ADAPTER_LEGACY_PATH=data/image_adapter/artifacts/adapt
 pnpm exec tsx scripts/render-image-adapter-demo.ts artifacts/demo/mlp-adapter-demo-forest.png forest
 ```
 
-The default training stack uses a **small MLP** (no LLM fine-tuning) and a **stub offline encoder** for targets; swap the encoder for a real frozen tokenizer when you wire a production decoder.
+The default training stack uses a **small MLP** (no LLM fine-tuning) and a **stub offline encoder** for targets; swap the encoder for a real frozen tokenizer when you wire a production decoder. Semantic-only scene-to-latent training is now baseline / fallback work, not the target architecture story.

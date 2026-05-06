@@ -52,7 +52,7 @@ function placeholderLatents(parsed: ImageSceneSpec, ctx: RenderCtx): ImageLatent
   });
 
   ctx.logger.warn(
-    "Using placeholder scene-to-latent adapter; set WITTGENSTEIN_IMAGE_ADAPTER_PREFERRED_PATH + WITTGENSTEIN_IMAGE_ADAPTER_LEGACY_PATH (or legacy aliases WITTGENSTEIN_IMAGE_ADAPTER_MLP_PATH + WITTGENSTEIN_IMAGE_ADAPTER_MLP_FALLBACK_PATH).",
+    "Using placeholder seed-expansion adapter; set WITTGENSTEIN_IMAGE_ADAPTER_PREFERRED_PATH + WITTGENSTEIN_IMAGE_ADAPTER_LEGACY_PATH (or legacy aliases WITTGENSTEIN_IMAGE_ADAPTER_MLP_PATH + WITTGENSTEIN_IMAGE_ADAPTER_MLP_FALLBACK_PATH).",
   );
   return latentCodes;
 }

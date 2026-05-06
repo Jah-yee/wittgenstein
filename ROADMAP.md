@@ -3,7 +3,7 @@
 > **Status:** high-level release / product roadmap. For the active execution order and
 > migration gates, use `docs/exec-plans/active/codec-v2-port.md`.
 >
-> As of 2026-05-04:
+> As of 2026-05-06:
 >
 > - `M0` is landed
 > - `M1A` is landed (`PR #68`)
@@ -47,7 +47,7 @@ The scaffold and the Python proving ground.
 
 ## Phase 1 — Image neural codec real 🚧 (in progress)
 
-Move the image path from "protocol port landed" to "real frozen decoder + trained adapter in".
+Move the image path from "protocol port landed" to "Visual Seed Code + real frozen decoder + seed expansion in".
 
 Already landed:
 
@@ -55,12 +55,16 @@ Already landed:
 - codec-owned packaging + manifest rows
 - image branch removed from the harness
 - single-route raster `ImageCodec extends BaseCodec<...>`
+- Visual Seed Code direction locked: Semantic IR remains supported and user-facing, Visual Seed Token becomes first-class, two-pass compile is the high-quality lane
 
-- [ ] Wire a frozen pretrained VQ decoder (LlamaGen or TiTok candidate)
-- [ ] Train the scene-to-latent adapter on a caption subset (CC12M or LAION-COCO slice)
+- [ ] Land the image doctrine rewrite across README / hard constraints / codec docs / architecture
+- [ ] Add a Visual Seed Code-bearing image contract with `seedCode`, optional `semantic`, optional `coarseVq`, and `providerLatents`
+- [ ] Wire a frozen pretrained VQ decoder (LlamaGen, TiTok, FlexTok, or sibling candidate)
+- [ ] Add seed-expansion priority order: `providerLatents -> coarseVq -> seedCode -> semantic -> placeholder`
+- [ ] Train the seed-expansion adapter on tokenizer-derived or paired semantic/seed data
 - [ ] Report CLIPScore on 100-prompt benchmark set
 - [ ] First golden fixture in `fixtures/golden/image/`
-- [ ] Adapter training recipe documented in `packages/codec-image/src/training/README.md`
+- [ ] Adapter / expander training recipe documented in `packages/codec-image/src/training/README.md`
 
 ## Phase 2 — Audio codec v2 + quality upgrade
 
