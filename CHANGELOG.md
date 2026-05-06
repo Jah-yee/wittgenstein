@@ -6,8 +6,47 @@ versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.0-alpha.1] — 2026-05-06 — M2 audio sweep and reproducibility gates
+
+This prerelease closes the v0.3 M2 audio line far enough to cut a release
+surface: audio has codec-v2 routing, codec-authored manifest evidence,
+same-seed parity receipts, an opt-in Kokoro speech backend, and a recorded
+sweep verdict. It also tightens the repo's release-facing evidence story:
+goldens, cold-checkout receipts, LLM-boundary validation, and CI/supply-chain
+gates now back the public claims.
+
+The key audio verdict is intentionally conservative. Kokoro-82M is useful and
+same-platform deterministic, but macOS and Linux produce different same-seed
+WAV artifact hashes. Therefore `procedural-audio-runtime` remains the v0.3
+default speech backend, while Kokoro stays opt-in via
+`WITTGENSTEIN_AUDIO_BACKEND=kokoro` and records
+`determinismClass: "structural-parity"`.
+
+### Added
+
+- Added the Kokoro-82M family as an opt-in speech decoder backend for the audio
+  codec, gated behind `WITTGENSTEIN_AUDIO_BACKEND=kokoro`.
+- Added same-seed audio parity/golden tests for speech, soundscape, and music
+  routes.
+- Added `pnpm sweep:audio-kokoro`, a release-facing receipt script that runs
+  three same-seed Kokoro speech renders and records artifact hashes plus
+  manifest evidence.
+- Added release-facing cold-checkout receipts for the v0.3 truth surface.
+- Added CI-gated sensor goldens and training-data lock receipts so the README
+  receipts table points at checkable artifacts rather than narrative claims.
+- Added benchmark-tool skeletons and generalized `pnpm test:golden` across codec
+  packages.
+- Added doctrine guardrail coverage for manifest and modality schemas.
+
 ### Changed
 
+- Kept the default audio backend procedural after the M2 sweep showed Kokoro is
+  same-platform deterministic but not cross-platform byte-identical.
+- Updated README and status surfaces around the harness-first thesis and the
+  current maturity of image, audio, sensor, SVG, and video outputs.
+- Tightened reproducibility and evidence surfaces: README receipts, sensor
+  goldens, audio sweep receipts, and cold-checkout verification now point to
+  concrete commands or artifacts.
 - Isolated `apps/wittgenstein-kimi` from the root `pnpm` workspace (Issue #112).
   The Kimi-flavored agent demo (~7,400 LOC of React / Radix / Vite) now carries
   its own `pnpm-lock.yaml` under `apps/wittgenstein-kimi/`, so its 70+ transitive
@@ -17,6 +56,18 @@ versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Fixed the Kokoro opt-in test timeout so local decoder initialization can
+  complete before Vitest aborts.
+- Fixed the Kokoro integrity-mismatch path so SHA-256 mismatches surface with a
+  typed `INTEGRITY_MISMATCH` code.
+- Fixed LLM response handling so provider responses are zod-validated at the
+  boundary instead of being trusted through TypeScript casts.
+- Fixed the polyglot-mini TTS status surface so Linux no longer advertises a
+  fictional `edge-tts` fallback.
+- Fixed the Kokoro sweep workflow summary so it includes nested manifest
+  evidence, not only artifact SHA-256 values.
+- Fixed release-gate drift by recording the current v0.3 gate state in an
+  explicit roadmap index.
 - Aligned top-level onboarding/status docs with the `v0.2.0-alpha.2` pre-M2
   state instead of the older M0/M1A wording.
 - Added a top-level research program map that closes the pre-M2 engineering-borrow
@@ -31,6 +82,29 @@ versioning follows [Semantic Versioning](https://semver.org/).
     using Tailwind v4's `@tailwindcss/postcss` plugin.
   - `apps/wittgenstein-kimi` stays on its Tailwind v3 / Vite 7-compatible
     stack instead of half-migrating to Tailwind v4 / Vite 8.
+
+### Verification
+
+- `pnpm install --frozen-lockfile`
+- `pnpm typecheck`
+- `pnpm lint`
+- `pnpm test`
+- `pnpm test:golden`
+- `pnpm smoke:cli`
+- `pnpm sweep:audio-kokoro -- --out artifacts/tmp/kokoro-sweep-final-macos.json`
+
+### Known limits
+
+- Kokoro remains opt-in with `determinismClass: "structural-parity"`; the v0.3
+  default speech backend remains `procedural-audio-runtime`.
+- Linux/Docker and macOS Kokoro receipts are same-platform stable but produce
+  different artifact SHA-256 values across platforms.
+- `costUsd` is not yet computed: both LLM adapters return `costUsd: 0`
+  regardless of provider/model/tokens. The manifest spine is honest about
+  duration, tokens, and artifact hash, but the price column is not a reliable
+  benchmark signal yet. Tracked in Issue #182.
+- This prerelease does not add neural soundscape, neural music, GPU inference,
+  voice cloning, Piper wiring, or a new audio manifest schema.
 
 ## [0.2.0-alpha.2] — 2026-04-29 — M2 preflight closure
 
@@ -387,7 +461,8 @@ video renderer remain intentionally incomplete.
 - Every run writes a manifest under `artifacts/runs/<id>/`
 - Shared contracts live in `@wittgenstein/schemas`; codec packages depend on schemas, not each other
 
-[Unreleased]: https://github.com/p-to-q/wittgenstein/compare/v0.2.0-alpha.2...HEAD
+[Unreleased]: https://github.com/p-to-q/wittgenstein/compare/v0.3.0-alpha.1...HEAD
+[0.3.0-alpha.1]: https://github.com/p-to-q/wittgenstein/compare/v0.2.0-alpha.2...v0.3.0-alpha.1
 [0.2.0-alpha.2]: https://github.com/p-to-q/wittgenstein/compare/v0.2.0-alpha.1...v0.2.0-alpha.2
 [0.2.0-alpha.1]: https://github.com/p-to-q/wittgenstein/compare/v0.1.0-alpha.2...v0.2.0-alpha.1
 [0.1.0-alpha.2]: https://github.com/p-to-q/wittgenstein/compare/v0.1.0-alpha.1...v0.1.0-alpha.2

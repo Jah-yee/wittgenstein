@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { parseOptionalSeed, resolveExecutionRoot } from "../src/commands/shared.js";
 
@@ -37,7 +39,7 @@ describe("resolveExecutionRoot", () => {
     // invoked via `pnpm --filter`. The function should walk up to the
     // monorepo root, where pnpm-workspace.yaml lives.
     const root = resolveExecutionRoot();
-    expect(root.endsWith("/wittgenstein") || root.endsWith("\\wittgenstein")).toBe(true);
+    expect(existsSync(resolve(root, "pnpm-workspace.yaml"))).toBe(true);
   });
 
   it("returns an absolute path", () => {
