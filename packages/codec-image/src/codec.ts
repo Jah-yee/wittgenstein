@@ -117,9 +117,9 @@ function dryRunSeedTokens(prompt: string, length = 32): number[] {
 
 function createDryRunScene(req: ImageRequest): ImageSceneSpec {
   const raw = JSON.stringify({
-    mode: "one-shot-hybrid",
+    mode: "one-shot-vsc",
     semantic: {
-      intent: "Dry-run Hybrid Image Code plan",
+      intent: "Dry-run Visual Seed Code plan",
       subject: req.prompt,
       composition: {
         framing: "centered subject",

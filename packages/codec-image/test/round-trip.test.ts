@@ -39,7 +39,7 @@ describe("image v2 round trip", () => {
     expect(art.mime).toBe("image/png");
     expect(art.metadata.route).toBe("raster");
     expect(art.metadata.imageCode).toMatchObject({
-      mode: "one-shot-hybrid",
+      mode: "one-shot-vsc",
       path: "visual-seed-code",
       hasSeedCode: true,
       hasSemantic: true,
