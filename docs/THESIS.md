@@ -19,7 +19,7 @@ The five-layer foundation stands:
 - **L1 Harness / runtime** — routing, retry, seed, budget, telemetry, sandbox, replayable run invariants.
 - **L2 IR / codec** — typed schemas, prompt contracts, structured parse boundaries at every external edge.
 - **L3 Renderer / decoder** — IR to bytes on disk. Frozen decoders are in-bounds; general generators are not the default path.
-- **L4 Optional adapter** — small learned translators (e.g. scene-to-latent bridges), shipped beside codecs, not inside the base model.
+- **L4 Optional adapter** — small learned bridges / seed expanders (e.g. hybrid image code to fuller decoder-native token grids), shipped beside codecs, not inside the base model.
 - **L5 Packaging** — CLI, installation, shared schemas, docs, agent primers, distribution conventions.
 
 What evolves is _generality_ (L4/L5 discipline must carry across **all** modalities, not only image), not the locked vocabulary.

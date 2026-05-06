@@ -18,7 +18,7 @@ interface WittgensteinCodec<Req, Parsed> {
 
 - `requestSchema` validates the user-facing request.
 - `schemaPreamble()` is the codec-owned prompt contract for the model.
-- `outputSchema` validates the model-emitted IR.
+- `outputSchema` validates the model-emitted IR or code-bearing contract.
 - `parse()` must return structured success or failure, never throw for bad JSON.
 - `render()` may throw structured implementation errors while the codec is stubbed.
 
@@ -37,4 +37,4 @@ Renderers return the file path plus metadata needed for manifests:
 
 ## Why This Matters
 
-This contract is the seam that lets Image and Audio work independently while the harness remains shared.
+This contract is the seam that lets Image, Audio, Sensor, and future codecs work independently while the harness remains shared. For image, the output side is no longer interpreted as semantic JSON alone: the codec contract now needs to admit hybrid image code, where semantic IR and decoder-facing seed/code layers coexist behind the same typed boundary.

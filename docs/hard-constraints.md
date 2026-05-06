@@ -11,8 +11,10 @@ it needs an RFC + ADR before it lands — not a PR comment.
   "Loom" / "Transducer" / "Score" / "Handoff" — those names were
   rejected (RFC-0003 ⛔).
 - **Image has exactly one shipping path.**
-  `LLM → structured JSON scene → adapter → frozen decoder → PNG`. No
-  SVG-as-PNG, HTML, Canvas, painter tier, or "temporary fallback".
+  `LLM → structured image-code container → seed expander / adapter → frozen decoder → PNG`.
+  The container may carry `Semantic IR`, `Visual Seed Token`, and optional
+  coarse/full VQ hints, but it remains one image path, not a second route.
+  No SVG-as-PNG, HTML, Canvas, painter tier, or "temporary fallback".
 - **`svg` is a separate modality**, not an image escape hatch. It targets
   vector output via the grammar-constrained engine in
   `research/chat2svg-lora/`.

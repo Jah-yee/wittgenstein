@@ -120,3 +120,33 @@ If a future contributor wants to broaden the research surface, require one of:
 - a horizon spike with a time box and kill criteria.
 
 Otherwise, keep research serving execution rather than becoming a parallel product.
+
+---
+
+## Post-v0.3 image-route correction
+
+After the v0.3 release-closeout line, image becomes the next major architecture-correction surface.
+
+The current image scaffold preserved the right seams but over-centered `scene-spec JSON`
+as the terminal image IR. That is now corrected by:
+
+- [`docs/research/hybrid-image-code.md`](hybrid-image-code.md)
+- RFC-0006
+- ADR-0018
+
+The locked direction is:
+
+- `Semantic IR` remains canonical, but not as the terminal image research object
+- `Visual Seed Token` becomes first-class
+- the adapter is redefined primarily as a seed expander / visual-code compiler
+- one-shot hybrid is the default lane
+- two-pass compile is the high-quality lane
+
+The main research variables that remain open are:
+
+- seed family,
+- seed length,
+- coarse-grid geometry,
+- the value of auxiliary semantic conditioning during expansion.
+
+Those variables stay in research until evaluation narrows them; the architectural correction itself is no longer open.

@@ -1,6 +1,10 @@
 # Adapter Training Recipe
 
-The trainable seam is **`ImageSceneSpec -> ImageLatentCodes`** (`packages/codec-image/src/pipeline/adapter.ts`).
+The currently wired trainable seam is **`ImageSceneSpec -> ImageLatentCodes`**
+([`packages/codec-image/src/pipeline/adapter.ts`](../pipeline/adapter.ts)).
+That remains the scaffold entrypoint, but the doctrine has moved: the preferred
+longer-term target is **Hybrid Image Code -> ImageLatentCodes**, where a compact
+visual seed is expanded into decoder-native latent tokens.
 
 ## v1 (shipped)
 
@@ -11,7 +15,9 @@ The trainable seam is **`ImageSceneSpec -> ImageLatentCodes`** (`packages/codec-
 
 ## Future
 
+- Keep the current MLP path as a baseline / fallback, not the end-state image story.
+- Introduce Hybrid Image Code fields (`semantic`, `seedCode`, optional `coarseVq`) at the schema boundary before training a stronger adapter.
 - Replace the stub offline encoder with a real frozen tokenizer aligned to your decoder family.
-- Move from the small MLP to a stronger translator (still not an end-to-end image generator).
+- Move from the small MLP to a stronger seed expander / visual-code compiler (still not an end-to-end image generator).
 
 The scaffold still ships without committed weights; generate artifacts locally under `data/image_adapter/artifacts/`.

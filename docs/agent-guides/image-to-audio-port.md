@@ -30,7 +30,7 @@ If the protocol shape cannot hold image, it is not the right protocol.
 ## 3. Non-negotiables
 
 - Image has one shipping raster path only:
-  `LLM -> structured JSON scene -> adapter -> frozen decoder -> PNG`
+  `LLM -> structured image-code container -> seed expander / adapter -> frozen decoder -> PNG`
 - No HTML / Canvas / SVG fallback for raster image.
 - No silent fallback.
 - Every successful or failed run must still respect the manifest spine.
@@ -77,8 +77,8 @@ Target:
 
 Focus:
 
-- scene spec boundary
-- adapter seam
+- image-code boundary
+- adapter / seed-expander seam
 - frozen decoder seam
 - packaging / manifest seam
 

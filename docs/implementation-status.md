@@ -10,7 +10,7 @@
 > - `docs/agent-guides/`
 > - `docs/archive-policy.md` if a row here starts to drift into historical-only status
 >
-> Last updated: 2026-04-20. "Ships" = produces real output today. "Stub" = typed interface,
+> Last updated: 2026-05-07. "Ships" = produces real output today. "Stub" = typed interface,
 > throws `NotImplementedError`, waiting for a renderer. "Partial" = some routes work.
 
 ---
@@ -19,19 +19,19 @@
 
 Everything below runs with `python3 -m polyglot.cli <cmd>`.
 
-| Component                          | Status   | Notes                                                                                              |
-| ---------------------------------- | -------- | -------------------------------------------------------------------------------------------------- |
-| **Image — LLM code-as-painter**    | ✅ Ships | LLM → Python PIL/NumPy/SciPy → sandboxed subprocess → PNG                                          |
-| **Image — MLP fallback painter**   | ✅ Ships | text → hashed-BoW embed → MLP → palette+layout → procedural PNG                                    |
-| **Image — COCO training pipeline** | ✅ Ships | `train/build_dataset_coco.py` + `train/train.py`; 781 examples, 9 s                                |
+| Component                          | Status                | Notes                                                                                                                                                                                                                     |
+| ---------------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Image — LLM code-as-painter**    | ✅ Ships              | LLM → Python PIL/NumPy/SciPy → sandboxed subprocess → PNG                                                                                                                                                                 |
+| **Image — MLP fallback painter**   | ✅ Ships              | text → hashed-BoW embed → MLP → palette+layout → procedural PNG                                                                                                                                                           |
+| **Image — COCO training pipeline** | ✅ Ships              | `train/build_dataset_coco.py` + `train/train.py`; 781 examples, 9 s                                                                                                                                                       |
 | **TTS — speech**                   | ✅ Ships (macOS-only) | macOS `say` → AIFF → `afconvert` → M4A (zero deps). Linux / Windows have no fallback in this surface; cross-platform speech is in the TS `@wittgenstein/codec-audio` codec via the Kokoro backend (Issue #116 / PR #158). |
-| **TTS — procedural ambient**       | ✅ Ships | AudioMLP classifier → rain/wind/city/forest/electronic/white_noise → NumPy+SciPy synth → mixed M4A |
-| **Audio adapter training**         | ✅ Ships | `train/train_audio.py`; 369 examples, < 5 s                                                        |
-| **Sensor — dry-run expand**        | ✅ Ships | Built-in ECG/accelerometer/temperature specs → numpy arrays → CSV + PNG                            |
-| **Sensor — LLM expand**            | ✅ Ships | LLM → operator-spec JSON → same expand path                                                        |
-| **Sensor — Loupe HTML dashboard**  | ✅ Ships | CSV → `loupe.py` → self-contained interactive HTML                                                 |
-| **LLM provider routing**           | ✅ Ships | Kimi K2 / MiniMax / OpenAI-compat / Anthropic via env vars                                         |
-| **Dry-run / no-LLM modes**         | ✅ Ships | All three commands work without an API key                                                         |
+| **TTS — procedural ambient**       | ✅ Ships              | AudioMLP classifier → rain/wind/city/forest/electronic/white_noise → NumPy+SciPy synth → mixed M4A                                                                                                                        |
+| **Audio adapter training**         | ✅ Ships              | `train/train_audio.py`; 369 examples, < 5 s                                                                                                                                                                               |
+| **Sensor — dry-run expand**        | ✅ Ships              | Built-in ECG/accelerometer/temperature specs → numpy arrays → CSV + PNG                                                                                                                                                   |
+| **Sensor — LLM expand**            | ✅ Ships              | LLM → operator-spec JSON → same expand path                                                                                                                                                                               |
+| **Sensor — Loupe HTML dashboard**  | ✅ Ships              | CSV → `loupe.py` → self-contained interactive HTML                                                                                                                                                                        |
+| **LLM provider routing**           | ✅ Ships              | Kimi K2 / MiniMax / OpenAI-compat / Anthropic via env vars                                                                                                                                                                |
+| **Dry-run / no-LLM modes**         | ✅ Ships              | All three commands work without an API key                                                                                                                                                                                |
 
 ---
 
@@ -89,16 +89,16 @@ codecs are wired. Image and video codecs are typed stubs — intentional until t
 
 ### @wittgenstein/codec-image
 
-| Component                            | Status         | Notes                                                                                                                      |
-| ------------------------------------ | -------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| Schema + Zod scene spec              | ✅ Ships       |                                                                                                                            |
-| `expand.ts` — prompt → scene JSON    | ✅ Ships       | LLM-driven                                                                                                                 |
-| `adapter.ts` — scene → latent codes  | ⚠️ Partial     | `placeholderLatents()` fires (deterministic FNV-1a seed), `resolveMlpForScene()` loads user-written MLP if weights present |
-| `decoder.ts` — latent codes → raster | ⚠️ Partial     | `renderSky()` / `renderTerrain()` functional; `tryDecodeReferenceLandscape()` fires when reference weights present         |
-| `package.ts` — raster → PNG          | ✅ Ships       |                                                                                                                            |
-| `decoders/llamagen.ts`               | 🔴 Stub        | Throws `NotImplementedError` — bridge to LlamaGen VQ-VAE decoder, not yet wired                                            |
-| `decoders/seed.ts`                   | 🔴 Stub        | Throws `NotImplementedError` — bridge to SEED decoder                                                                      |
-| `training/`                          | 📋 Recipe only | Dataset choice, loss, LoRA config documented; no weights committed                                                         |
+| Component                                     | Status         | Notes                                                                                                                             |
+| --------------------------------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Schema + Zod image-code contract              | ⚠️ Partial     | `ImageSceneSpec` ships today; Hybrid Image Code / `Visual Seed Token` doctrine is ratified, but schema migration is still pending |
+| `expand.ts` — prompt → image code             | ⚠️ Partial     | LLM-driven; current implementation still centers scene JSON, hybrid output migration pending                                      |
+| `adapter.ts` — seed / semantic → latent codes | ⚠️ Partial     | `providerLatents` bypass ships; `placeholderLatents()` fires today; seed-expansion-first priority is not implemented yet          |
+| `decoder.ts` — latent codes → raster          | ⚠️ Partial     | `renderSky()` / `renderTerrain()` functional; `tryDecodeReferenceLandscape()` fires when reference weights present                |
+| `package.ts` — raster → PNG                   | ✅ Ships       |                                                                                                                                   |
+| `decoders/llamagen.ts`                        | 🔴 Stub        | Throws `NotImplementedError` — bridge to LlamaGen VQ-VAE decoder, not yet wired                                                   |
+| `decoders/seed.ts`                            | 🔴 Stub        | Throws `NotImplementedError` — bridge to SEED decoder                                                                             |
+| `training/`                                   | 📋 Recipe only | Seed-expansion training direction is locked; concrete tokenizer family, dataset, and weights remain open                          |
 
 ### @wittgenstein/codec-video
 
