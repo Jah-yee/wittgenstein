@@ -7,10 +7,15 @@ export type ImageCodePath =
   | "visual-seed-code"
   | "semantic-fallback";
 
+export type ImageSemanticSource = "emitted" | "legacy-top-level" | "absent";
+
 export interface ImageCodeReceipt {
   readonly mode: NonNullable<ImageSceneSpec["mode"]>;
   readonly path: ImageCodePath;
   readonly hasSemantic: boolean;
+  readonly hasEmittedSemantic: boolean;
+  readonly hasEffectiveSemantic: boolean;
+  readonly semanticSource: ImageSemanticSource;
   readonly hasSeedCode: boolean;
   readonly hasCoarseVq: boolean;
   readonly hasProviderLatents: boolean;

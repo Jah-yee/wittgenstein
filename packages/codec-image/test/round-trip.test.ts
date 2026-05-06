@@ -43,6 +43,9 @@ describe("image v2 round trip", () => {
       path: "visual-seed-code",
       hasSeedCode: true,
       hasSemantic: true,
+      hasEmittedSemantic: true,
+      hasEffectiveSemantic: true,
+      semanticSource: "emitted",
       seedFamily: "witt-dry-run",
       seedLength: 32,
     });
