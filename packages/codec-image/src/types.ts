@@ -1,6 +1,26 @@
 import type { ImageSceneSpec } from "./schema.js";
 import type { codecV2 } from "@wittgenstein/schemas";
 
+export type ImageCodePath =
+  | "provider-latents"
+  | "coarse-vq"
+  | "visual-seed-code"
+  | "semantic-fallback";
+
+export interface ImageCodeReceipt {
+  readonly mode: NonNullable<ImageSceneSpec["mode"]>;
+  readonly path: ImageCodePath;
+  readonly hasSemantic: boolean;
+  readonly hasSeedCode: boolean;
+  readonly hasCoarseVq: boolean;
+  readonly hasProviderLatents: boolean;
+  readonly seedFamily: string | null;
+  readonly seedMode: string | null;
+  readonly seedLength: number | null;
+  readonly coarseVqGrid: readonly [number, number] | null;
+  readonly providerLatentGrid: readonly [number, number] | null;
+}
+
 export interface ImageArtifactMetadata extends codecV2.BaseArtifactMetadata {
   readonly codec: "image";
   readonly route: "raster";
@@ -12,10 +32,12 @@ export interface ImageArtifactMetadata extends codecV2.BaseArtifactMetadata {
   readonly promptExpanded: string | null;
   readonly llmOutputRaw: string | null;
   readonly llmOutputParsed: ImageSceneSpec | null;
+  readonly imageCode: ImageCodeReceipt;
   readonly quality: {
     readonly structural: {
       readonly schemaValidated: boolean;
       readonly route: "raster";
+      readonly imageCode: ImageCodeReceipt;
       readonly paletteCount: number;
       readonly palette: string[];
     };
