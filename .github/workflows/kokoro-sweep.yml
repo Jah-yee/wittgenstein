@@ -68,7 +68,7 @@ jobs:
           if [ -f artifacts/tmp/kokoro-sweep-linux.json ]; then
             echo "## Kokoro sweep receipt (Linux)" >> "$GITHUB_STEP_SUMMARY"
             echo '```json' >> "$GITHUB_STEP_SUMMARY"
-            jq '{ok, platform, packageVersions, backend, seed, runsRequested, uniqueArtifactShaCount, runs: [.runs[] | {index, artifactSha256}]}' \
+            jq '{ok, platform, packageVersions, backend, seed, runsRequested, uniqueArtifactShaCount, runs: [.runs[] | {index, artifactSha256, audioRender, decoderHash, quality}]}' \
               artifacts/tmp/kokoro-sweep-linux.json >> "$GITHUB_STEP_SUMMARY"
             echo '```' >> "$GITHUB_STEP_SUMMARY"
           else
