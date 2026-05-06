@@ -15,6 +15,25 @@ This document is meant to support:
 - doctrine PR `#206`
 - implementation PR `#210`
 
+## Decision after broader skill-format research
+
+The decision is to adopt a **literal repo-local Agent Skills shape** for the image planner,
+not only a prose prompt-playbook note.
+
+Concretely:
+
+- keep this file as the research / design note,
+- add a short `SKILL.md`-style image planner file in a stable repo path in a follow-up,
+- keep the skill body lean enough to load as prompt context,
+- move long examples, schema notes, and research citations into references loaded only when
+  needed,
+- do not make Acontext, Claude Code, Codex, OpenClaw, or any external memory layer a
+  dependency of image generation.
+
+The source of truth remains the codec schema and doctrine. The skill is an activation and
+instruction surface: it teaches a model how to emit the already-ratified image-code
+container.
+
 ## Why a skill-style surface is useful
 
 The image correction changed the runtime hierarchy, but it also exposed a missing layer
@@ -29,13 +48,208 @@ That is closer to a `SKILL.md` than to a one-off prompt string:
 - easy to audit and revise
 - able to separate output contract from casual prompt wording
 
+The strongest reason to use a literal skill file is **progressive disclosure**. Agent
+Skills implementations commonly load only `name` and `description` at discovery time, load
+the full `SKILL.md` only when the task matches, and load bundled resources lazily. That is
+a better fit than stuffing the entire image doctrine into every prompt.
+
+## Surveyed skill patterns
+
+The broader pattern is now clear enough to make a call:
+
+- **Agent Skills open format / agentskills.io** — A skill is a folder with `SKILL.md`
+  front matter plus optional `scripts/`, `references/`, and `assets/`. The loading model is
+  discovery metadata first, full instructions on activation, resources only when needed.
+- **Anthropic / Claude Code** — `description` is the trigger surface; skills can be
+  project-local or user-local; full skill content stays in the session once invoked. Claude
+  Code also supports tool-related front matter, but that is platform-specific and should
+  not be required by Wittgenstein.
+- **OpenAI / Codex skills** — The system skill guidance emphasizes context economy,
+  explicit degrees of freedom, optional `scripts/`, `references/`, and `assets/`, and
+  keeping large reference material outside `SKILL.md`. OpenAI also uses optional
+  UI-facing `agents/openai.yaml`; useful later, not needed for the image planner now.
+- **Acontext** — The useful contribution is skill-memory: successful and failed runs can
+  be distilled into reusable Markdown skills. That is interesting for future maintainer
+  memory, but it is not the right runtime dependency for image generation.
+
+The resulting Wittgenstein choice is:
+
+```text
+docs/research/hybrid-image-code-skill-playbook.md
+  = research/design note, citations, rationale, longer examples
+
+packages/agent-contact-text/skills/image-hybrid-code/SKILL.md
+  = compact agent-loadable prompt context for the image planner
+
+packages/agent-contact-text/skills/image-hybrid-code/references/
+  = optional schema examples, troubleshooting, and eval prompts
+```
+
+This keeps the public skill portable while preserving research depth without context
+bloat.
+
+## North-star references
+
+For this line, use three north stars rather than one:
+
+### 1. Agent Skills / Anthropic shape
+
+Use this as the north star for the **file format and loading model**.
+
+Borrow:
+
+- one folder per skill,
+- `SKILL.md` with `name` and `description` front matter,
+- progressive disclosure: metadata first, full instructions on activation, references only
+  when needed,
+- focused skills instead of a broad mini-manual,
+- optional `scripts/`, `references/`, and `assets/` only when they pull their weight.
+
+Do not borrow:
+
+- Claude-only front matter as a required contract,
+- broad tool permissions in a project skill,
+- long narrative documentation inside the skill body.
+
+### 2. OpenAI / Codex skill discipline
+
+Use this as the north star for **agent usefulness and evalability**.
+
+Borrow:
+
+- "context window is a public good" as the editing principle,
+- degrees of freedom: strict where parsing is fragile, open where research variables remain
+  unsettled,
+- bundled scripts only for deterministic repeated work,
+- references for details that should not load on every activation,
+- test prompts / eval cases for trigger quality and output validity.
+
+Do not borrow:
+
+- Codex-specific installation paths as the project contract,
+- UI metadata before the first skill shape is proven,
+- over-optimized trigger descriptions before real image-planner evals exist.
+
+### 3. Acontext skill-memory pattern
+
+Use this as the north star for **learning and maintenance**, not for runtime installation.
+
+Borrow:
+
+- successful and failed runs can become durable Markdown knowledge,
+- troubleshooting should capture failure symptoms, fixes, and prevention,
+- skills should be human-readable, editable, portable, and version-controllable,
+- future maintainer memory may distill real image-planner failures into skill updates.
+
+Do not borrow:
+
+- Acontext login / project selection in the image runtime path,
+- cloud memory as a prerequisite,
+- installer commands in the prompt surface.
+
+The practical outcome: the first Wittgenstein image skill should be small and static. A
+later maintainer-memory experiment may use Acontext-like distillation to propose updates,
+but those updates still go through normal review.
+
+## System-prompt structure survey
+
+The same ecosystem also points to a broader lesson: a skill is only one layer in a prompt
+stack.
+
+Useful structures observed:
+
+- **Role/system layer.** Claude's system-prompt guidance emphasizes using the system layer
+  to set the model's role and durable behavioral frame. For Wittgenstein image, that role
+  is "image planner / image-code emitter", not "artist" or "prompt writer".
+- **Project context layer.** Claude Code's `CLAUDE.md` pattern is closest to
+  Wittgenstein's `AGENTS.md` / `PROMPT.md`: project-wide standards, repo map, common
+  commands, and engineering discipline. The image skill should not duplicate those.
+- **Append / task layer.** Per-call image data belongs in the prompt assembled by the
+  codec: user prompt, requested size, seed, active mode, and schema preamble.
+- **Output-format layer.** OpenAI prompt guidance keeps output instructions early and
+  concrete: desired format, separators, examples, and constraints. For image, this means
+  JSON-only, schema-valid, no markdown fences, no prose-only prompt.
+- **Spec / workflow layer.** OpenAI's Symphony writeup is useful because it treats a
+  Markdown spec as an orchestrator's policy layer. That maps well to `WORKFLOW.md` and
+  issue orchestration, but the image skill should remain narrower than a workflow spec.
+
+So the image prompt stack should be:
+
+```text
+Project doctrine/context:
+  AGENTS.md / PROMPT.md / docs/hard-constraints.md
+
+Skill activation:
+  packages/agent-contact-text/skills/image-hybrid-code/SKILL.md
+
+Codec prompt assembly:
+  schema preamble + request size + seed + user prompt + selected mode
+
+Runtime validation:
+  zod parse -> adapter priority -> manifest receipt -> artifact hash
+```
+
+The skill sits between project doctrine and per-call prompt assembly. It should not absorb
+either one.
+
+## Information blocks the image skill should contain
+
+After surveying skills and system-prompt patterns, the candidate `SKILL.md` should contain
+these blocks:
+
+1. **Front matter**
+   - `name`
+   - `description` with explicit trigger language
+2. **When to use**
+   - image artifact planning,
+   - PNG through the image codec,
+   - Hybrid Image Code output.
+3. **Role**
+   - the agent is an image-code planner,
+   - not a prose prompt writer,
+   - not a decoder or generator.
+4. **Input assumptions**
+   - user prompt,
+   - request size,
+   - seed,
+   - current schema version,
+   - optional mode (`one-shot-hybrid`, `two-pass-hybrid`, `provider-latents`).
+5. **Output contract**
+   - valid JSON only,
+   - no markdown fences,
+   - emit the image-code container.
+6. **Path hierarchy**
+   - `providerLatents` only for real direct latents,
+   - `seedCode` as the normal VSC output,
+   - `coarseVq` only as optional bridge,
+   - `semantic` optional / paired / user-facing,
+   - semantic-only as honest fallback.
+7. **Hard constraints**
+   - no SVG / HTML / Canvas / pixel arrays,
+   - no diffusion prompt,
+   - no second image path,
+   - no guessed `providerLatents`.
+8. **Mode rules**
+   - one-shot: emit `seedCode` and optional `semantic` together,
+   - two-pass: pass 1 may emit semantic; pass 2 must emit `seedCode`.
+9. **Validation rules**
+   - seed length matches tokens,
+   - VQ grid area matches token count,
+   - provider latents match decoder contract,
+   - malformed output should be retried or recorded as fallback.
+10. **References**
+    - point to schema details, examples, troubleshooting, and eval prompts.
+
+This block list is the real design payload. The literal wording can keep changing as evals
+teach us what triggers and validates best.
+
 ## What to borrow from Acontext / skills-style design
 
 The useful idea from Acontext and similar skills systems is not a vendor dependency. It
 is the shape:
 
-- a skill starts with machine-readable metadata (`name`, `version`, `description`,
-  `keywords`)
+- a skill starts with machine-readable metadata (`name` and `description` are the minimum
+  portable fields)
 - skills are stored as plain Markdown files
 - they are meant to be portable and version-controlled
 - they define when they apply, what to output, how to configure the environment, and what
@@ -90,6 +304,19 @@ For Hybrid Image Code, the equivalent should be:
 This keeps the useful operational discipline of `SKILL.md` without importing a third-party
 memory product into the codec path.
 
+## What not to borrow
+
+Do not copy the Acontext installer as-is into the image skill:
+
+- no `curl | sh` install path in the image planner skill,
+- no OAuth/login/project-selection steps in the image generation path,
+- no cloud-memory sync requirement,
+- no vendor-specific plugin commands in the core prompt surface,
+- no expectation that early adopters install Acontext to run the image codec.
+
+Those may be useful for maintainer memory experiments later. They are not part of the
+image path contract.
+
 ## What this prompt surface should do
 
 The image skill / system-prompt layer should:
@@ -123,12 +350,18 @@ image line.
 
 ## Recommended file shape
 
-Longer-term, the repo can store an image skill surface in a dedicated location such as:
+The repo should store an image skill surface in:
 
 - `packages/agent-contact-text/skills/image-hybrid-code/SKILL.md`
-- or `docs/skills/image-hybrid-code/SKILL.md`
 
-The exact path is less important than the properties:
+Rationale:
+
+- `packages/agent-contact-text/` already exists as the agent-facing context package.
+- Keeping it outside `.claude/`, `.codex/`, or another vendor path avoids choosing one
+  agent client as canonical.
+- Consumers can copy or symlink the skill into tool-specific locations when needed.
+
+Required properties:
 
 - repo-tracked
 - easy to cite from issues and PRs
@@ -141,15 +374,7 @@ If we create a literal skill file, it should be shaped like this:
 ```md
 ---
 name: wittgenstein-image-hybrid-code
-version: 0.1.0
 description: Emit Hybrid Image Code for Wittgenstein's sole neural image path.
-keywords:
-  - image
-  - visual seed code
-  - vsc
-  - hybrid image code
-  - frozen decoder
-  - manifest
 ---
 
 # Wittgenstein Image Hybrid Code
@@ -165,6 +390,10 @@ change the codec contract by itself.
 
 The literal skill may later include small examples and validation checklists, but it
 should not duplicate ADR text or become a second architecture document.
+
+Optional platform metadata such as `version`, `keywords`, `allowed-tools`, or
+`agents/openai.yaml` can be added after the first skill exists. The first pass should stay
+portable: `name`, `description`, Markdown instructions, and direct references.
 
 ## Candidate system prompt v0.1
 
@@ -230,15 +459,7 @@ portable instruction file like this:
 ```md
 ---
 name: wittgenstein-image-hybrid-code
-version: 0.1.0
-description: Produce Hybrid Image Code containers for Wittgenstein image generation.
-keywords:
-  - image
-  - visual seed code
-  - vsc
-  - semantic ir
-  - vq
-  - decoder
+description: Use when planning a Wittgenstein image artifact. Emit the Hybrid Image Code JSON container for the image codec, preferring Visual Seed Code over prose or semantic-only output.
 ---
 
 # Wittgenstein Image Hybrid Code
@@ -281,6 +502,19 @@ Pass 2 must use that semantic layer as support and emit `seedCode` as the primar
 
 This literal form is intentionally shorter than the research note. Agents should load the
 skill, while maintainers should review the research note and controlling ADRs.
+
+## Skill resource split
+
+The literal skill should not carry every example and research argument. Use bundled
+resources with progressive disclosure:
+
+- `references/schema.md` — the current JSON field contract and examples.
+- `references/troubleshooting.md` — malformed output symptoms, retry wording, and
+  fallback receipts.
+- `references/evals.md` — trigger/eval prompts for one-shot and two-pass behavior.
+
+Do not add scripts in the first pass. Add a script only if model outputs repeatedly need a
+deterministic validator that cannot be expressed cleanly in tests or existing zod schemas.
 
 ## Candidate one-shot output shape
 
@@ -356,6 +590,17 @@ outputs:
 
 ## Suggested next step
 
-Once the repo is happy with this shape, create a literal `SKILL.md`-style file in a
-stable repo path and have the image planner load it as part of the prompt context rather
-than hard-coding the entire contract inside one function.
+Create the literal `SKILL.md` under
+`packages/agent-contact-text/skills/image-hybrid-code/`, with `references/` files only for
+details that would bloat the skill body. Then wire the image planner prompt to load or
+derive from that file rather than hard-coding the entire contract inside one function.
+
+## Sources checked
+
+- Agent Skills overview / open format: https://agentskills.io/
+- Agent Skills structure and progressive disclosure: https://agentskills.io/what-are-skills
+- Claude Code skills docs: https://code.claude.com/docs/en/skills
+- Anthropic skills repository and template: https://github.com/anthropics/skills
+- OpenAI skills catalog and skill-creator guidance: https://github.com/openai/skills
+- Acontext skill memory docs: https://docs.acontext.io/store/skill
+- Acontext skill-memory pipeline: https://acontext.io/blog/agent-skills-as-a-memory-layer
