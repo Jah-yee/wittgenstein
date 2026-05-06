@@ -30,13 +30,13 @@ harness/codec/manifest contract. Video targets `.mp4` once its codec slot opens.
 local 30-second sensor quickstart below is the smallest no-API-key proof; maturity levels
 are called out in `docs/implementation-status.md`.
 
-> **🧪 Project status — early-stage, doctrine-locked, v0.3 release closeout.**
-> Wittgenstein is a prerelease (`v0.2.0-alpha.2`) with a working Python
+> **🧪 Project status — early-stage, doctrine-locked, v0.3 prerelease.**
+> Wittgenstein is a prerelease (`v0.3.0-alpha.1`) with a working Python
 > surface, a production-shaped TypeScript harness, and a few intentionally
 > unfinished surfaces clearly flagged with ⚠️ or 🔴 in
 > [`docs/implementation-status.md`](docs/implementation-status.md). The v0.2
 > cut locks the thesis, vocabulary, and codec protocol (RFC-0001 / ADR-0008);
-> M0, M1A, and the M2 audio sweep have landed; v0.3 is now in release closeout against
+> M0, M1A, and the M2 audio sweep have landed; v0.3 is packaged against
 > [`docs/exec-plans/active/codec-v2-port.md`](docs/exec-plans/active/codec-v2-port.md).
 > Breaking changes are still possible before a stable release. **We are
 > actively looking for early adopters and contributors** — see
