@@ -10,17 +10,18 @@ Audio is the second-priority modality after image. It ships three internal route
 
 Audio is a _layered_ modality, not a single decoder. Each route picks its own L3:
 
-- `speech` — `Kokoro-82M-family` local TTS render by default, with `Piper-family`
-  fallback, plus optional ambient layer.
+- `speech` — `procedural-audio-runtime` by default at v0.3, with an opt-in
+  `Kokoro-82M-family` local TTS render and a ratified but not-yet-wired
+  `Piper-family` fallback target, plus optional ambient layer.
 - `soundscape` — deterministic ambient texture render from a small operator library.
 - `music` — tiny symbolic synthesizer (chords, melody, rhythm) plus optional ambient layer.
 
 This means audio's "decoder" is per-route, not a single frozen artifact like image's
 decoder. The ADR-0005 "decoder ≠ generator" line still holds: no path samples from a
 learned distribution at inference time, and every route has an explicit reproducibility
-contract. Procedural routes are byte-stable by construction; speech is byte-stable on
-the pinned deterministic CPU backend and structural-only on GPU. There is no audio
-diffusion in the core path.
+contract. Procedural routes are byte-stable by construction; Kokoro speech is
+same-platform deterministic in the v0.3 receipts and structural-only across the tested
+macOS and Linux targets. There is no audio diffusion in the core path.
 
 At the v0.3 harness boundary there is also **no audio tokenizer**. The speech decoder
 emits a waveform directly; the codec packages waveform bytes plus manifest rows without
@@ -79,11 +80,11 @@ tested macOS and Linux targets.
 The v0.3 path picks render libraries on three constraints, in order: **license-clean,
 on-device, deterministic.**
 
-| Route      | v0.3 default                              | Why this and not X                                                                                                                                                                   |
-| ---------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| speech     | Kokoro-82M-family default; Piper fallback | ElevenLabs / cloud TTS would violate "on-device deterministic." F5 / XTTS-class paths either fail the commercial-license bar or create a less reproducible inference story for v0.3. |
-| soundscape | deterministic operator-library render     | No external sample packs (license risk); no neural soundscape model (not deterministic in the ADR-0005 sense).                                                                       |
-| music      | symbolic synth (chord → note → sample)    | MusicLM / Riffusion are generators in the ADR-0005 sense — out of scope. MIDI rendering against a frozen soundfont is in-scope and on the v0.3 upgrade path.                         |
+| Route      | v0.3 default                                             | Why this and not X                                                                                                                                                                                                                                                |
+| ---------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| speech     | procedural default; Kokoro opt-in; Piper fallback target | ElevenLabs / cloud TTS would violate "on-device deterministic." Kokoro is useful but not cross-platform byte-identical in the v0.3 receipts. F5 / XTTS-class paths either fail the commercial-license bar or create a less reproducible inference story for v0.3. |
+| soundscape | deterministic operator-library render                    | No external sample packs (license risk); no neural soundscape model (not deterministic in the ADR-0005 sense).                                                                                                                                                    |
+| music      | symbolic synth (chord → note → sample)                   | MusicLM / Riffusion are generators in the ADR-0005 sense — out of scope. MIDI rendering against a frozen soundfont is in-scope and on the v0.3 upgrade path.                                                                                                      |
 
 The v0.3+ upgrade path is named in `docs/exec-plans/active/codec-v2-port.md` M5b (audio benchmark bridge): UTMOS + Whisper-WER for speech, librosa spectral metrics for soundscape, LAION-CLAP for music.
 
@@ -137,8 +138,8 @@ See `tts-launch` and `audio-music` in `benchmarks/cases.json`. Quality bridges l
 
 Audio quality at v0.3 is _structurally honest_, not _aesthetically frontier_:
 
-- Speech intelligibility from the Kokoro-82M-family default is strong for local TTS, but
-  still not ElevenLabs-grade; the Piper fallback is slightly lower.
+- Speech intelligibility from the Kokoro-82M-family opt-in path is strong for local TTS,
+  but still not ElevenLabs-grade; the Piper fallback remains ratified but not wired.
 - Soundscape texture is recognizable but not field-recording-grade.
 - Music is identifiable as music in the requested key but is not Suno / Udio quality.
 
