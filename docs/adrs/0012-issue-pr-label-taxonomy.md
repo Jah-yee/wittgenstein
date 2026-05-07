@@ -4,6 +4,10 @@
 
 Accepted (ratifies `docs/labels.md` introduced via PR #71).
 
+Superseded in part by ADR-0019 for queue-management prefixes
+(`priority/*`, `size/*`, `stage/*`). The semantic label taxonomy remains in
+force.
+
 ## Context
 
 The repo had ad-hoc GitHub labels with no canonical definition. PR #71 introduced `docs/labels.md` as the single source of truth, but that PR did not have a paired ADR — the rule "doctrine lands via ADR" (ADR-0014) was not yet in place. This ADR retroactively ratifies the labels taxonomy so the audit trail is complete.

@@ -17,3 +17,24 @@ tracker: '^tracker[:\s]|\[tracker\]|watch[:\s]'
 research-derived: 'Brief\s+[A-Z]\b|brief-derived'
 adr-derived: 'ADR-?\d{3,4}'
 rfc-derived: 'RFC-?\d{3,4}'
+
+# Queue metadata labels ratified by ADR-0019. These are driven by explicit
+# title tokens or obvious milestone nouns, not by fuzzy prose inference.
+priority/p0: '\[p0\]|\[priority/p0\]'
+priority/p1: '\[p1\]|\[priority/p1\]'
+priority/p2: '\[p2\]|\[priority/p2\]'
+priority/p3: '\[p3\]|\[priority/p3\]'
+
+size/s: '\[size/s\]|\[small\]'
+size/m: '\[size/m\]|\[medium\]'
+size/l: '\[size/l\]|\[large\]'
+size/xl: '\[size/xl\]|\[xl\]|\[umbrella\]'
+
+stage/m1-image: '\[image\]|\[m1\]|\[m1b\]|Visual Seed Code|VSC|SeedExpander|decoder bridge'
+stage/m2-audio: '\[audio\]|\[m2\]|Kokoro|Piper|TTS'
+stage/m3-sensor: '\[sensor\]|\[m3\]|TimesFM|chaos|operator route'
+stage/m4-video: '\[video\]|\[m4\]|HyperFrames|Remotion|TEN'
+stage/release: '\[release\]|prerelease|CHANGELOG|release notes'
+stage/governance: '\[governance\]|WORKFLOW|label taxonomy|orchestration'
+stage/cross-cutting: '\[cross-cutting\]|manifest|schema|CLI|dependency|infra'
+stage/post-v0.3: '\[post-v0\.3\]|post-v0\.3|v0\.3\.x'

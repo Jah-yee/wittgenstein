@@ -2,7 +2,9 @@
 
 This page is the canonical definition of every label used on GitHub Issues and Pull Requests in this repository. Adding a new label without updating this page is a process bug — a future contributor cannot infer the label's intent from a one-line GitHub description alone.
 
-The taxonomy is **flat by design**. We do not use prefixes (`area:*`, `type:*`, `phase:*`) because (a) GitHub's label UI does not group by prefix, (b) prefixes consume namespace that becomes hard to refactor, and (c) the repo is small enough that ~15 well-named labels are easier to grip than 30 prefixed ones. If the label set grows past ~20, revisit and consider prefixes.
+The semantic taxonomy remains **flat by design**. Labels such as `research-derived`, `tracker`, `enhancement`, and `discussion` carry body conventions and review meaning.
+
+ADR-0019 adds a separate queue-management layer with prefixed labels: `priority/*`, `size/*`, and `stage/*`. These labels answer "when, how large, and which line?" They do not replace the semantic labels below.
 
 Per `docs/engineering-discipline.md`, a label is a contract: applying one obliges you to satisfy the body conventions listed below (e.g. `research-derived` requires citing the brief; `tracker` requires naming the gating event).
 
@@ -10,14 +12,15 @@ Per `docs/engineering-discipline.md`, a label is a contract: applying one oblige
 
 ## Categories
 
-We think of labels in four implicit categories — **provenance**, **lifecycle**, **type**, and **audience**. The categories are not encoded in the label name, but they are useful for picking which label(s) to apply.
+We think of labels in five categories — **provenance**, **lifecycle**, **type**, **audience**, and **queue metadata**. The first four categories keep flat names. Queue metadata uses prefixes by ADR-0019.
 
 - **Provenance** — where did this come from? (research brief, RFC, ADR, user)
 - **Lifecycle** — where is it in its journey? (spike, tracker, blocked, discussion)
 - **Type** — what kind of work is it? (bug, enhancement, docs, refactor)
 - **Audience** — who can pick this up? (good first issue, help wanted)
+- **Queue metadata** — urgency, size, and owning milestone / lane
 
-A typical issue carries 1–3 labels: usually one type, optionally one provenance, optionally one lifecycle. Avoid stacking more than three — they stop being grippable.
+A typical issue carries 1–3 semantic labels plus, when useful, up to three queue labels: one `priority/*`, one `size/*`, and one `stage/*`. Avoid stacking multiple labels from the same queue family unless the issue is explicitly an umbrella.
 
 ---
 
@@ -165,11 +168,81 @@ Dependabot version-bump PR.
 
 Per-ecosystem dependabot routing labels. Cosmetic; safe to ignore.
 
+### Queue metadata
+
+Queue labels are operational triage metadata. They do not change whether an issue is agent-eligible. `tracker`, `discussion`, `horizon-spike`, and `blocked` remain excluded from auto-dispatch per `WORKFLOW.md`.
+
+#### `priority/p0`
+
+Must resolve before the current release or mainline gate.
+
+#### `priority/p1`
+
+High priority after the current mainline gate. This is the normal label for the next thing maintainers should actively coordinate.
+
+#### `priority/p2`
+
+Important but not current-mainline blocking.
+
+#### `priority/p3`
+
+Parked, horizon, post-release, or only actionable when a later gate opens.
+
+#### `size/s`
+
+Small scoped change or review task. Usually one PR or one issue comment pass.
+
+#### `size/m`
+
+Medium slice with multiple files or focused research.
+
+#### `size/l`
+
+Large implementation, research, or coordination task.
+
+#### `size/xl`
+
+Very large program, umbrella, or multi-slice effort.
+
+#### `stage/m1-image`
+
+Image line: M1/M1B, Visual Seed Code, decoder, or SeedExpander work.
+
+#### `stage/m2-audio`
+
+Audio line: M2 codec v2, audio backend, or audio verification.
+
+#### `stage/m3-sensor`
+
+Sensor line: M3 or sensor research.
+
+#### `stage/m4-video`
+
+Video line: M4 or video backend research.
+
+#### `stage/release`
+
+Release, prerelease, changelog, or public release surface.
+
+#### `stage/governance`
+
+Workflow, labels, doctrine governance, or maintainer process.
+
+#### `stage/cross-cutting`
+
+Cross-cutting schema, CLI, manifest, dependency, or infra work.
+
+#### `stage/post-v0.3`
+
+Explicitly deferred until after the v0.3 release cut.
+
 ---
 
 ## How to apply labels
 
-**Issues.** When opening an issue, apply 1–3 labels: usually one type (`bug` / `enhancement` / `documentation`) plus optional provenance and lifecycle. The labelling is part of the filing — an unlabelled issue is harder to triage.
+**Issues.** When opening an issue, apply 1–3 semantic labels: usually one type (`bug` / `enhancement` / `documentation`) plus optional provenance and lifecycle. When the queue status is clear, also apply one priority, one size, and one stage label. The labelling is part of the filing — an unlabelled issue is harder to triage.
+
+For machine labelling, include explicit title tokens when useful: `[p1]`, `[size/m]`, `[image]`, `[audio]`, `[sensor]`, `[video]`, `[release]`, `[governance]`, or `[cross-cutting]`.
 
 **PRs.** When opening a PR, the labelling should match the issue(s) it closes (if any). PRs that don't close an issue still get labelled — usually one type plus one provenance.
 
@@ -187,4 +260,4 @@ Per-ecosystem dependabot routing labels. Cosmetic; safe to ignore.
 
 ---
 
-_Last updated: 2026-04-26. Next review: when the label set crosses ~20 entries (consider introducing prefixes), or when a label is renamed (always)._
+_Last updated: 2026-05-07. Next review: after the next queue-audit pass, or when a label is renamed (always)._
