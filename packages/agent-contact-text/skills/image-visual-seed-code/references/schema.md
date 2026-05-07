@@ -1,6 +1,6 @@
 # Image schema reference
 
-Full surface for `ImageSceneSpec` — the container the image codec parses. Source of truth: [`packages/codec-image/src/schema.ts`](../../../../codec-image/src/schema.ts).
+Full surface for `ImageSceneSpec` — the Visual Seed Code contract the image codec parses. Source of truth: [`packages/codec-image/src/schema.ts`](../../../../codec-image/src/schema.ts).
 
 ## Top-level shape
 
@@ -92,27 +92,27 @@ When valid, the codec skips the learned adapter entirely.
     "composition": {
       "framing": "wide shot",
       "camera": "natural",
-      "depthPlan": ["foreground ferns", "midground path", "distant trees"]
+      "depthPlan": ["foreground ferns", "midground path", "distant trees"],
     },
     "lighting": { "mood": "warm", "key": "low golden side light" },
     "style": {
       "references": ["landscape photography"],
-      "palette": ["amber", "moss", "umber"]
+      "palette": ["amber", "moss", "umber"],
     },
-    "constraints": { "mustHave": ["natural light"], "negative": ["text"] }
+    "constraints": { "mustHave": ["natural light"], "negative": ["text"] },
   },
   "seedCode": {
     "schemaVersion": "witt.image.seed/v0.1",
     "family": "vqvae",
     "mode": "prefix",
-    "tokens": [12, 7, 41, 88, 3, 17, 9, 220, 145]
+    "tokens": [12, 7, 41, 88, 3, 17, 9, 220, 145],
   },
   "decoder": {
     "family": "llamagen",
     "codebook": "stub-codebook",
     "codebookVersion": "v0",
-    "latentResolution": [32, 32]
-  }
+    "latentResolution": [32, 32],
+  },
 }
 ```
 

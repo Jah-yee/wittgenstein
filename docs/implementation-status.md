@@ -89,16 +89,17 @@ codecs are wired. Image and video codecs are typed stubs — intentional until t
 
 ### @wittgenstein/codec-image
 
-| Component                                     | Status         | Notes                                                                                                                            |
-| --------------------------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| Schema + Zod image-code contract              | ⚠️ Partial     | `ImageSceneSpec` ships today; Visual Seed Code / `Visual Seed Token` doctrine is ratified, but schema migration is still pending |
-| `expand.ts` — prompt → image code             | ⚠️ Partial     | LLM-driven; current implementation still centers scene JSON, Visual Seed Code output migration pending                           |
-| `adapter.ts` — seed / semantic → latent codes | ⚠️ Partial     | `providerLatents` bypass ships; `placeholderLatents()` fires today; seed-expansion-first priority is not implemented yet         |
-| `decoder.ts` — latent codes → raster          | ⚠️ Partial     | `renderSky()` / `renderTerrain()` functional; `tryDecodeReferenceLandscape()` fires when reference weights present               |
-| `package.ts` — raster → PNG                   | ✅ Ships       |                                                                                                                                  |
-| `decoders/llamagen.ts`                        | 🔴 Stub        | Throws `NotImplementedError` — bridge to LlamaGen VQ-VAE decoder, not yet wired                                                  |
-| `decoders/seed.ts`                            | 🔴 Stub        | Throws `NotImplementedError` — bridge to SEED decoder                                                                            |
-| `training/`                                   | 📋 Recipe only | Seed-expansion training direction is locked; concrete tokenizer family, dataset, and weights remain open                         |
+| Component                                     | Status         | Notes                                                                                                                           |
+| --------------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Schema + Zod image-code contract              | ✅ Ships       | Visual Seed Code contract now supports `seedCode`, optional `semantic`, optional `coarseVq`, and `providerLatents`              |
+| `expand.ts` — prompt → image code             | ⚠️ Partial     | LLM-driven; dry-run emits deterministic `witt-dry-run` seed tokens, while real prompt-stack quality remains a follow-up         |
+| `adapter.ts` — seed / semantic → latent codes | ⚠️ Partial     | Priority order now ships as `providerLatents -> coarseVq -> seedCode -> semantic fallback -> placeholder`; trained expander TBD |
+| Image-code manifest receipts                  | ✅ Ships       | `metadata.imageCode` / manifest `image.code` records fired path, semantic source, seed family/mode/length, and VQ grids         |
+| `decoder.ts` — latent codes → raster          | ⚠️ Partial     | `renderSky()` / `renderTerrain()` functional; `tryDecodeReferenceLandscape()` fires when reference weights present              |
+| `package.ts` — raster → PNG                   | ✅ Ships       |                                                                                                                                 |
+| `decoders/llamagen.ts`                        | 🔴 Stub        | Throws `NotImplementedError` — bridge to LlamaGen VQ-VAE decoder, not yet wired                                                 |
+| `decoders/seed.ts`                            | 🔴 Stub        | Throws `NotImplementedError` — bridge to SEED decoder                                                                           |
+| `training/`                                   | 📋 Recipe only | Seed-expansion training direction is locked; concrete tokenizer family, dataset, and weights remain open                        |
 
 ### @wittgenstein/codec-video
 

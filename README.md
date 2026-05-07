@@ -156,7 +156,10 @@ agents; current implementation guidance lives in the codec-v2 plan and agent gui
 ## Architecture (Five Layers)
 
 ```
- User prompt
+ User prompt + system / skill context
+      │
+      │               system / skill context injects the codec contract:
+      │               output Visual Seed Code first; Semantic IR is optional support
       │
       ▼
   L1 HARNESS          routing · retry · budget · manifest · seed
@@ -167,7 +170,7 @@ agents; current implementation guidance lives in the codec-v2 plan and agent gui
       │               audio: AudioPlan / route spec
       │               sensor: SignalSpec / operator spec
       │               IR is a sum type: Text | Latent | Hybrid
-      │   └── schema preamble injected before the LLM call
+      │   └── schema preamble + codec playbook injected before the LLM call
       ▼
   L3 DECODER          code-bearing Spec/IR → real file (deterministic; never generative)
       │               image:  frozen VQ decoder     → PNG

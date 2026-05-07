@@ -56,11 +56,14 @@ Already landed:
 - image branch removed from the harness
 - single-route raster `ImageCodec extends BaseCodec<...>`
 - Visual Seed Code direction locked: Semantic IR remains supported and user-facing, Visual Seed Token becomes first-class, two-pass compile is the high-quality lane
+- Visual Seed Code contract landed with `seedCode`, optional `semantic`, optional `coarseVq`, and `providerLatents`
+- image receipts record the actual fired path via `metadata.imageCode` / manifest `image.code`
 
-- [ ] Land the image doctrine rewrite across README / hard constraints / codec docs / architecture
-- [ ] Add a Visual Seed Code-bearing image contract with `seedCode`, optional `semantic`, optional `coarseVq`, and `providerLatents`
+- [x] Land the image doctrine rewrite across README / hard constraints / codec docs / architecture
+- [x] Add a Visual Seed Code-bearing image contract with `seedCode`, optional `semantic`, optional `coarseVq`, and `providerLatents`
 - [ ] Wire a frozen pretrained VQ decoder (LlamaGen, TiTok, FlexTok, or sibling candidate)
-- [ ] Add seed-expansion priority order: `providerLatents -> coarseVq -> seedCode -> semantic -> placeholder`
+- [x] Add seed-expansion priority order: `providerLatents -> coarseVq -> seedCode -> semantic -> placeholder`
+- [x] Record image-code manifest receipts for `providerLatents` / `coarseVq` / `seedCode` / semantic fallback
 - [ ] Train the seed-expansion adapter on tokenizer-derived or paired semantic/seed data
 - [ ] Report CLIPScore on 100-prompt benchmark set
 - [ ] First golden fixture in `fixtures/golden/image/`
