@@ -319,8 +319,8 @@ This gives us shared control flow with per-modality specialization and makes tes
 
 ### Modality status (2 min)
 
-"Image has the strongest shape today: the sole neural path is fixed as scene-spec to adapter to frozen decoder to PNG.
-Audio, video, and sensor have typed schemas and dispatch seams, but renderer bodies are still intentionally stubs."
+"Image has the strongest shape today: the sole neural path is now framed as Visual Seed Code-bearing contract to seed expander / adapter to frozen decoder to PNG.
+Semantic IR remains useful for model-side organization and user inspection, but it is not the terminal image research object. Audio, video, and sensor have typed schemas and dispatch seams, with maturity called out per modality."
 
 ### Product/UX assets (1 min)
 

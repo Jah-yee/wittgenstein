@@ -28,15 +28,15 @@ The core insight is that large pretrained models already contain cross-modal gro
 
 ## Applied to Wittgenstein
 
-The image adapter in Wittgenstein is 781 COCO captions trained in approximately nine seconds. It maps text embeddings (from the scene spec fields) to VQ codebook logits that the frozen decoder expects. The audio ambient classifier is 369 examples trained in under five seconds. Neither component learns image or audio semantics from scratch. The LLM backbone already encodes the semantic content. The adapters learn only the interface geometry.
+The early image adapter in Wittgenstein used 781 COCO captions and trained in approximately nine seconds. That historical receipt mapped text embeddings from scene-spec fields to VQ codebook logits. After the Visual Seed Code correction, the forward-looking adapter role is narrower and cleaner: expand decoder-facing seed code / VQ hints into fuller decoder-native token grids, with Semantic IR available as optional conditioning and inspection. The audio ambient classifier is 369 examples trained in under five seconds. Neither component learns image or audio semantics from scratch. The LLM backbone already encodes much of the semantic content. The adapters learn only the interface geometry.
 
 This has three immediate practical consequences.
 
 **Codec swaps.** The decoder can be replaced — swap a LlamaGen decoder for a SEED tokenizer, or a VQGAN for a TiTok decoder — without touching the LLM or retraining the adapter beyond a short re-calibration on the new codebook. The LLM's semantic representation does not change.
 
-**Provider swaps.** The LLM can be replaced — swap Kimi for Claude, or GPT-4o for a local Llama 3 instance — without retraining the adapters. The scene JSON schema is the stable interface contract.
+**Provider swaps.** The LLM can be replaced — swap Kimi for Claude, or GPT-4o for a local Llama 3 instance — without retraining the adapters. The Visual Seed Code-bearing image contract is the stable interface, with Semantic IR as inspectable support rather than the whole image route.
 
-**Independent debugging.** If the output image is wrong, the failure can be localized: is the scene spec malformed (LLM problem)? Are the VQ indices plausible (adapter problem)? Is the reconstruction faithful (decoder problem)? Each component is inspectable in isolation.
+**Independent debugging.** If the output image is wrong, the failure can be localized: is the Visual Seed Code contract malformed (LLM / prompt-stack problem)? Are the expanded VQ indices plausible (adapter problem)? Is the reconstruction faithful (decoder problem)? Each component is inspectable in isolation.
 
 ## The Locality Principle
 
@@ -48,7 +48,7 @@ A frozen pipeline with a deterministic decoder produces identical output for ide
 
 ## References
 
-- Radford, A. et al. (2021). "Learning Transferable Visual Models From Natural Language Supervision." *ICML 2021* (CLIP).
-- Liu, H. et al. (2023). "Visual Instruction Tuning." *NeurIPS 2023* (LLaVA).
-- Li, J. et al. (2023). "BLIP-2: Bootstrapping Language-Image Pre-training with Frozen Image Encoders and Large Language Models." *ICML 2023*.
-- Jia, C. et al. (2021). "Scaling Up Visual and Vision-Language Representation Learning With Noisy Text Supervision." *ICML 2021* (ALIGN).
+- Radford, A. et al. (2021). "Learning Transferable Visual Models From Natural Language Supervision." _ICML 2021_ (CLIP).
+- Liu, H. et al. (2023). "Visual Instruction Tuning." _NeurIPS 2023_ (LLaVA).
+- Li, J. et al. (2023). "BLIP-2: Bootstrapping Language-Image Pre-training with Frozen Image Encoders and Large Language Models." _ICML 2023_.
+- Jia, C. et al. (2021). "Scaling Up Visual and Vision-Language Representation Learning With Noisy Text Supervision." _ICML 2021_ (ALIGN).

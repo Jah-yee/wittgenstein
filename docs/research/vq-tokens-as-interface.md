@@ -63,12 +63,12 @@ VQ (vector quantization) maps a continuous latent to the nearest entry in a lear
 of K discrete vectors. The result is an index in {0, …, K−1}. This is directly analogous to
 BPE tokenization:
 
-| Text tokenization | Image VQ tokenization |
-|---|---|
-| Character sequence → BPE token indices | Image patches → codebook indices |
-| Vocabulary size: ~50,000 tokens | Codebook size: 1,024–16,384 codes |
-| Sequence: ~256–2048 tokens per prompt | Sequence: 256–1024 tokens per image |
-| Autoregressive prediction: next token | Autoregressive prediction: next code |
+| Text tokenization                      | Image VQ tokenization                |
+| -------------------------------------- | ------------------------------------ |
+| Character sequence → BPE token indices | Image patches → codebook indices     |
+| Vocabulary size: ~50,000 tokens        | Codebook size: 1,024–16,384 codes    |
+| Sequence: ~256–2048 tokens per prompt  | Sequence: 256–1024 tokens per image  |
+| Autoregressive prediction: next token  | Autoregressive prediction: next code |
 
 The key property is that an autoregressive language model can be trained or prompted to
 predict the next VQ code in a sequence using the same objective it uses for text. DALL-E 1
@@ -89,7 +89,7 @@ distribution over codebook indices for each position in the token grid.
 
 The adapter does not learn image generation. The frozen decoder already knows how to
 reconstruct an image from a code sequence — that knowledge is baked into its weights. The
-adapter only needs to learn the *projection* between the LLM's semantic representation and
+adapter only needs to learn the _projection_ between the LLM's semantic representation and
 the decoder's code vocabulary. Because both spaces are semantically structured (text embeddings
 carry semantic content; VQ codes are trained to encode image semantics), the projection is a
 low-dimensional problem. This is why a small MLP suffices.
@@ -142,8 +142,9 @@ The VQ token interface is chosen because:
 5. the decoder can be frozen and swapped without touching the LLM
 6. the sequence length is trending toward 32–256 tokens (TiTok direction)
 
-The scene spec sits upstream of the VQ tokens. The LLM is never asked to predict raw VQ
-indices directly — it emits semantic structure that the adapter translates. The two-stage
-design (scene spec → adapter → VQ tokens → frozen decoder) separates concerns cleanly:
-the LLM does semantic planning, the adapter does vocabulary alignment, the decoder does
-reconstruction.
+The image contract now sits upstream of the VQ tokens. It may carry Semantic IR for
+model-side organization and inspection, but Visual Seed Code / VQ hints are the primary
+decoder-facing research layer. The staged design (Visual Seed Code-bearing contract →
+seed expander / adapter → VQ tokens → frozen decoder) separates concerns cleanly: the LLM
+does structured planning and initial visual coding, the adapter does vocabulary / grid
+alignment, and the decoder does reconstruction.
