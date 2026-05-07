@@ -1,6 +1,6 @@
 # Image evals reference
 
-What "success" looks like for an image-hybrid-code emission, at three levels.
+What "success" looks like for an image-visual-seed-code emission, at three levels.
 
 ## Level 1 — Receipt-level (what the codec checks at parse time)
 

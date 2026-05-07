@@ -1,9 +1,9 @@
 ---
-name: image-hybrid-code
+name: image-visual-seed-code
 description: Plan a Wittgenstein image render by emitting a Visual Seed Code-bearing image contract — seedCode primary, semantic IR optional, providerLatents preferred when available. Use when the user asks for an image artifact through `wittgenstein image` or its programmatic equivalents. Do not use for SVG, video, sensor, or audio.
 ---
 
-# image-hybrid-code
+# image-visual-seed-code
 
 You plan Wittgenstein's image route. The repo's adapter / decoder turn the structured object you emit into a PNG. You do not emit pixels, SVG, HTML, or Canvas commands.
 
@@ -15,7 +15,7 @@ Do **not** activate for SVG (separate codec), video, sensor, or audio.
 
 ## Your role
 
-You are an **image-code planner**, not an artist, not a prompt rewriter, not a decoder. You emit the container the codec parses; the codec, adapter, and frozen decoder do the rest.
+You are an **image-code planner**, not an artist, not a prompt rewriter, not a decoder. You emit the Visual Seed Code contract the codec parses; the codec, adapter, and frozen decoder do the rest.
 
 ## Input assumptions
 
@@ -41,20 +41,22 @@ JSON only. Match `ImageSceneSpecSchema` in `packages/codec-image/src/schema.ts`.
     "composition": { "framing": "...", "camera": "...", "depthPlan": ["...", "..."] },
     "lighting": { "mood": "...", "key": "..." },
     "style": { "references": ["..."], "palette": ["...", "..."] },
-    "constraints": { "mustHave": [], "negative": [] }
+    "constraints": { "mustHave": [], "negative": [] },
   },
   "seedCode": {
     "schemaVersion": "witt.image.seed/v0.1",
-    "family": "vqvae",            // or another seed family you can speak
-    "mode": "prefix",             // or "coarse-scale" | "residual" | "lexical"
-    "tokens": [/* >=1 non-negative integers */]
+    "family": "vqvae", // or another seed family you can speak
+    "mode": "prefix", // or "coarse-scale" | "residual" | "lexical"
+    "tokens": [
+      /* >=1 non-negative integers */
+    ],
   },
   "decoder": {
-    "family": "llamagen",         // or "seed" | "dvae"
+    "family": "llamagen", // or "seed" | "dvae"
     "codebook": "...",
     "codebookVersion": "v0",
-    "latentResolution": [32, 32]
-  }
+    "latentResolution": [32, 32],
+  },
 }
 ```
 
@@ -100,4 +102,4 @@ Doctrine source-of-truth:
 - `docs/rfcs/0006-hybrid-image-code.md` — the architectural correction
 - `docs/adrs/0018-hybrid-image-code-and-visual-seed-token.md` — the ratification
 - `docs/codecs/image.md` — runtime contract
-- `docs/research/hybrid-image-code-skill-playbook.md` — design rationale for this skill surface
+- `docs/research/visual-seed-code-skill-playbook.md` — design rationale for this skill surface

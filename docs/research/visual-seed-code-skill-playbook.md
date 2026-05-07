@@ -1,4 +1,4 @@
-# Hybrid Image Code Skill / Prompt Playbook
+# Visual Seed Code Skill / Prompt Playbook
 
 ## Purpose
 
@@ -7,11 +7,11 @@ It is narrower than doctrine and more durable than scattered prompt snippets.
 
 The target use case is the image planner stage:
 
-`user prompt -> system prompt / skill context -> image-code container -> adapter -> decoder`
+`user prompt -> system prompt / skill context -> Visual Seed Code contract -> adapter -> decoder`
 
 This document is meant to support:
 
-- issue `#212` (`[image prompt] Add a SKILL.md-style system prompt for Hybrid Image Code`)
+- issue `#212` (`[image prompt] Add a SKILL.md-style system prompt for Visual Seed Code`)
 - doctrine PR `#206`
 - implementation PR `#210`
 
@@ -31,8 +31,8 @@ Concretely:
   dependency of image generation.
 
 The source of truth remains the codec schema and doctrine. The skill is an activation and
-instruction surface: it teaches a model how to emit the already-ratified image-code
-container.
+instruction surface: it teaches a model how to emit the already-ratified Visual Seed Code
+contract.
 
 ## Why a skill-style surface is useful
 
@@ -75,13 +75,13 @@ The broader pattern is now clear enough to make a call:
 The resulting Wittgenstein choice is:
 
 ```text
-docs/research/hybrid-image-code-skill-playbook.md
+docs/research/visual-seed-code-skill-playbook.md
   = research/design note, citations, rationale, longer examples
 
-packages/agent-contact-text/skills/image-hybrid-code/SKILL.md
+packages/agent-contact-text/skills/image-visual-seed-code/SKILL.md
   = compact agent-loadable prompt context for the image planner
 
-packages/agent-contact-text/skills/image-hybrid-code/references/
+packages/agent-contact-text/skills/image-visual-seed-code/references/
   = optional schema examples, troubleshooting, and eval prompts
 ```
 
@@ -180,7 +180,7 @@ Project doctrine/context:
   AGENTS.md / PROMPT.md / docs/hard-constraints.md
 
 Skill activation:
-  packages/agent-contact-text/skills/image-hybrid-code/SKILL.md
+  packages/agent-contact-text/skills/image-visual-seed-code/SKILL.md
 
 Codec prompt assembly:
   schema preamble + request size + seed + user prompt + selected mode
@@ -203,7 +203,7 @@ these blocks:
 2. **When to use**
    - image artifact planning,
    - PNG through the image codec,
-   - Hybrid Image Code output.
+   - Visual Seed Code output.
 3. **Role**
    - the agent is an image-code planner,
    - not a prose prompt writer,
@@ -213,11 +213,11 @@ these blocks:
    - request size,
    - seed,
    - current schema version,
-   - optional mode (`one-shot-hybrid`, `two-pass-hybrid`, `provider-latents`).
+   - optional mode (`one-shot-vsc`, `two-pass-compile`, `provider-latents`).
 5. **Output contract**
    - valid JSON only,
    - no markdown fences,
-   - emit the image-code container.
+   - emit the Visual Seed Code contract.
 6. **Path hierarchy**
    - `providerLatents` only for real direct latents,
    - `seedCode` as the normal VSC output,
@@ -288,7 +288,7 @@ The Acontext document is effectively organized as:
 9. tool inventory,
 10. troubleshooting.
 
-For Hybrid Image Code, the equivalent should be:
+For Visual Seed Code, the equivalent should be:
 
 1. front matter for agent discovery,
 2. a short statement that this file is repo-tracked prompt context, not doctrine,
@@ -352,7 +352,7 @@ image line.
 
 The repo should store an image skill surface in:
 
-- `packages/agent-contact-text/skills/image-hybrid-code/SKILL.md`
+- `packages/agent-contact-text/skills/image-visual-seed-code/SKILL.md`
 
 Rationale:
 
@@ -373,14 +373,14 @@ If we create a literal skill file, it should be shaped like this:
 
 ```md
 ---
-name: wittgenstein-image-hybrid-code
-description: Emit Hybrid Image Code for Wittgenstein's sole neural image path.
+name: wittgenstein-image-visual-seed-code
+description: Emit Visual Seed Code for Wittgenstein's sole neural image path.
 ---
 
-# Wittgenstein Image Hybrid Code
+# Wittgenstein Image Visual Seed Code
 
-Use this skill when an image request must be turned into a structured image-code
-container for Wittgenstein.
+Use this skill when an image request must be turned into a structured Visual Seed Code
+contract for Wittgenstein.
 
 This skill is prompt context only. It does not install tools, pick a tokenizer family, or
 change the codec contract by itself.
@@ -406,7 +406,7 @@ Return valid JSON only.
 Do not return markdown fences.
 Do not return prose explanations.
 
-Your job is to emit a Hybrid Image Code container for the sole neural image pipeline.
+Your job is to emit a Visual Seed Code contract for the sole neural image pipeline.
 
 Primary goal:
 
@@ -421,8 +421,8 @@ Optional outputs:
 Priority:
 
 1. `providerLatents`
-2. `seedCode`
-3. `coarseVq`
+2. `coarseVq`
+3. `seedCode`
 4. `semantic`
 
 Rules:
@@ -458,11 +458,11 @@ portable instruction file like this:
 
 ```md
 ---
-name: wittgenstein-image-hybrid-code
-description: Use when planning a Wittgenstein image artifact. Emit the Hybrid Image Code JSON container for the image codec, preferring Visual Seed Code over prose or semantic-only output.
+name: wittgenstein-image-visual-seed-code
+description: Use when planning a Wittgenstein image artifact. Emit the Visual Seed Code JSON contract for the image codec, preferring Visual Seed Code over prose or semantic-only output.
 ---
 
-# Wittgenstein Image Hybrid Code
+# Wittgenstein Image Visual Seed Code
 
 Use this skill when the user asks Wittgenstein to produce a PNG through the image codec.
 
@@ -521,7 +521,7 @@ deterministic validator that cannot be expressed cleanly in tests or existing zo
 ```json
 {
   "schemaVersion": "witt.image.spec/v0.1",
-  "mode": "one-shot-hybrid",
+  "mode": "one-shot-vsc",
   "seedCode": {
     "schemaVersion": "witt.image.seed/v0.1",
     "family": "vqvae",
@@ -591,7 +591,7 @@ outputs:
 ## Suggested next step
 
 Create the literal `SKILL.md` under
-`packages/agent-contact-text/skills/image-hybrid-code/`, with `references/` files only for
+`packages/agent-contact-text/skills/image-visual-seed-code/`, with `references/` files only for
 details that would bloat the skill body. Then wire the image planner prompt to load or
 derive from that file rather than hard-coding the entire contract inside one function.
 
