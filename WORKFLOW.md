@@ -65,6 +65,10 @@ The exclusion list is load-bearing. Each excluded label has a semantic contract 
 
 An orchestrator that does not honor this list is non-conformant.
 
+Queue labels introduced by ADR-0019 (`priority/*`, `size/*`, `stage/*`) are
+triage metadata only. They may help an orchestrator rank work, but they never
+make an issue agent-eligible and they never override the exclusion list.
+
 ## 2. `polling` — how often to look
 
 `interval_ms: 60000` (1 minute). Symphony's default is 30s; ours is 60s because the repo's commit cadence already produces multiple events per minute and a faster poll buys nothing.
