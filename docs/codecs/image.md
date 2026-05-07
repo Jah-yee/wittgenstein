@@ -53,6 +53,26 @@ Two image lanes are legal:
 One-shot VSC is the default lane to optimize first.
 Two-pass compile is the explicit high-quality lane.
 
+## CLI inspection surface
+
+The default CLI output stays compact. Image-specific inspection flags expose the already
+recorded receipt fields without changing generation behavior:
+
+```bash
+wittgenstein image "otter portrait" --dry-run --show-image-code --show-semantic --show-seed-summary
+```
+
+- `--show-image-code` prints the manifest `image.code` receipt: fired path, semantic
+  source, seed family / mode / length, and any coarse / provider latent grids.
+- `--show-semantic` prints the emitted or effective Semantic IR with its receipt source.
+  This is the human-inspection layer; it is not proof that semantic fallback was the active
+  backend path.
+- `--show-seed-summary` prints a compact execution summary for the decoder-facing layer.
+
+These flags intentionally do not add `--mode`, `--quality`, or two-pass orchestration yet.
+They expose path honesty first; generation-mode controls belong with the prompt-stack /
+eval work once the acceptance cases are settled.
+
 ## Optional `providerLatents` (MiniMax / API extensions)
 
 If the text API can return discrete VQ indices in the same object, include them under `providerLatents` using the `witt.image.latents/v0.1` shape (`family`, `codebook`, `codebookVersion`, `tokenGrid`, `tokens`). When valid, the runtime **skips** seed expansion and decodes those tokens directly.

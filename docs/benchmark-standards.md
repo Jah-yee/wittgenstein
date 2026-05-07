@@ -11,11 +11,11 @@ and to give honest numbers about what the current harness can actually measure.
 
 Every benchmark result is reported in three buckets regardless of modality:
 
-| Dimension | Definition | Source |
-|---|---|---|
-| **Cost** | API spend (USD) + token counts | `manifest.costUsd`, `manifest.llmTokens` |
-| **Latency** | Wall-clock time from CLI invoke to artifact written | `manifest.durationMs` |
-| **Quality** | Modality-specific; see sections below | Depends on modality |
+| Dimension   | Definition                                          | Source                                   |
+| ----------- | --------------------------------------------------- | ---------------------------------------- |
+| **Cost**    | API spend (USD) + token counts                      | `manifest.costUsd`, `manifest.llmTokens` |
+| **Latency** | Wall-clock time from CLI invoke to artifact written | `manifest.durationMs`                    |
+| **Quality** | Modality-specific; see sections below               | Depends on modality                      |
 
 Cost and latency are always measurable from the manifest. Quality proxies vary by whether a
 real codec is running or a stub.
@@ -53,19 +53,35 @@ proxy is structural:
 
 Score range: 0.0 – 1.0. This is a smoke test, not a visual quality measure.
 
+### Visual Seed Code receipt matrix
+
+Until a real frozen decoder and trained SeedExpander ship, image evals must first report
+which decoder-facing path actually fired. The minimum receipt matrix is:
+
+| Path                | Manifest evidence                                         | What it proves today                                    |
+| ------------------- | --------------------------------------------------------- | ------------------------------------------------------- |
+| `provider-latents`  | `image.code.path`, `providerLatentGrid`                   | Direct decoder-native tokens were supplied and accepted |
+| `coarse-vq`         | `image.code.path`, `coarseVqGrid`                         | A partial VQ structure was accepted and expanded        |
+| `visual-seed-code`  | `image.code.path`, `seedFamily`, `seedMode`, `seedLength` | Compact seed code was accepted and expanded             |
+| `semantic-fallback` | `image.code.path`, `semanticSource`                       | The run fell back to semantic-only / baseline behavior  |
+
+This matrix is not a quality score. It is the first gate for comparing one-shot VSC,
+two-pass compile, semantic fallback, and direct/coarse-token experiments without hiding
+which path the runtime actually used.
+
 ### Adapter baseline (measured 2026-04)
 
 The image style MLP was trained and evaluated on real COCO captions:
 
-| Metric | Value |
-|---|---|
-| Training examples | 781 (COCO captions → extracted palette + layout stats) |
-| Training time | ~9 s on CPU |
-| Epochs | 600 |
-| Best validation BCE | 0.7698 |
-| Architecture | 3-layer MLP — 512 → 256 → 128 → 21 outputs |
-| Embedding | Hashed BoW, dim 512, double-hash + bigrams, L2-normalised |
-| Output dimensions | 5 palette RGB triplets (15 dims), noise\_scale, grain, composition one-hot (3), accent\_count |
+| Metric              | Value                                                                                       |
+| ------------------- | ------------------------------------------------------------------------------------------- |
+| Training examples   | 781 (COCO captions → extracted palette + layout stats)                                      |
+| Training time       | ~9 s on CPU                                                                                 |
+| Epochs              | 600                                                                                         |
+| Best validation BCE | 0.7698                                                                                      |
+| Architecture        | 3-layer MLP — 512 → 256 → 128 → 21 outputs                                                  |
+| Embedding           | Hashed BoW, dim 512, double-hash + bigrams, L2-normalised                                   |
+| Output dimensions   | 5 palette RGB triplets (15 dims), noise_scale, grain, composition one-hot (3), accent_count |
 
 ---
 
@@ -97,24 +113,24 @@ Score range: 0.0 – 1.0.
 
 ### Audio ambient classifier baseline (measured 2026-04)
 
-| Metric | Value |
-|---|---|
-| Training examples | 369 (41 seed phrases × 9 suffix augmentations) |
-| Training time | < 5 s on CPU |
-| Epochs | 300 |
-| Architecture | 2-layer MLP — 256 → 96 → 8 outputs (7 category logits + 1 volume sigmoid) |
-| Categories | silence · rain · wind · city · forest · electronic · white\_noise |
-| Keyword override | fires when MLP confidence < 0.75; overriding confidence set to 0.85 |
+| Metric            | Value                                                                     |
+| ----------------- | ------------------------------------------------------------------------- |
+| Training examples | 369 (41 seed phrases × 9 suffix augmentations)                            |
+| Training time     | < 5 s on CPU                                                              |
+| Epochs            | 300                                                                       |
+| Architecture      | 2-layer MLP — 256 → 96 → 8 outputs (7 category logits + 1 volume sigmoid) |
+| Categories        | silence · rain · wind · city · forest · electronic · white_noise          |
+| Keyword override  | fires when MLP confidence < 0.75; overriding confidence set to 0.85       |
 
 Spot-check predictions (all correct):
 
-| Prompt | Predicted category | Source | Confidence |
-|---|---|---|---|
-| "cozy rainy afternoon" | rain | keyword\_override | 0.85 |
-| "forest birds chirping" | forest | mlp | 0.99 |
-| "electrical hum server room" | electronic | keyword\_override | 0.85 |
-| "silent meditation empty room" | silence | mlp | 0.94 |
-| "busy city intersection" | city | mlp | 0.88 |
+| Prompt                         | Predicted category | Source           | Confidence |
+| ------------------------------ | ------------------ | ---------------- | ---------- |
+| "cozy rainy afternoon"         | rain               | keyword_override | 0.85       |
+| "forest birds chirping"        | forest             | mlp              | 0.99       |
+| "electrical hum server room"   | electronic         | keyword_override | 0.85       |
+| "silent meditation empty room" | silence            | mlp              | 0.94       |
+| "busy city intersection"       | city               | mlp              | 0.88       |
 
 ---
 
@@ -151,12 +167,12 @@ Score range: 0.0 – 1.0.
 
 ECG dry-run · 250 Hz · 10 s:
 
-| Metric | Value |
-|---|---|
-| Signal expand time | < 2 ms (pure numpy, no I/O) |
-| Sample count | 2,500 |
-| Loupe HTML size | ~117 KB (self-contained, zero external dependencies) |
-| Loupe render time | ~0.8 s (Python subprocess, one-time startup cost) |
+| Metric             | Value                                                |
+| ------------------ | ---------------------------------------------------- |
+| Signal expand time | < 2 ms (pure numpy, no I/O)                          |
+| Sample count       | 2,500                                                |
+| Loupe HTML size    | ~117 KB (self-contained, zero external dependencies) |
+| Loupe render time  | ~0.8 s (Python subprocess, one-time startup cost)    |
 
 ---
 
@@ -196,21 +212,21 @@ the full `RunManifest` in `artifacts/runs/<id>/manifest.json` can be inspected.
 
 ## Benchmark Cadence
 
-| When | Action |
-|---|---|
-| Per PR touching a codec | CI runs smoke proxy checks automatically |
-| Per release tag | Full local harness run; commit `artifacts/benchmarks/<tag>.json` |
-| Post real-codec landing | Add CLIPScore / WER / discriminative score to result schema |
-| Post human eval panel | Add MOS column to audio results |
+| When                    | Action                                                           |
+| ----------------------- | ---------------------------------------------------------------- |
+| Per PR touching a codec | CI runs smoke proxy checks automatically                         |
+| Per release tag         | Full local harness run; commit `artifacts/benchmarks/<tag>.json` |
+| Post real-codec landing | Add CLIPScore / WER / discriminative score to result schema      |
+| Post human eval panel   | Add MOS column to audio results                                  |
 
 ---
 
 ## References
 
-- Heusel, M. et al. (2017). "GANs Trained by a Two Time-Scale Update Rule." *NeurIPS 2017.* (FID)
-- Hessel, J. et al. (2021). "CLIPScore: A Reference-free Evaluation Metric for Image Captioning." *EMNLP 2021.*
+- Heusel, M. et al. (2017). "GANs Trained by a Two Time-Scale Update Rule." _NeurIPS 2017._ (FID)
+- Hessel, J. et al. (2021). "CLIPScore: A Reference-free Evaluation Metric for Image Captioning." _EMNLP 2021._
 - Lin, Z. et al. (2024). "Evaluating Text-to-Visual Generation with Image-to-Text Generation." (VQScore)
-- Saeki, T. et al. (2022). "UTMOS: UTokyo-SaruLab System for VoiceMOS Challenge 2022." *Interspeech 2022.*
-- Unterthiner, T. et al. (2019). "FVD: A new Metric for Video Generation." *ICLR 2019 Workshop.*
+- Saeki, T. et al. (2022). "UTMOS: UTokyo-SaruLab System for VoiceMOS Challenge 2022." _Interspeech 2022._
+- Unterthiner, T. et al. (2019). "FVD: A new Metric for Video Generation." _ICLR 2019 Workshop._
 - Niu, M. et al. (2024). "Video-Bench: A Comprehensive Benchmark and Toolkit for Evaluating Video-based LLMs."
 - Liao, W. et al. (2024). "A Survey on Time Series Synthesis." (discriminative/predictive score framing)

@@ -1,6 +1,6 @@
 import { existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import type { WittgensteinRequest } from "@wittgenstein/schemas";
+import type { RunManifest, WittgensteinRequest } from "@wittgenstein/schemas";
 import { Wittgenstein } from "@wittgenstein/core";
 
 export interface CommandRuntimeOptions {
@@ -10,11 +10,22 @@ export interface CommandRuntimeOptions {
   config?: string;
 }
 
+export interface CommandInspectionContext {
+  manifest: RunManifest;
+  runDir: string;
+  error: unknown;
+}
+
+export interface CommandOutputOptions {
+  inspect?: (context: CommandInspectionContext) => Record<string, unknown> | undefined;
+}
+
 export async function runCodecCommand(
   request: WittgensteinRequest,
   command: string,
   args: string[],
   options: CommandRuntimeOptions,
+  outputOptions: CommandOutputOptions = {},
 ): Promise<void> {
   const workspaceRoot = resolveExecutionRoot();
   const harness = await Wittgenstein.bootstrap({
@@ -31,6 +42,12 @@ export async function runCodecCommand(
     ...(options.config ? { configPath: options.config } : {}),
   });
 
+  const extra = outputOptions.inspect?.({
+    manifest: outcome.manifest,
+    runDir: outcome.runDir,
+    error: outcome.error,
+  });
+
   console.log(
     JSON.stringify(
       {
@@ -39,6 +56,7 @@ export async function runCodecCommand(
         runDir: outcome.runDir,
         artifactPath: outcome.manifest.artifactPath,
         error: outcome.error,
+        ...(extra ?? {}),
       },
       null,
       2,
@@ -70,7 +88,5 @@ export function resolveExecutionRoot(): string {
     parent = dirname(current);
   }
 
-  return existsSync(resolve(current, "pnpm-workspace.yaml"))
-    ? current
-    : process.cwd();
+  return existsSync(resolve(current, "pnpm-workspace.yaml")) ? current : process.cwd();
 }
