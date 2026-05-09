@@ -1,0 +1,240 @@
+@import url('https://fonts.googleapis.com/css2?family=Cardo:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* preview (1).html — Claude / Anthropic (Light) tokens → HSL for shadcn/Tailwind */
+@layer base {
+  :root {
+    --background: 48 24% 95%;
+    --foreground: 60 3% 8%;
+    --card: 48 33% 97%;
+    --card-foreground: 60 3% 8%;
+    --popover: 48 33% 97%;
+    --popover-foreground: 60 3% 8%;
+    --primary: 14 55% 52%;
+    --primary-foreground: 48 33% 97%;
+    --secondary: 48 20% 91%;
+    --secondary-foreground: 43 5% 29%;
+    --muted: 48 20% 91%;
+    --muted-foreground: 43 5% 36%;
+    --accent: 48 20% 91%;
+    --accent-foreground: 60 3% 8%;
+    --destructive: 0 55% 45%;
+    --destructive-foreground: 48 33% 97%;
+    --border: 48 20% 93%;
+    --input: 48 20% 93%;
+    --ring: 43 8% 78%;
+    --radius: 0.5rem;
+    --yellow-accent: 14 55% 52%;
+    --red-accent: 0 55% 45%;
+    --green-accent: 100 12% 37%;
+    --blue-accent: 207 80% 57%;
+    --terracotta: 14 55% 52%;
+    --coral: 16 60% 58%;
+    --parchment: 48 24% 95%;
+    --ivory: 48 33% 97%;
+    --warm-sand: 48 20% 91%;
+    --dark-surface: 60 2% 18%;
+    --deep-dark: 60 3% 8%;
+    --stone: 43 5% 52%;
+    --olive: 43 5% 36%;
+    --muted-green: 100 12% 37%;
+    --warm-silver: 43 8% 68%;
+    --sidebar-background: 48 33% 97%;
+    --sidebar-foreground: 60 3% 8%;
+    --sidebar-primary: 14 55% 52%;
+    --sidebar-primary-foreground: 48 33% 97%;
+    --sidebar-accent: 48 20% 91%;
+    --sidebar-accent-foreground: 60 3% 8%;
+    --sidebar-border: 48 20% 93%;
+    --sidebar-ring: 43 8% 78%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+}
+
+@layer components {
+  .font-serif {
+    font-family: Georgia, 'Times New Roman', Times, serif;
+  }
+  .font-brand {
+    font-family: 'Cardo', Georgia, 'Times New Roman', serif;
+  }
+  .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .section-number {
+    @apply font-mono text-sm text-muted-foreground;
+  }
+  .card-border {
+    @apply border border-border rounded-lg bg-card shadow-sm;
+  }
+  .yellow-btn {
+    @apply bg-primary text-primary-foreground font-medium rounded-full px-6 py-3 transition-colors hover:opacity-90;
+    box-shadow: 0 0 0 1px hsl(var(--primary));
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-slow {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 3s ease-in-out infinite;
+}
+
+/* Hero headline — ambient signal drift with a longer-lived grid pulse */
+@layer components {
+  .hero-headline {
+    position: relative;
+  }
+
+  .hero-headline__text {
+    position: relative;
+    display: inline-block;
+    isolation: isolate;
+    text-rendering: optimizeLegibility;
+    animation: heroAmbient 9.8s ease-in-out infinite;
+    transition:
+      filter 220ms ease,
+      opacity 220ms ease;
+  }
+
+  .hero-headline__text::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: -0.08em -0.12em;
+    pointer-events: none;
+    background-image:
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 3px,
+        hsl(var(--foreground) / 0.075) 3px,
+        hsl(var(--foreground) / 0.075) 4px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 3px,
+        hsl(var(--foreground) / 0.075) 3px,
+        hsl(var(--foreground) / 0.075) 4px
+      );
+    mix-blend-mode: multiply;
+    -webkit-mask-image: radial-gradient(ellipse at center, #000 0 60%, transparent 88%);
+    mask-image: radial-gradient(ellipse at center, #000 0 60%, transparent 88%);
+    opacity: 0;
+    transform: translate3d(0, 0, 0);
+    transition:
+      opacity 220ms ease,
+      transform 1400ms ease;
+  }
+
+  .hero-headline__text[data-pulse='active'] {
+    filter: contrast(1.1) saturate(1.05) blur(0.28px);
+    animation:
+      heroAmbient 9.8s ease-in-out infinite,
+      heroPulseJitter 0.95s steps(2, end) infinite;
+  }
+
+  .hero-headline__text[data-pulse='active']::before {
+    opacity: 0.74;
+    transform: translate3d(1.6px, -0.8px, 0);
+  }
+
+  @keyframes heroAmbient {
+    0%,
+    12%,
+    56%,
+    100% {
+      opacity: 1;
+      text-shadow:
+        1.4px 0 0 hsl(var(--coral) / 0.24),
+        -1.4px 0 0 hsl(var(--blue-accent) / 0.2);
+    }
+    22%,
+    30% {
+      text-shadow:
+        2px 0 0 hsl(var(--coral) / 0.32),
+        -1.8px 0 0 hsl(var(--blue-accent) / 0.28);
+    }
+    38%,
+    46%,
+    68%,
+    76% {
+      text-shadow:
+        0.4px 0 0 hsl(var(--coral) / 0.1),
+        -0.4px 0 0 hsl(var(--blue-accent) / 0.08);
+    }
+    84%,
+    92% {
+      text-shadow:
+        1.6px 0 0 hsl(var(--coral) / 0.26),
+        -1.7px 0 0 hsl(var(--blue-accent) / 0.22);
+    }
+  }
+
+  @keyframes heroPulseJitter {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0);
+    }
+    20% {
+      transform: translate3d(-0.8px, 0.2px, 0);
+    }
+    45% {
+      transform: translate3d(1.1px, -0.4px, 0);
+    }
+    70% {
+      transform: translate3d(-0.7px, 0.1px, 0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-headline__text {
+      animation: none !important;
+      filter: none !important;
+      text-shadow: none !important;
+      transform: none !important;
+    }
+
+    .hero-headline__text::before {
+      display: none !important;
+    }
+  }
+}
