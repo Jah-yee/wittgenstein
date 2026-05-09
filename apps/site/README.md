@@ -43,17 +43,24 @@ This runs lint plus a full production build.
 
 ## Vercel Deployment
 
-This app includes [`vercel.json`](./vercel.json), but Vercel Git Source is still a manual follow-up step. The current production project may still point at the old external repository until a maintainer switches it.
+The monorepo root [`vercel.json`](../../vercel.json) now builds `@wittgenstein/site` and emits `apps/site/dist`. This keeps the default root-level Vercel project aligned with the canonical website instead of the older `apps/wittgenstein-kimi` demo.
 
-When switching Vercel to the monorepo, choose the Git Source manually in Vercel at that time. Do not treat this migration PR as the deployment switch. The remaining settings should be:
+This app also includes [`vercel.json`](./vercel.json) for a Vercel project whose root directory is set to `apps/site`. Vercel Git Source is still a manual follow-up step: the production project may still point at the old external repository until a maintainer switches it.
 
+Supported Vercel configurations:
+
+- Root directory: repository root
+  - Build command: `pnpm --filter @wittgenstein/site build`
+  - Output directory: `apps/site/dist`
 - Root directory: `apps/site`
-- Build command: `pnpm build`
-- Output directory: `dist`
+  - Build command: `pnpm build`
+  - Output directory: `dist`
+
+Do not treat this migration PR as the domain cutover. The Git Source and production domain should still be switched intentionally in Vercel.
 
 Notes:
 
-- The app is a Vite SPA, so `vercel.json` includes a rewrite to `index.html`.
+- The app is a Vite SPA, so both Vercel configs include a rewrite to `index.html`.
 - The canonical production host is `https://wittgenstein.wtf`.
 - `public/CNAME` is harmless for static hosting portability, but Vercel itself uses project-domain settings rather than GitHub Pages style CNAME handling.
 
