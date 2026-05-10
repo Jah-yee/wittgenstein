@@ -14,6 +14,9 @@ reviews:
   path_filters:
     - "!artifacts/**"
     - "!fixtures/**"
+    - "!apps/site/dist/**"
+    - "!apps/wittgenstein-kimi/dist/**"
+    - "!docs/research/www.aquin.app/**"
     - "!**/pnpm-lock.yaml"
     - "!**/*.png"
     - "!**/*.wav"

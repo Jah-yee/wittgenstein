@@ -12,7 +12,27 @@ jobs:
   assign:
     runs-on: ubuntu-latest
     steps:
-      - name: Auto assign PR owner
-        uses: kentaro-m/auto-assign-action@v2.0.0
+      - name: Assign counterpart maintainer
+        uses: actions/github-script@v8
         with:
-          configuration-path: .github/auto_assign.yml
+          script: |
+            const author = context.payload.pull_request.user.login;
+            const assigneesByAuthor = {
+              "Jah-yee": ["Moapacha"],
+              "Moapacha": ["Jah-yee"],
+              "moapacha": ["Jah-yee"],
+            };
+
+            const assignees = assigneesByAuthor[author] ?? [];
+            if (assignees.length === 0) {
+              core.info(`No counterpart-maintainer mapping for PR author ${author}; skipping auto-assign.`);
+              return;
+            }
+
+            await github.rest.issues.addAssignees({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              assignees,
+            });
+            core.info(`Assigned ${assignees.join(", ")} to PR #${context.payload.pull_request.number}.`);

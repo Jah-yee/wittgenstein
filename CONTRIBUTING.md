@@ -103,9 +103,10 @@ We keep repo automation deliberately small and reviewable:
   The config is biased toward contract drift, manifest honesty, and package-boundary
   checks rather than generic prose comments.
 - **AutoAssign** is configured via
-  [`.github/workflows/auto-assign.yml`](.github/workflows/auto-assign.yml) and
-  [`.github/auto_assign.yml`](.github/auto_assign.yml). `CODEOWNERS` continues to handle
-  review routing; AutoAssign only makes ownership explicit by assigning the PR author.
+  [`.github/workflows/auto-assign.yml`](.github/workflows/auto-assign.yml).
+  `CODEOWNERS` continues to handle review routing; AutoAssign assigns the
+  counterpart maintainer as the PR assignee (`Jah-yee -> Moapacha`,
+  `Moapacha -> Jah-yee`) so ownership stays explicit without duplicating reviewer logic.
 - **reviewdog** is wired through
   [`.github/workflows/reviewdog.yml`](.github/workflows/reviewdog.yml) and currently
   provides three narrow PR-assist surfaces:
@@ -113,9 +114,9 @@ We keep repo automation deliberately small and reviewable:
     on contributor-facing docs
   - ESLint review comments on `packages/**` and `apps/site/**`
   - Prettier-based formatting suggestions on changed files
-  It uses [`.markdownlint-cli2.yaml`](.markdownlint-cli2.yaml) for the doc surface and
-  comments only on added lines where possible so we can tighten hygiene without flooding
-  old surfaces with legacy noise.
+    It uses [`.markdownlint-cli2.yaml`](.markdownlint-cli2.yaml) for the doc surface and
+    comments only on added lines where possible so we can tighten hygiene without flooding
+    old surfaces with legacy noise.
 - Bot config changes should stay narrow. If a bot starts producing noisy or misleading
   comments, prefer tightening scope or turning off that surface before adding more rules.
 - We are intentionally **not** enabling `textlint` yet. For this repo it needs a
