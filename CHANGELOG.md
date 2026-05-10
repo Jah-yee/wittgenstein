@@ -6,6 +6,14 @@ versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Added a committed CodeRabbit repository configuration (`.coderabbit.yaml`) so PR
+  review behavior is versioned in-repo instead of living only in a dashboard.
+- Added a narrow Markdown `reviewdog` workflow plus `.markdownlint-cli2.yaml` so docs
+  get lightweight PR annotations without turning legacy line-length and inline-HTML
+  debt into a merge blocker.
+
 ## [0.3.0-alpha.1] — 2026-05-06 — M2 audio sweep and reproducibility gates
 
 This prerelease closes the v0.3 M2 audio line far enough to cut a release

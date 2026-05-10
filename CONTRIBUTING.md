@@ -94,6 +94,25 @@ pnpm test
 For Python-surface changes, run the affected `python3 -m polyglot.cli ...` path end-to-end
 at least once — the Python side doesn't have CI coverage today.
 
+## Repository automation
+
+We keep repo automation deliberately small and reviewable:
+
+- **CodeRabbit** is configured in [`/.coderabbit.yaml`](.coderabbit.yaml). It is meant
+  to help with PR summarization and focused review, not replace maintainer judgment.
+  The config is biased toward contract drift, manifest honesty, and package-boundary
+  checks rather than generic prose comments.
+- **reviewdog** is wired through
+  [`.github/workflows/reviewdog.yml`](.github/workflows/reviewdog.yml) and currently
+  scopes itself to Markdown PR comments only. It uses
+  [`.markdownlint-cli2.yaml`](.markdownlint-cli2.yaml) and comments only on added
+  lines so we can tighten doc hygiene without flooding old surfaces with legacy noise.
+- Bot config changes should stay narrow. If a bot starts producing noisy or misleading
+  comments, prefer tightening scope or turning off that surface before adding more rules.
+
+Maintainer note: CodeRabbit's repository configuration is committed here, but the
+GitHub App installation and repo authorization still have to be done in GitHub.
+
 ## Experimental vs shipping code
 
 Wittgenstein explicitly mixes both. To keep users safe:
