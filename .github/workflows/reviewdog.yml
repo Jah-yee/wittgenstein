@@ -29,6 +29,7 @@ on:
 permissions:
   contents: read
   checks: write
+  issues: write
   pull-requests: write
 
 jobs:
@@ -92,7 +93,7 @@ jobs:
 
       - name: ESLint via reviewdog
         if: steps.changed-eslint.outputs.has_files == 'true'
-        uses: reviewdog/action-eslint@2fee6d5014644bd9314cb0c1a588a5c8040b7372 # v1.33.2
+        uses: reviewdog/action-eslint@2fee6dd72a5419ff4113f694e2068d2a03bb35dd # v1.33.2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: github-pr-review
@@ -155,7 +156,7 @@ jobs:
 
       - name: Suggest formatting fixes
         if: steps.changed.outputs.has_files == 'true'
-        uses: reviewdog/action-suggester@4746290c5f84f25f0c9b33312c8f3c43b1b15e08 # v1.21.0
+        uses: reviewdog/action-suggester@4747dbc9f9e37adba0943e681cc20db466642158 # v1.21.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           tool_name: prettier

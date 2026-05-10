@@ -10,6 +10,8 @@ versioning follows [Semantic Versioning](https://semver.org/).
 
 - Added a committed CodeRabbit repository configuration (`.coderabbit.yaml`) so PR
   review behavior is versioned in-repo instead of living only in a dashboard.
+- Added AutoAssign configuration so new PRs explicitly assign ownership to the PR author
+  without duplicating CODEOWNERS-based reviewer routing.
 - Added a narrow Markdown `reviewdog` workflow plus `.markdownlint-cli2.yaml` so docs
   get lightweight PR annotations without turning legacy line-length and inline-HTML
   debt into a merge blocker.

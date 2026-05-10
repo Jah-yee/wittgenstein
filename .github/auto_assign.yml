@@ -1,0 +1,6 @@
+# Keep review routing with CODEOWNERS.
+# AutoAssign is used here to make PR ownership explicit by assigning the author.
+
+addReviewers: false
+addAssignees: author
+runOnDraft: false

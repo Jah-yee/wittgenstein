@@ -102,6 +102,10 @@ We keep repo automation deliberately small and reviewable:
   to help with PR summarization and focused review, not replace maintainer judgment.
   The config is biased toward contract drift, manifest honesty, and package-boundary
   checks rather than generic prose comments.
+- **AutoAssign** is configured via
+  [`.github/workflows/auto-assign.yml`](.github/workflows/auto-assign.yml) and
+  [`.github/auto_assign.yml`](.github/auto_assign.yml). `CODEOWNERS` continues to handle
+  review routing; AutoAssign only makes ownership explicit by assigning the PR author.
 - **reviewdog** is wired through
   [`.github/workflows/reviewdog.yml`](.github/workflows/reviewdog.yml) and currently
   provides three narrow PR-assist surfaces:
