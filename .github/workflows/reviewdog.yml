@@ -56,6 +56,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
@@ -78,12 +80,9 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
-          files="$(
-            git diff --name-only --diff-filter=ACMRT "${BASE_SHA}" "${HEAD_SHA}" \
-              | grep -E '^(packages|apps/site)/.*\.(ts|tsx|js)$' \
-              | tr '\n' ' ' \
-              || true
-          )"
+          changed_files="$(mktemp)"
+          git diff --name-only --diff-filter=ACMRT "${BASE_SHA}" "${HEAD_SHA}" > "${changed_files}"
+          files="$(grep -E '^(packages|apps/site)/.*\.(ts|tsx|js)$' "${changed_files}" | tr '\n' ' ' || true)"
           if [ -z "${files}" ]; then
             echo "has_files=false" >> "${GITHUB_OUTPUT}"
             exit 0
