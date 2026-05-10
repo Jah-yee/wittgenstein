@@ -1,0 +1,161 @@
+name: reviewdog
+
+on:
+  pull_request:
+    paths:
+      - "package.json"
+      - ".eslintrc.cjs"
+      - ".prettierrc"
+      - "README.md"
+      - "CONTRIBUTING.md"
+      - "CHANGELOG.md"
+      - "PROMPT.md"
+      - "packages/**/*.ts"
+      - "packages/**/*.tsx"
+      - "packages/**/*.js"
+      - "apps/site/**/*.ts"
+      - "apps/site/**/*.tsx"
+      - "apps/site/**/*.js"
+      - "docs/THESIS.md"
+      - "docs/architecture.md"
+      - "docs/hard-constraints.md"
+      - "docs/implementation-status.md"
+      - "docs/quickstart.md"
+      - "docs/reproducibility.md"
+      - "docs/codecs/*.md"
+      - ".markdownlint-cli2.yaml"
+      - ".github/workflows/reviewdog.yml"
+
+permissions:
+  contents: read
+  checks: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  markdownlint:
+    name: Markdown review comments
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Markdownlint via reviewdog
+        uses: reviewdog/action-markdownlint@3667398db9118d7e78f7a63d10e26ce454ba5f58 # v0.26.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
+          filter_mode: added
+          level: warning
+          fail_level: none
+          markdownlint_flags: "README.md CONTRIBUTING.md CHANGELOG.md PROMPT.md docs/THESIS.md docs/architecture.md docs/hard-constraints.md docs/implementation-status.md docs/quickstart.md docs/reproducibility.md docs/codecs/*.md"
+
+  eslint:
+    name: ESLint review comments
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 9.12.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20.19.0
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Collect changed ESLint files
+        id: changed-eslint
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          changed_files="$(mktemp)"
+          git diff --name-only --diff-filter=ACMRT "${BASE_SHA}" "${HEAD_SHA}" > "${changed_files}"
+          files="$(grep -E '^(packages|apps/site)/.*\.(ts|tsx|js)$' "${changed_files}" | tr '\n' ' ' || true)"
+          if [ -z "${files}" ]; then
+            echo "has_files=false" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+          echo "has_files=true" >> "${GITHUB_OUTPUT}"
+          echo "files=${files}" >> "${GITHUB_OUTPUT}"
+
+      - name: ESLint via reviewdog
+        if: steps.changed-eslint.outputs.has_files == 'true'
+        uses: reviewdog/action-eslint@2fee6dd72a5419ff4113f694e2068d2a03bb35dd # v1.33.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
+          filter_mode: added
+          level: warning
+          fail_level: none
+          eslint_flags: "${{ steps.changed-eslint.outputs.files }}"
+
+  prettier-suggestions:
+    name: Prettier suggestions
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 9.12.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20.19.0
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Collect changed files
+        id: changed
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          files="$(
+            git diff --name-only --diff-filter=ACMRT "${BASE_SHA}" "${HEAD_SHA}" \
+              | grep -E '(^README\.md$|^CONTRIBUTING\.md$|^CHANGELOG\.md$|^PROMPT\.md$|^package\.json$|^\.eslintrc\.cjs$|^\.prettierrc$|^\.github/.*\.(md|yml|yaml)$|^docs/(THESIS\.md|architecture\.md|hard-constraints\.md|implementation-status\.md|quickstart\.md|reproducibility\.md|codecs/.*\.md)$|^packages/.*\.(ts|tsx|js|json|md)$|^apps/site/.*\.(ts|tsx|js|json|md|css)$)' \
+              || true
+          )"
+          if [ -z "${files}" ]; then
+            echo "has_files=false" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+          {
+            echo "has_files=true"
+            echo "files<<EOF"
+            printf '%s\n' "${files}"
+            echo "EOF"
+          } >> "${GITHUB_OUTPUT}"
+
+      - name: Run Prettier on changed files
+        if: steps.changed.outputs.has_files == 'true'
+        run: |
+          set -euo pipefail
+          printf '%s\n' "${{ steps.changed.outputs.files }}" | xargs pnpm prettier --write
+
+      - name: Suggest formatting fixes
+        if: steps.changed.outputs.has_files == 'true'
+        uses: reviewdog/action-suggester@4747dbc9f9e37adba0943e681cc20db466642158 # v1.21.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tool_name: prettier

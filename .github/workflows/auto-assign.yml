@@ -1,0 +1,39 @@
+name: Auto assign
+
+on:
+  pull_request_target:
+    types: [opened, ready_for_review]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  assign:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Assign counterpart maintainer
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        with:
+          script: |
+            const author = context.payload.pull_request.user.login;
+            const assigneesByAuthor = {
+              "Jah-yee": ["Moapacha"],
+              "Moapacha": ["Jah-yee"],
+              "moapacha": ["Jah-yee"],
+            };
+
+            const assignees = assigneesByAuthor[author] ?? [];
+            if (assignees.length === 0) {
+              core.info(`No counterpart-maintainer mapping for PR author ${author}; skipping auto-assign.`);
+              return;
+            }
+
+            await github.rest.issues.addAssignees({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              assignees,
+            });
+            core.info(`Assigned ${assignees.join(", ")} to PR #${context.payload.pull_request.number}.`);

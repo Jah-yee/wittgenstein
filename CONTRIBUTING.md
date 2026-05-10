@@ -94,6 +94,38 @@ pnpm test
 For Python-surface changes, run the affected `python3 -m polyglot.cli ...` path end-to-end
 at least once — the Python side doesn't have CI coverage today.
 
+## Repository automation
+
+We keep repo automation deliberately small and reviewable:
+
+- **CodeRabbit** is configured in [`/.coderabbit.yaml`](.coderabbit.yaml). It is meant
+  to help with PR summarization and focused review, not replace maintainer judgment.
+  The config is biased toward contract drift, manifest honesty, and package-boundary
+  checks rather than generic prose comments.
+- **AutoAssign** is configured via
+  [`.github/workflows/auto-assign.yml`](.github/workflows/auto-assign.yml).
+  `CODEOWNERS` continues to handle review routing; AutoAssign assigns the
+  counterpart maintainer as the PR assignee (`Jah-yee -> Moapacha`,
+  `Moapacha -> Jah-yee`) so ownership stays explicit without duplicating reviewer logic.
+- **reviewdog** is wired through
+  [`.github/workflows/reviewdog.yml`](.github/workflows/reviewdog.yml) and currently
+  provides three narrow PR-assist surfaces:
+  - Markdown review comments via [`markdownlint`](https://github.com/DavidAnson/markdownlint)
+    on contributor-facing docs
+  - ESLint review comments on `packages/**` and `apps/site/**`
+  - Prettier-based formatting suggestions on changed files
+    It uses [`.markdownlint-cli2.yaml`](.markdownlint-cli2.yaml) for the doc surface and
+    comments only on added lines where possible so we can tighten hygiene without flooding
+    old surfaces with legacy noise.
+- Bot config changes should stay narrow. If a bot starts producing noisy or misleading
+  comments, prefer tightening scope or turning off that surface before adding more rules.
+- We are intentionally **not** enabling `textlint` yet. For this repo it needs a
+  deliberate, engineering-oriented rule set first; generic prose lint would likely add
+  more noise than signal.
+
+Maintainer note: CodeRabbit's repository configuration is committed here, but the
+GitHub App installation and repo authorization still have to be done in GitHub.
+
 ## Experimental vs shipping code
 
 Wittgenstein explicitly mixes both. To keep users safe:

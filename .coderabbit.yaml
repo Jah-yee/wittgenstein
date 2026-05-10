@@ -1,0 +1,44 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+
+reviews:
+  auto_review:
+    drafts: false
+    auto_incremental_review: true
+    auto_pause_after_reviewed_commits: 8
+    ignore_title_keywords:
+      - "WIP"
+      - "[skip review]"
+    ignore_usernames:
+      - "dependabot[bot]"
+      - "github-actions[bot]"
+  path_filters:
+    - "!artifacts/**"
+    - "!fixtures/**"
+    - "!apps/site/dist/**"
+    - "!apps/wittgenstein-kimi/dist/**"
+    - "!docs/research/www.aquin.app/**"
+    - "!**/pnpm-lock.yaml"
+    - "!**/*.png"
+    - "!**/*.wav"
+    - "!**/*.m4a"
+    - "!**/*.mp4"
+    - "!**/*.csv"
+    - "!**/*.svg"
+  path_instructions:
+    - path: "packages/schemas/**"
+      instructions: |
+        Treat schema edits as contract changes.
+        Check zod boundary accuracy, manifest honesty, and whether tests/docs move
+        with the contract.
+    - path: "packages/core/**"
+      instructions: |
+        Focus on harness invariants: modality-blind routing, structured failures,
+        manifest preservation, and package-boundary cleanliness.
+    - path: "packages/codec-*/**"
+      instructions: |
+        Check that modality-specific behavior stays inside the codec package,
+        manifests remain truthful, and harness logic does not regrow in codec PRs.
+    - path: "**/*.md"
+      instructions: |
+        Prefer factual drift checks over prose polish.
+        Flag claims that overstate placeholder, future, or partially-landed behavior.
