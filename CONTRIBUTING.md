@@ -104,11 +104,19 @@ We keep repo automation deliberately small and reviewable:
   checks rather than generic prose comments.
 - **reviewdog** is wired through
   [`.github/workflows/reviewdog.yml`](.github/workflows/reviewdog.yml) and currently
-  scopes itself to Markdown PR comments only. It uses
-  [`.markdownlint-cli2.yaml`](.markdownlint-cli2.yaml) and comments only on added
-  lines so we can tighten doc hygiene without flooding old surfaces with legacy noise.
+  provides three narrow PR-assist surfaces:
+  - Markdown review comments via [`markdownlint`](https://github.com/DavidAnson/markdownlint)
+    on contributor-facing docs
+  - ESLint review comments on `packages/**` and `apps/site/**`
+  - Prettier-based formatting suggestions on changed files
+  It uses [`.markdownlint-cli2.yaml`](.markdownlint-cli2.yaml) for the doc surface and
+  comments only on added lines where possible so we can tighten hygiene without flooding
+  old surfaces with legacy noise.
 - Bot config changes should stay narrow. If a bot starts producing noisy or misleading
   comments, prefer tightening scope or turning off that surface before adding more rules.
+- We are intentionally **not** enabling `textlint` yet. For this repo it needs a
+  deliberate, engineering-oriented rule set first; generic prose lint would likely add
+  more noise than signal.
 
 Maintainer note: CodeRabbit's repository configuration is committed here, but the
 GitHub App installation and repo authorization still have to be done in GitHub.
