@@ -29,11 +29,17 @@ WORKDIR /workspace
 COPY research/training/requirements.txt /tmp/training-requirements.txt
 RUN pip install --no-cache-dir -r /tmp/training-requirements.txt
 
-# Wittgenstein harness is mounted at runtime, not baked into the image,
-# so the same image runs against any harness git SHA.
 ENV PYTHONUNBUFFERED=1 \
     HF_HOME=/workspace/.cache/huggingface \
     TRANSFORMERS_CACHE=/workspace/.cache/huggingface \
     AIM_REPO=/workspace/.aim
+
+# Wittgenstein harness is mounted at runtime, not baked into the image,
+# so the same image runs against any harness git SHA.
+RUN useradd --create-home --uid 1000 --shell /bin/bash trainuser \
+    && mkdir -p /workspace/.cache/huggingface /workspace/.aim \
+    && chown -R trainuser:trainuser /workspace /home/trainuser
+
+USER trainuser
 
 CMD ["bash"]

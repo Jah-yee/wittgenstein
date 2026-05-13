@@ -14,9 +14,10 @@ research/training/  ──may import──▶  packages/<pkg>/src/
 packages/<pkg>/src/ ──MUST NOT────▶  research/training/
 ```
 
-Both directions are enforced in CI by
-`scripts/check-no-research-imports.mjs` and
-`scripts/check-npm-publish-tarball.mjs`.
+CI enforces the publish surface via
+`scripts/check-npm-publish-tarball.mjs` and prevents
+`packages/*/src` -> `research/` imports via
+`scripts/check-no-research-imports.mjs`.
 
 See the operating doctrine:
 
@@ -27,12 +28,12 @@ See the operating doctrine:
 
 ## Subprograms
 
-| Folder         | Phase 1 deliverable                                        |
-| -------------- | ---------------------------------------------------------- |
-| `tokenizer/`   | Wittgenstein-native VQGAN-class tokenizer (ImageNet+CC12M) |
-| `adapter/`     | Learned MaskGIT-style L4 seed-code adapter                 |
-| `llm-head/`    | Native image-emitting LLM head distilled from teacher      |
-| `_shared/`     | Datasets, manifest-spine adapters, eval harness            |
+| Folder       | Phase 1 deliverable                                        |
+| ------------ | ---------------------------------------------------------- |
+| `tokenizer/` | Wittgenstein-native VQGAN-class tokenizer (ImageNet+CC12M) |
+| `adapter/`   | Learned MaskGIT-style L4 seed-code adapter                 |
+| `llm-head/`  | Native image-emitting LLM head distilled from teacher      |
+| `_shared/`   | Datasets, manifest-spine adapters, eval harness            |
 
 Each subprogram is a self-contained Python project with its own entrypoint.
 Subprograms share dataset loading, eval, and manifest-emission helpers from
@@ -58,8 +59,8 @@ generation receipt and a training receipt — same spine.
 Training is GPU-only and not part of CI's free tier. Run targets:
 
 - Tokenizer: ~1–2 GPU-weeks on 8×A100
-- Adapter:   ~1–3 GPU-weeks on 4×A100
-- LLM head:  ~4–8 GPU-weeks on 8×A100
+- Adapter: ~1–3 GPU-weeks on 4×A100
+- LLM head: ~4–8 GPU-weeks on 8×A100
 
 The Phase-1 trackers in the issue list (filed under the M1B prep umbrella)
 own the actual runs.

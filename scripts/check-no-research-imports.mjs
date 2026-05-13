@@ -55,15 +55,28 @@ function findImports(text) {
   return out;
 }
 
+function normalizeRel(path) {
+  return path.split("\\").join("/");
+}
+
+function isResearchRel(rel) {
+  const normalized = normalizeRel(rel);
+  return normalized === "research" || normalized.startsWith("research/");
+}
+
 function importsResearch(specifier, filePath) {
   // Relative imports: resolve and check if the target lands inside research/.
   if (specifier.startsWith(".")) {
     const targetAbs = resolve(dirname(filePath), specifier);
-    return targetAbs.includes(`${repoRoot}/research/`);
+    return isResearchRel(relative(repoRoot, targetAbs));
   }
-  // Absolute paths inside the repo: same check.
+  // Absolute import specifiers: catch repo-root `/research/...` imports and
+  // absolute filesystem paths that resolve inside this checkout's research/.
   if (specifier.startsWith("/")) {
-    return specifier.includes(`${repoRoot}/research/`);
+    if (specifier === "/research" || specifier.startsWith("/research/")) {
+      return true;
+    }
+    return isResearchRel(relative(repoRoot, specifier));
   }
   // Package names: look for any hint at "research" — we don't publish a
   // @wittgenstein/research package, so any such bare specifier is a leak.

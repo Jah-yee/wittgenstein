@@ -1,13 +1,14 @@
 # Training stack setup
 
-This is the contributor guide for spinning up the GPU training environment
-that lives in [`research/training/`](../../research/training/README.md). If
-you are running the harness to **generate** artifacts, you do not need any
-of this — `pnpm install` + the Tier 1 path is enough.
+This is the contributor guide for the planned GPU training environment
+that lives in [`research/training/`](../../research/training/README.md).
+The current repository contains only the Phase-1 skeleton and boundary
+guards. If you are running the harness to **generate** artifacts, you do
+not need any of this — `pnpm install` + the Tier 1 path is enough.
 
 ## When to read this
 
-You need this guide if you are:
+You will need this guide when you are:
 
 - Training a tokenizer / adapter / LLM head against the Phase-1 program.
 - Reproducing a published checkpoint locally from its training manifest.
@@ -38,14 +39,16 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-The Docker path is preferred for any run whose receipts you intend to
-publish — the image SHA goes into the training manifest alongside the
-git SHA of the harness.
+For planned operational training runs, the Docker path is preferred for
+any receipt you intend to publish. Once implemented, the image SHA will go
+into the training manifest alongside the git SHA of the harness.
 
 ## Manifest spine + experiment tracking
 
-Every training run writes a Wittgenstein manifest receipt under
-`research/training/_shared/manifests/<run-id>/`. The receipt records:
+This section describes the intended Phase-1 behavior; manifest emission is
+not implemented in this skeleton yet. Each future training run will write
+a Wittgenstein manifest receipt under
+`research/training/_shared/manifests/<run-id>/`. The receipt will record:
 
 - Dataset hash (DVC-pinned)
 - Git SHA of the harness at training time
@@ -53,23 +56,26 @@ Every training run writes a Wittgenstein manifest receipt under
 - Seed, lockfile hash
 - Per-eval-step metric snapshots
 
-The same receipt is mirrored to Aim (local) and W&B (when a project key
-is set via `WANDB_PROJECT`). Aim is the default because the manifest
+The same receipt will be mirrored to Aim (local) and W&B (when a project
+key is set via `WANDB_PROJECT`). Aim is the default because the manifest
 spine is the canonical record and Aim stays local + offline-friendly.
 
 ## Data versioning
 
-Datasets are pinned with [DVC](https://dvc.org/) so a training receipt
-points to an exact data SHA, not a moving HF dataset id. Pull the
-canonical Phase-1 mix:
+Datasets will be pinned with [DVC](https://dvc.org/) so a training receipt
+points to an exact data SHA, not a moving HF dataset id.
+
+**TODO:** the DVC remote setup is described in `_shared/dvc.md` and is
+tracked under the data-versioning Phase-1 issue. Configure that remote
+before running:
 
 ```bash
 cd research/training
 dvc pull
 ```
 
-The DVC remote is described in `_shared/dvc.md` (TODO — filed under the
-data-versioning Phase-1 tracker).
+Until that remote exists, `dvc pull` is a placeholder command, not an
+operational checkout step.
 
 ## CI guards
 
@@ -78,9 +84,9 @@ accidentally pulling the training stack in:
 
 - `node scripts/check-no-research-imports.mjs` — verifies no file under
   `packages/<pkg>/src/` imports from `research/`.
-- `node scripts/check-npm-publish-tarball.mjs` — runs `npm pack
-  --dry-run` per publishable package and verifies the tarball contains
-  no `research/`, `bench/`, `examples/`, or large binaries.
+- `node scripts/check-npm-publish-tarball.mjs` — runs `npm pack --dry-run`
+  per publishable package and verifies the tarball contains no `research/`,
+  `bench/`, `examples/`, or large binaries.
 
 Both run in CI on every PR. If you add a new package or move code into
 `research/`, run them locally:
