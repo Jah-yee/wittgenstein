@@ -169,7 +169,7 @@ agents; current implementation guidance lives in the codec-v2 plan and agent gui
       │   ▲           image: Visual Seed Code (VSC) primary; Semantic IR / VQ hints optional
       │               audio: AudioPlan / route spec
       │               sensor: SignalSpec / operator spec
-      │               IR is a sum type: Text | Latent | Hybrid
+      │               contracts may carry text / code / hybrid sections by modality
       │   └── schema preamble + codec playbook injected before the LLM call
       ▼
   L3 DECODER          code-bearing Spec/IR → real file (deterministic; never generative)
@@ -410,8 +410,10 @@ sources: [`docs/hard-constraints.md`](docs/hard-constraints.md).
   lockfile). No diffusion samplers in the core image path. (ADR-0005)
 - **Path C rejected through v0.4** — no Chameleon/LlamaGen-style fused multimodal retrain;
   the base model stays text-only. (ADR-0007)
-- **IR is a sum type** — `Text | Latent | Hybrid`; only `Text` is inhabited at v0.2. New
-  IR variants require an ADR. (ADR-0011)
+- **IR is a typed internal-representation layer** — different modalities may carry
+  text, code-bearing, or hybrid sections inside one contract. New IR shapes still
+  require the normal RFC/ADR path; image's Visual Seed Code route is the current
+  ratified example. (ADR-0011 / ADR-0018)
 - **Schema at every LLM boundary** — preamble injected, zod-parsed on return, no free-form
   prose accepted as structured output.
 - **Manifest spine, no exceptions** — every run writes git SHA, lockfile hash, seed, full

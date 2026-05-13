@@ -21,7 +21,7 @@ Three open questions remain:
 2. **What chaos / shapelet / reservoir ideas could enrich the operator library without adding runtime dependencies?** #153 (chaotic operators) and #154 (TimesFM tracker) are parked; this note revisits whether they should stay parked.
 3. **What measurement gate would justify post-M3 sensor work?** #155 (downstream-task measurement) is parked pending a dataset + metric pick.
 
-This note answers all three: surveys the relevant prior art, names the measurement gate, and recommends what should change vs stay parked.
+This note answers all three at the research-note level: it surveys the relevant prior art, proposes a measurement gate, and recommends what should change vs stay parked.
 
 ## Question 1 — patchGrammar expressiveness
 
@@ -102,7 +102,7 @@ This is a one-page research issue with an explicit pass/fail gate; it does NOT r
 
 ## Question 3 — what measurement gate justifies post-M3 sensor work
 
-The brief in #262 names *"downstream-task metrics for generated sensor signals"* as the open research variable. This note proposes the gate as concrete:
+The brief in #262 names *"downstream-task metrics for generated sensor signals"* as the open research variable. This note proposes a concrete candidate gate:
 
 **Proposed gate for any post-M3 sensor work (operator additions, patchGrammar promotion, anything in #153/#154/#155):**
 
