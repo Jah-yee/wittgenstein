@@ -1,0 +1,44 @@
+# Wittgenstein training stack — Python dependencies.
+#
+# This file pins the floor; individual subprograms (tokenizer/, adapter/,
+# llm-head/) may add their own requirements.txt with extras. Versions are
+# kept open at the patch level; subprograms can pin tighter when a recipe
+# requires it.
+#
+# Install:
+#   python -m venv .venv
+#   source .venv/bin/activate
+#   pip install -r requirements.txt
+
+# --- Core training stack ---------------------------------------------------
+torch>=2.4.0
+torchvision>=0.19.0
+transformers>=4.45.0
+accelerate>=0.34.0
+datasets>=3.0.0
+
+# --- Distributed training --------------------------------------------------
+# FSDP is built into torch; DeepSpeed is optional for ZeRO stage-3 sweeps.
+deepspeed>=0.15.0 ; sys_platform == "linux"
+
+# --- Experiment tracking + data versioning --------------------------------
+# Manifest-spine integration glue lives in _shared/. These are the
+# external dashboards the receipts also point at.
+aim>=3.25.0
+dvc[s3]>=3.55.0
+
+# --- Eval ------------------------------------------------------------------
+# Generative metrics for the Phase-1 eval matrix.
+torchmetrics[image]>=1.5.0
+clean-fid>=0.1.35
+open_clip_torch>=2.30.0
+lpips>=0.1.4
+pillow>=10.4.0
+numpy>=1.26.0
+scipy>=1.13.0
+
+# --- Optional, modality-specific ------------------------------------------
+# These are commented out at the root level because not every subprogram
+# needs them. Uncomment in a subprogram's own requirements.txt as needed.
+# vector-quantize-pytorch>=1.18.0   # for tokenizer subprogram
+# einops>=0.8.0                      # for adapter subprogram
