@@ -391,6 +391,7 @@ function isV2Codec(
 
 function createHarnessCtx(options: {
   runId: string;
+  parentRunId?: string | null;
   runDir: string;
   seed: number | null;
   outPath: string;
@@ -404,7 +405,7 @@ function createHarnessCtx(options: {
 }): codecV2.HarnessCtx {
   const ctx: codecV2.HarnessCtx = {
     runId: options.runId,
-    parentRunId: null,
+    parentRunId: options.parentRunId ?? null,
     runDir: options.runDir,
     seed: options.seed,
     outPath: options.outPath,
@@ -432,6 +433,10 @@ function createHarnessCtx(options: {
       createHarnessCtx({
         ...options,
         runId: childRunId,
+        // Derive parentRunId from the forking ctx so multi-stage codecs
+        // can trace sub-run lineage on receipts (Issue #346; contract
+        // pinned by `packages/schemas/test/codec-v2.test.ts`).
+        parentRunId: options.runId,
         runDir: overrides?.runDir ?? options.runDir,
         seed: overrides?.seed ?? options.seed,
         outPath: overrides?.outPath ?? options.outPath,
