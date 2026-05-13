@@ -6,6 +6,87 @@ versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.0-alpha.3] — 2026-05-13 — maintainer-onboarding sweep, M1B prep, tier doctrine
+
+This prerelease packages the May-2026 maintainer-onboarding session: an
+audited M1B prep bundle, the three-track research-program reframe
+(engineering / research / hacker), the delivery-and-componentization tier
+doctrine, and the publish-surface CI guards that make the doctrine
+machine-checked. It also adds the reviewer-bench Tier-0 verification
+surface and cleans up the workflow labels that track PR/issue closure.
+The image trained projector (M1B) remains the named mainline blocker; the
+path to it is now own-trained decoders rather than the original
+LlamaGen-fallback floor (see
+[#283](https://github.com/p-to-q/wittgenstein/issues/283),
+[#396](https://github.com/p-to-q/wittgenstein/issues/396),
+[`docs/research/2026-05-13-wittgenstein-research-program.md`](docs/research/2026-05-13-wittgenstein-research-program.md)).
+
+### Added
+
+- M1B prep bundle (PR [#395](https://github.com/p-to-q/wittgenstein/pull/395) closing the prep-side of [#283](https://github.com/p-to-q/wittgenstein/issues/283)):
+  the locked [`packages/codec-image/src/decoders/types.ts`](packages/codec-image/src/decoders/types.ts) bridge contract (`ImageDecoderBridge`, `ImageDecoderCapabilities`, `LoadDecoderBridgeOptions`, `DecoderDeterminismClass`); stub bridges for `llamagen` + `seed` that throw stable `LLAMAGEN_BRIDGE_NOT_IMPLEMENTED` / `SEED_BRIDGE_NOT_IMPLEMENTED` codes with structured blocker links; three doctrine notes ([`2026-05-13-wittgenstein-research-program.md`](docs/research/2026-05-13-wittgenstein-research-program.md), [`2026-05-13-delivery-and-componentization.md`](docs/research/2026-05-13-delivery-and-componentization.md), [`2026-05-13-m1b-prep-research.md`](docs/research/2026-05-13-m1b-prep-research.md)); ten Phase-1 follow-up trackers.
+- Reviewer-bench Tier-0 verification command (PR [#407](https://github.com/p-to-q/wittgenstein/pull/407) closing [#405](https://github.com/p-to-q/wittgenstein/issues/405)):
+  `pnpm reviewer-bench` verifies deterministic sensor / svg-local /
+  asciipng receipts, replay parity, and `wittgenstein doctor` in one
+  reviewer-facing report.
+- `wittgenstein replay <manifest-path>` CLI (PR [#388](https://github.com/p-to-q/wittgenstein/pull/388) closing [#384](https://github.com/p-to-q/wittgenstein/issues/384)) — re-runs a previously
+  emitted run manifest and verifies the new artifact matches by SHA-256 (byte-parity)
+  or by structural invariants (per-modality determinism class). Smoke test:
+  svg-local round-trips byte-identically.
+- `research/training/` skeleton + publish-surface CI guards (PR [#408](https://github.com/p-to-q/wittgenstein/pull/408) closing [#406](https://github.com/p-to-q/wittgenstein/issues/406)):
+  Phase-1 training directories, planned setup docs, a non-root Docker base,
+  `check-no-research-imports`, and `check-npm-publish-tarball` keep training
+  code out of the npm surface.
+- Optional `onnxruntime-node` peer contract for image decoding (PR [#409](https://github.com/p-to-q/wittgenstein/pull/409) closing [#404](https://github.com/p-to-q/wittgenstein/issues/404)):
+  `ensureOnnxRuntime()` defers loading the heavy runtime until the image tier
+  needs it and emits schema-validated `DECODER_RUNTIME_UNAVAILABLE` details
+  when the peer is absent.
+- RFC-0007 (PR [#375](https://github.com/p-to-q/wittgenstein/pull/375) closing [#352](https://github.com/p-to-q/wittgenstein/issues/352)) — seed-code shape discriminator (1D | 2D), the schema decision
+  above the bridge interface. Locks the seam where a 1D-sequence TiTok-style decoder
+  and a 2D-grid VQGAN-style decoder both fit under one IR.
+- ADR-0020 (PR [#377](https://github.com/p-to-q/wittgenstein/pull/377) closing [#353](https://github.com/p-to-q/wittgenstein/issues/353)) — code/weights license divergence policy. Permissive code + weights is
+  canonical; research-only weights are opt-in via `--allow-research-weights`. Implementation
+  tracked at [#376](https://github.com/p-to-q/wittgenstein/issues/376).
+- Verification ladder beyond green CI (PR [#385](https://github.com/p-to-q/wittgenstein/pull/385) closing [#310](https://github.com/p-to-q/wittgenstein/issues/310)) — research note describing the
+  trust ladder past `pnpm test` (golden + replay + structural).
+- `test:golden` coverage extended to image, video, asciipng, svg (PR [#372](https://github.com/p-to-q/wittgenstein/pull/372) closing [#347](https://github.com/p-to-q/wittgenstein/issues/347));
+  codec-image gains fixture sharing + parametrized two-pass cases (PR [#381](https://github.com/p-to-q/wittgenstein/pull/381) closing [#354](https://github.com/p-to-q/wittgenstein/issues/354));
+  negative-input schema-boundary tests for parsers (PR [#386](https://github.com/p-to-q/wittgenstein/pull/386) closing [#383](https://github.com/p-to-q/wittgenstein/issues/383)).
+
+### Changed
+
+- Public API surface tightened for `@wittgenstein/core` and `@wittgenstein/codec-image`
+  (PR [#380](https://github.com/p-to-q/wittgenstein/pull/380) closing [#365](https://github.com/p-to-q/wittgenstein/issues/365)). Internal pipeline / decoder primitives are no longer re-exported;
+  external consumers depend on the codec instance + the typed request/artifact surface.
+- `ProcessRunner` was extracted out of codec-video (PR [#379](https://github.com/p-to-q/wittgenstein/pull/379) closing [#356](https://github.com/p-to-q/wittgenstein/issues/356)) and then corrected into the leaf
+  `@wittgenstein/process-runner` package (PR [#401](https://github.com/p-to-q/wittgenstein/pull/401)) so `@wittgenstein/core`
+  does not form a dependency cycle with codec-video.
+- `codec-audio` `inferIntentRoute` tied to `AudioRouteSchema` enum (PR [#382](https://github.com/p-to-q/wittgenstein/pull/382) closing [#355](https://github.com/p-to-q/wittgenstein/issues/355) Slice A) —
+  eliminates the parallel string-literal source of truth.
+- README first-screen audit fixes (PR [#373](https://github.com/p-to-q/wittgenstein/pull/373) closing [#366](https://github.com/p-to-q/wittgenstein/issues/366)) — quickstart `cd` step, Node version, TTS
+  deprecation, image placeholder signal.
+- `v1`-compat modality branches in the harness explicitly classified + bounded-count test
+  added (PR [#358](https://github.com/p-to-q/wittgenstein/pull/358), [#300](https://github.com/p-to-q/wittgenstein/issues/300) step 1).
+
+### Fixed
+
+- `costUsd` is now null on no-LLM-call paths instead of `0` (PR [#368](https://github.com/p-to-q/wittgenstein/pull/368) closing [#363](https://github.com/p-to-q/wittgenstein/issues/363));
+  invariant added to schemas so the change can't regress.
+- Harness throws a typed error on missing artifact instead of emitting `null artifactSha256`
+  silently (PR [#369](https://github.com/p-to-q/wittgenstein/pull/369) closing [#345](https://github.com/p-to-q/wittgenstein/issues/345)).
+- `CodecRegistry.register()` validates at runtime (PR [#370](https://github.com/p-to-q/wittgenstein/pull/370) closing [#344](https://github.com/p-to-q/wittgenstein/issues/344)) — passing a non-conforming
+  codec instance now fails fast at registration.
+- CLI uses `@wittgenstein/codec-video` public entry, not a `src/`-relative path
+  (PR [#371](https://github.com/p-to-q/wittgenstein/pull/371) closing [#364](https://github.com/p-to-q/wittgenstein/issues/364)).
+- `HarnessCtx.fork()` threads `parentRunId` through (PR [#378](https://github.com/p-to-q/wittgenstein/pull/378) closing [#346](https://github.com/p-to-q/wittgenstein/issues/346)) so nested runs
+  link back to their parent manifest.
+- codec-sensor HTML fallback embeds the CSV basename, not its absolute path
+  (PR [#389](https://github.com/p-to-q/wittgenstein/pull/389) closing [#387](https://github.com/p-to-q/wittgenstein/issues/387)) — the manifest replay path was diverging on absolute-path bytes
+  baked into the dashboard.
+- Status-label automation now marks `status/has-pr` only for closing issue
+  references (PR [#412](https://github.com/p-to-q/wittgenstein/pull/412));
+  incidental issue mentions in PR bodies no longer pollute the issue queue.
+
 ## [0.3.0-alpha.2] — 2026-05-13 — campaign sweep, audit ratification, AI-shape refactors
 
 This prerelease packages the trust-surface advances from the May-2026
@@ -84,7 +165,7 @@ refactors. The image trained projector (M1B) remains the named blocker; see
   early after WORKFLOW.md kill-criterion signal 3 met; closed #287 with audit
   comment; closed #305 with continuation map; closed #308 with reply sweep.
   Status comments on #70, #190 (with `status/needs-triage` → `status/parked`
-  + `horizon-spike` label updates), #304, #306, #307, #309, #310.
+  and `horizon-spike` label updates), #304, #306, #307, #309, #310.
 
 ### Known blockers (current mainline)
 
