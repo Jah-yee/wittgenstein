@@ -88,6 +88,9 @@ jobs:
       - name: Lint deps
         run: pnpm lint:deps
 
+      - name: Lint publish surface (no research/ leaks)
+        run: pnpm lint:publish-surface
+
       - name: Typecheck
         run: pnpm typecheck
 
