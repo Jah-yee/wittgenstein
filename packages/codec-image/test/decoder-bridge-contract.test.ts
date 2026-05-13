@@ -17,6 +17,11 @@
  */
 import { describe, expect, it } from "vitest";
 import { LLAMAGEN_DECODER_ID, loadLlamagenDecoderBridge } from "../src/decoders/llamagen.js";
+import {
+  RuntimeUnavailableDetailsSchema,
+  WittgensteinRuntimeUnavailableError,
+  ensureOnnxRuntime,
+} from "../src/decoders/runtime.js";
 import { SEED_DECODER_ID, loadSeedDecoderBridge } from "../src/decoders/seed.js";
 import type { ImageDecoderBridge, ImageDecoderCapabilities } from "../src/decoders/types.js";
 
@@ -104,5 +109,28 @@ describe("decoder bridge contract (M1B prep)", () => {
     expect(result.warnings).toEqual([]);
 
     await bridge.unload();
+  });
+
+  it("ensureOnnxRuntime throws DECODER_RUNTIME_UNAVAILABLE with installHint when peer is missing", async () => {
+    // The peer is declared `optional: true` in package.json and is not
+    // installed in this workspace's resolved node_modules. The helper must
+    // turn that into a typed Wittgenstein error pointing at the install CLI,
+    // not bubble Node's ERR_MODULE_NOT_FOUND.
+    let caught: unknown;
+    try {
+      await ensureOnnxRuntime();
+    } catch (error) {
+      caught = error;
+    }
+    expect(caught).toBeInstanceOf(WittgensteinRuntimeUnavailableError);
+    const err = caught as WittgensteinRuntimeUnavailableError;
+    expect(err.code).toBe("DECODER_RUNTIME_UNAVAILABLE");
+    expect(err.name).toBe("WittgensteinError");
+    expect(err.details.runtime).toBe("onnxruntime-node");
+    expect(err.details.tier).toBe("image");
+    expect(err.details.installHint).toBe("wittgenstein install image");
+    expect(err.details.tracker).toMatch(/issues\/404$/);
+    expect(err.details.cause).toBeTypeOf("string");
+    expect(RuntimeUnavailableDetailsSchema.parse(err.details)).toEqual(err.details);
   });
 });

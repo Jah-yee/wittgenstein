@@ -52,10 +52,50 @@ infrastructure lands).
 
 - [`./types.ts`](./types.ts) — the bridge contract; locked surface every
   impl PR fills.
+- [`./runtime.ts`](./runtime.ts) — `ensureOnnxRuntime()` helper that every
+  bridge calls before building an inference session. Turns missing-peer
+  failures into typed `DECODER_RUNTIME_UNAVAILABLE` errors instead of
+  leaking Node's `ERR_MODULE_NOT_FOUND`.
 - [`./llamagen.ts`](./llamagen.ts) — M1B canonical bridge (currently
   throws `LLAMAGEN_BRIDGE_NOT_IMPLEMENTED`).
 - [`./seed.ts`](./seed.ts) — alternate bridge (currently throws
   `SEED_BRIDGE_NOT_IMPLEMENTED`).
+
+## Optional peer dependencies
+
+Per the [delivery and componentization doctrine](../../../../docs/research/2026-05-13-delivery-and-componentization.md) §"Optional/peer dependencies for runtimes",
+heavy inference runtimes do NOT land in a Tier 0 user's install
+footprint. They are declared in this package's `package.json` as:
+
+```jsonc
+{
+  "peerDependencies": { "onnxruntime-node": "^1.18.0" },
+  "peerDependenciesMeta": { "onnxruntime-node": { "optional": true } }
+}
+```
+
+A clean `pnpm install @wittgenstein/cli` against a machine with no GPU /
+no ONNX install pulls zero bytes of inference runtime. The CLI's
+`wittgenstein install image` (tracker [#403](https://github.com/p-to-q/wittgenstein/issues/403))
+fetches the runtime on demand.
+
+Bridges call [`./runtime.ts`](./runtime.ts) to load the runtime at
+bridge-load time:
+
+```ts
+import { ensureOnnxRuntime } from "./runtime.js";
+
+export async function loadLlamagenDecoderBridge(options) {
+  const ort = await ensureOnnxRuntime(); // throws DECODER_RUNTIME_UNAVAILABLE
+  const session = await ort.InferenceSession.create(weightsPath);
+  // ...
+}
+```
+
+Failure surfaces as a `WittgensteinError` with stable code
+`DECODER_RUNTIME_UNAVAILABLE` and a `details.installHint` pointing the
+user at the install CLI. Never let Node's `ERR_MODULE_NOT_FOUND` reach
+the user surface — it's confusing and bypasses the tier doctrine.
 
 ## How the M1B impl PR fills this
 
