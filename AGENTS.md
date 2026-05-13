@@ -109,7 +109,7 @@ The repo runs on **two separate decision lanes**. Pick the right one before you 
 | **Harness**   | L1    | Routing, retry, seed, validate, budget, record                                                       |
 | **Codec**     | L2    | Modality implementation (owns schema + render)                                                       |
 | **Spec**      | L2    | Structured artifact (`ImageSceneSpec`, `AudioPlan`, …)                                               |
-| **IR**        | L3    | Internal representation; sum type `Text \| Latent \| Hybrid`; **only `Text` is inhabited at v0.2**   |
+| **IR**        | L3    | Typed internal-representation layer; contracts may carry text, code-bearing, or hybrid sections by modality. Image's Visual Seed Code route is the current ratified example. New IR shapes require RFC/ADR routing. (ADR-0011 / ADR-0018) |
 | **Decoder**   | L3    | IR → bytes; frozen, deterministic, never generative (ADR-0005)                                       |
 | **Adapter**   | L4    | Learned bridge / seed expander (visual seed code → fuller latent tokens); optional, image only today |
 | **Packaging** | L5    | CLI · npm · manifests · install (was “Distribution” above)                                           |
@@ -142,7 +142,7 @@ The original Read Order is still valid as a depth path. Before that, an agent la
 2. [`docs/glossary.md`](docs/glossary.md) — locked vocabulary (the table above)
 3. [`docs/contributor-map.md`](docs/contributor-map.md) — onboarding map (humans + agents)
 4. [`docs/hard-constraints.md`](docs/hard-constraints.md) — what will not change (canonical, supersedes the bullets above)
-5. [`docs/exec-plans/active/codec-v2-port.md`](docs/exec-plans/active/codec-v2-port.md) — the live P6 plan; M0 and M1A are landed, and M2 audio is the active execution line
+5. [`docs/exec-plans/active/codec-v2-port.md`](docs/exec-plans/active/codec-v2-port.md) — the live P6 plan; M0, M1A, M2 audio, and M3 sensor are landed. M1B (image trained projector) is the current mainline blocker, gated on [#283](https://github.com/p-to-q/wittgenstein/issues/283).
 6. [`docs/inheritance-audit.md`](docs/inheritance-audit.md) — what survived / was promoted / was retired in the v0.2 lock
 7. [`docs/SYNTHESIS_v0.2.md`](docs/SYNTHESIS_v0.2.md) — branch-level merge brief
 8. [`docs/v02-final-audit.md`](docs/v02-final-audit.md) — pre-lock decision ledger
@@ -152,7 +152,7 @@ Then return to the original Read Order above for engineering discipline, codec p
 ### What's currently active
 
 - **Doctrine:** locked at v0.2.0-alpha.1; M2 preflight closure cut at v0.2.0-alpha.2; governance lane introduced in ADRs 0012–0014 (see below).
-- **Code:** Codec Protocol v2 port — sequenced **M0 image → M1 image refinement → M2 audio → M3 sensor → M4 video stub → M5a/b benchmarks**. M0 and M1A are landed; M2 audio has closed its sweep gate. The next image-depth line is no longer framed as `scene-spec -> latent` alone: image now centers Visual Seed Code, with `Semantic IR` as semantic/debug/user-facing support.
+- **Code:** Codec Protocol v2 port — sequenced **M0 image → M1 image refinement → M2 audio → M3 sensor → M4 video stub → M5a/b benchmarks**. M0, M1A, M2 audio, and M3 sensor are landed (per [exec-plan annotation](docs/exec-plans/active/codec-v2-port.md), [PR #293](https://github.com/p-to-q/wittgenstein/pull/293)). **M1B (image trained projector) is the current v0.3 mainline blocker** — gated on per-candidate radar audits in [#283](https://github.com/p-to-q/wittgenstein/issues/283). M4 cleanup is partial; M5a/b deferred until M1B lands. The image-depth line centers Visual Seed Code (per ADR-0018), with `Semantic IR` as semantic/debug/user-facing support.
 - **Out of scope until M5b:** new modalities, diffusion samplers, trained model weights, website rewrite, RFC-0003 renaming.
 
 ### Two decision lanes (v0.2.0-alpha.2 governance addition)
