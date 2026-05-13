@@ -23,6 +23,7 @@
 //   - The helper is intentionally typed against the structural surface
 //     bridges actually use, not against `onnxruntime-node`'s full types,
 //     so the package can compile cleanly without the peer installed.
+import { z } from "zod";
 
 /**
  * The minimal structural surface a bridge needs from `onnxruntime-node`.
@@ -44,14 +45,22 @@ export interface RuntimeUnavailableDetails {
   readonly tracker: string;
 }
 
+export const RuntimeUnavailableDetailsSchema = z.object({
+  runtime: z.literal("onnxruntime-node"),
+  tier: z.enum(["image", "audio", "video", "sensor"]),
+  installHint: z.string().min(1),
+  cause: z.string(),
+  tracker: z.string().url(),
+}) satisfies z.ZodType<RuntimeUnavailableDetails>;
+
 export class WittgensteinRuntimeUnavailableError extends Error {
   readonly code = "DECODER_RUNTIME_UNAVAILABLE";
-  constructor(
-    message: string,
-    readonly details: RuntimeUnavailableDetails,
-  ) {
+  readonly details: RuntimeUnavailableDetails;
+
+  constructor(message: string, details: RuntimeUnavailableDetails) {
     super(message);
     this.name = "WittgensteinError";
+    this.details = RuntimeUnavailableDetailsSchema.parse(details);
   }
 }
 

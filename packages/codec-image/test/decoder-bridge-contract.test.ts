@@ -18,6 +18,7 @@
 import { describe, expect, it } from "vitest";
 import { LLAMAGEN_DECODER_ID, loadLlamagenDecoderBridge } from "../src/decoders/llamagen.js";
 import {
+  RuntimeUnavailableDetailsSchema,
   WittgensteinRuntimeUnavailableError,
   ensureOnnxRuntime,
 } from "../src/decoders/runtime.js";
@@ -130,5 +131,6 @@ describe("decoder bridge contract (M1B prep)", () => {
     expect(err.details.installHint).toBe("wittgenstein install image");
     expect(err.details.tracker).toMatch(/issues\/404$/);
     expect(err.details.cause).toBeTypeOf("string");
+    expect(RuntimeUnavailableDetailsSchema.parse(err.details)).toEqual(err.details);
   });
 });
