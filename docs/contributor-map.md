@@ -27,6 +27,13 @@ If you keep that frame, the repo reads cleanly.
 
 That order gets you from doctrine → review model → decisions → execution.
 
+Current maintainer map after the post-#433 sweep:
+
+- `docs/exec-plans/active/codec-v2-port.md` is still the engineering source of truth.
+- [#402](https://github.com/p-to-q/wittgenstein/issues/402) is the current decoder-delivery decision.
+- [#435](https://github.com/p-to-q/wittgenstein/issues/435) is the owner-review hub for the M1B training / weights / eval line.
+- `moapacha` and `koriyoshi2041` are the explicit co-owners on that model/training line.
+
 One extra rule now applies across all doctrine-bearing work: the author does not count as the sole reviewer. If a PR changes doctrine, exec plans, shared contracts, or codec-shape assumptions, it needs a second independent review pass before merge. (Locked in ADR-0013.)
 
 One more rule matters just as much: contributors are expected to bring agency, not just compliance. A plan, issue, or agent prompt defines the starting slice; it does not forbid you from correcting a stale assumption, widening to a tightly-coupled fix, or proposing a better engineering path when the evidence is strong.
@@ -108,6 +115,15 @@ Success criterion:
 
 - the image path proves the protocol shape;
 - audio inherits it cleanly without re-opening doctrine.
+
+### Line B, current sub-state
+
+The image line has moved past the earlier "port the protocol" phase. The current split is:
+
+- delivery and runtime follow-through: PRs #427–#434 plus [#402](https://github.com/p-to-q/wittgenstein/issues/402)
+- owner review and training sequencing: [#435](https://github.com/p-to-q/wittgenstein/issues/435)
+
+If you land cold and need the next concrete thing, read those before widening scope.
 
 ## 5. How to add a new thing
 

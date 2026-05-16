@@ -13,6 +13,13 @@ Read these two files before any task:
 
 For doctrine-bearing PRs, also remember the review rule now locked in `engineering-discipline.md`: authoring a PR does not count as ratifying it; a second independent review pass is required before merge.
 
+Current maintainer pointers:
+
+- Engineering source of truth: [`exec-plans/active/codec-v2-port.md`](exec-plans/active/codec-v2-port.md)
+- Current M1B owner-review hub: [Issue #435](https://github.com/p-to-q/wittgenstein/issues/435)
+- Current decoder-delivery decision: [Issue #402](https://github.com/p-to-q/wittgenstein/issues/402)
+- Current truth-surface cleanup tracker: [Issue #436](https://github.com/p-to-q/wittgenstein/issues/436)
+
 ## Then understand the thesis and governance
 
 - [`THESIS.md`](THESIS.md) — smallest locked statement of the project
