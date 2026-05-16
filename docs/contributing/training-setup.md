@@ -65,9 +65,10 @@ spine is the canonical record and Aim stays local + offline-friendly.
 Datasets will be pinned with [DVC](https://dvc.org/) so a training receipt
 points to an exact data SHA, not a moving HF dataset id.
 
-**TODO:** the DVC remote setup is described in `_shared/dvc.md` and is
-tracked under the data-versioning Phase-1 issue. Configure that remote
-before running:
+The DVC remote does not exist yet. It is tracked by
+[#400](https://github.com/p-to-q/wittgenstein/issues/400), which owns the
+dataset snapshots, remote-storage choice, and sweep-manifest shape for
+Phase 1 training. Once #400 lands, configure the remote before running:
 
 ```bash
 cd research/training
